@@ -311,12 +311,18 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage }) =
     
     {/* 底部提示 */}
     <div className="mt-2 flex items-center justify-between px-2">
-      <div className="flex items-center space-x-2 text-xs text-gray-500">
+      <div className="flex items-center space-x-3 text-xs text-gray-500">
         <span className="flex items-center">
           <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
           Ctrl + Enter 发送
+        </span>
+        <span className="flex items-center">
+          <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+          Enter 换行
         </span>
         {selectedModels.length > 0 && (
           <span className="flex items-center">
