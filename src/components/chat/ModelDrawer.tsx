@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ChevronUpIcon, ChevronDownIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, XMarkIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { getAllModels, ImageModel } from '@/services/modelService';
 import { getDefaultSelectedModels } from '@/utils/modelUtils';
 
@@ -102,63 +102,54 @@ export const ModelDrawer: React.FC<ModelDrawerProps> = ({
 
   return (
     <div className="relative" ref={drawerRef}>
-      {/* 触发条 */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-2 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-t-lg hover:bg-gray-50 transition-colors"
-      >
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-700">选择模型</span>
-          <span className="text-xs text-gray-500">
-            {selectedModels.length > 0
-              ? `已选择 ${selectedModels.length} 个模型`
-              : '未选择'}
-          </span>
-        </div>
-        {isOpen ? (
-          <ChevronUpIcon className="h-5 w-5 text-gray-500" />
-        ) : (
-          <ChevronDownIcon className="h-5 w-5 text-gray-500" />
-        )}
-      </button>
-
-      {/* 已选模型标签 */}
-      {selectedModels.length > 0 && (
-        <div className="flex flex-wrap gap-2 mt-2">
-          {selectedModels.map(({ id, count }) => {
-            const model = models.find(m => m.id === id);
-            return (
-              <div
-                key={id}
-                className="flex items-center gap-2 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-sm"
-              >
-                <span>{model?.name}</span>
-                <div className="flex items-center gap-1">
+      {/* 已选模型标签和添加按钮 */}
+      <div className="flex flex-wrap items-center gap-2">
+        {selectedModels.length > 0 && (
+          <>
+            {selectedModels.map(({ id, count }) => {
+              const model = models.find(m => m.id === id);
+              return (
+                <div
+                  key={id}
+                  className="flex items-center gap-2 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-sm"
+                >
+                  <span>{model?.name}</span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => handleCountChange(id, count - 1)}
+                      className="w-5 h-5 flex items-center justify-center rounded-full bg-indigo-100 hover:bg-indigo-200"
+                    >
+                      -
+                    </button>
+                    <span className="text-xs font-medium">{count}</span>
+                    <button
+                      onClick={() => handleCountChange(id, count + 1)}
+                      className="w-5 h-5 flex items-center justify-center rounded-full bg-indigo-100 hover:bg-indigo-200"
+                    >
+                      +
+                    </button>
+                  </div>
                   <button
-                    onClick={() => handleCountChange(id, count - 1)}
-                    className="w-5 h-5 flex items-center justify-center rounded-full bg-indigo-100 hover:bg-indigo-200"
+                    onClick={() => handleRemoveModel(id)}
+                    className="ml-1 text-indigo-400 hover:text-indigo-600"
                   >
-                    -
-                  </button>
-                  <span className="text-xs font-medium">{count}</span>
-                  <button
-                    onClick={() => handleCountChange(id, count + 1)}
-                    className="w-5 h-5 flex items-center justify-center rounded-full bg-indigo-100 hover:bg-indigo-200"
-                  >
-                    +
+                    <XMarkIcon className="h-4 w-4" />
                   </button>
                 </div>
-                <button
-                  onClick={() => handleRemoveModel(id)}
-                  className="ml-1 text-indigo-400 hover:text-indigo-600"
-                >
-                  <XMarkIcon className="h-4 w-4" />
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      )}
+              );
+            })}
+          </>
+        )}
+        
+        {/* 添加模型按钮 */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex items-center gap-1 px-3 py-1 bg-white border border-gray-200 rounded-full text-sm text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-colors"
+        >
+          <PlusIcon className="h-4 w-4" />
+          <span>添加模型</span>
+        </button>
+      </div>
 
       {/* 模型选择面板 */}
       {isOpen && (
