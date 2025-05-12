@@ -281,33 +281,55 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage }) =
           selectedModels={selectedModels}
           onModelChange={setSelectedModels}
         />
-        <form onSubmit={handleSubmit} className="mt-4 flex gap-2">
-          <div className="flex-1 relative">
-            <textarea
-              ref={textareaRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="输入提示词... (Enter 换行，Ctrl + Enter 发送)"
-              className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 resize-none min-h-[40px] overflow-hidden"
-              rows={1}
-            />
-            <div className="absolute right-2 bottom-2 text-xs text-gray-400">
-              Ctrl + Enter 发送
-            </div>
-          </div>
-          <button
-            type="submit"
-            disabled={!input.trim() || selectedModels.length === 0 || isGenerating}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-300 disabled:cursor-not-allowed"
-          >
-            {isGenerating ? (
-              <SparklesIcon className="h-5 w-5 animate-pulse" />
-            ) : (
-              <PaperAirplaneIcon className="h-5 w-5" />
-            )}
-          </button>
-        </form>
+        <form onSubmit={handleSubmit} className="mt-4">
+    <div className="relative flex items-center">
+      {/* 输入框容器 */}
+      <div className="flex-1 relative">
+        <textarea
+          ref={textareaRef}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="输入提示词... (Enter 换行）"
+          className="w-full min-h-[60px] max-h-[200px] py-3 pl-4 pr-12 text-sm text-gray-900 placeholder-gray-500 bg-white border border-gray-200 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none overflow-hidden transition-all duration-200 ease-in-out"
+          rows={1}
+        />
+        {/* 发送按钮 */}
+        <button
+          type="submit"
+          disabled={!input.trim() || selectedModels.length === 0 || isGenerating}
+          className="absolute right-2 bottom-2 p-2 text-gray-400 hover:text-indigo-600 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors duration-200 rounded-lg hover:bg-gray-100 disabled:hover:bg-transparent"
+        >
+          {isGenerating ? (
+            <SparklesIcon className="h-5 w-5 animate-pulse text-indigo-500" />
+          ) : (
+            <PaperAirplaneIcon className="h-5 w-5" />
+          )}
+        </button>
+      </div>
+    </div>
+    
+    {/* 底部提示 */}
+    <div className="mt-2 flex items-center justify-between px-2">
+      <div className="flex items-center space-x-2 text-xs text-gray-500">
+        <span className="flex items-center">
+          <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          Ctrl + Enter 发送
+        </span>
+        {selectedModels.length > 0 && (
+          <span className="flex items-center">
+            <SparklesIcon className="h-4 w-4 mr-1" />
+            已选择 {selectedModels.length} 个模型
+          </span>
+        )}
+      </div>
+      <div className="text-xs text-gray-500">
+        {input.length > 0 && `${input.length} 字符`}
+      </div>
+    </div>
+  </form>
       </div>
     </div>
   );
