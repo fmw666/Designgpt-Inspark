@@ -9,10 +9,6 @@ interface ServiceConfig {
   cooldownMs: number;
 }
 
-interface GenerationRequest {
-  count?: number;
-}
-
 interface GPT4oServiceRequest extends GPT4oRequest {
   count?: number;
 }
