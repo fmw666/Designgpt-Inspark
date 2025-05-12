@@ -45,9 +45,17 @@ const ChatMessage: FC<ChatMessageProps> = ({ message }) => {
         >
           {/* Avatar */}
           <div className="flex-shrink-0">
-            <div className="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center">
-              <UserCircleIcon className="h-6 w-6 text-primary-600" />
-            </div>
+            {isUser ? (
+              // 用户头像
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                <UserCircleIcon className="h-6 w-6 text-white" />
+              </div>
+            ) : (
+              // 机器人头像
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
+                <SparklesIcon className="h-6 w-6 text-white" />
+              </div>
+            )}
           </div>
 
           {/* Message Content */}
