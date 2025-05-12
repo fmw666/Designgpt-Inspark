@@ -33,15 +33,6 @@ const ChatLayout: FC<ChatLayoutProps> = ({ children }) => {
           )}
         </button>
 
-        {/* Test Page Link */}
-        <Link
-          to="/test"
-          className="absolute bottom-20 left-0 right-0 p-4 flex items-center gap-2 text-gray-600 hover:text-primary-600 transition-colors"
-        >
-          <BeakerIcon className="h-5 w-5" />
-          {!isSidebarCollapsed && <span>测试页面</span>}
-        </Link>
-
         {/* User Info at Bottom */}
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-primary-100 bg-white/50 backdrop-blur-sm">
           <UserMenu isCollapsed={isSidebarCollapsed} />
