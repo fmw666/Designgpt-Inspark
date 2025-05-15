@@ -1,15 +1,17 @@
-import { initializeApp } from 'firebase/app';
+import { initializeApp, FirebaseApp, FirebaseOptions } from 'firebase/app';
+import { AppCheck, initializeAppCheck, ReCaptchaEnterpriseProvider } from 'firebase/app-check';
 import { getAuth, Auth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
+import { Firestore, getFirestore } from 'firebase/firestore';
+import { getStorage, FirebaseStorage } from 'firebase/storage';
 
-let app;
+let app: FirebaseApp | null = null;
+let appCheck: AppCheck;
 let auth: Auth;
-let db;
-let storage;
+let db: Firestore;
+let storage: FirebaseStorage;
 
 try {
-  const firebaseConfig = {
+  const firebaseConfig: FirebaseOptions = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
     projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
@@ -19,9 +21,16 @@ try {
   };
 
   app = initializeApp(firebaseConfig);
+  appCheck = initializeAppCheck(app, {
+    provider: new ReCaptchaEnterpriseProvider(import.meta.env.VITE_FIREBASE_RECAPTCHA_SITE_KEY),
+    isTokenAutoRefreshEnabled: true,
+  });
   auth = getAuth(app);
+  auth.languageCode = 'zh-CN';
   db = getFirestore(app);
   storage = getStorage(app);
+
+  console.log('Firebase initialized successfully');
 } catch (error) {
   console.warn('Firebase initialization failed:', error);
   // Create mock services for development
@@ -45,13 +54,13 @@ try {
       add: async () => ({ id: 'mock-id' }),
       get: async () => ({ docs: [] }),
     }),
-  };
+  } as unknown as Firestore;
   storage = {
     ref: () => ({
       put: async () => ({ ref: { getDownloadURL: async () => 'mock-url' } }),
     }),
-  };
+  } as unknown as FirebaseStorage;
 }
 
 export { auth, db, storage };
-export default app; 
+export default app;

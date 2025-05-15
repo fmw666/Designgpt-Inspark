@@ -5,82 +5,73 @@ import { useAuth } from '@/hooks/useAuth';
 
 interface UserMenuProps {
   isCollapsed?: boolean;
+  onSignInClick: () => void;
 }
 
-const UserMenu: FC<UserMenuProps> = ({ isCollapsed = false }) => {
-  const { user, signIn, logout, isAuthAvailable } = useAuth();
+const UserMenu: FC<UserMenuProps> = ({ isCollapsed, onSignInClick }) => {
+  const { user, logout } = useAuth();
 
-  const handleLogin = async () => {
-    try {
-      await signIn('demo@example.com', 'password123');
-    } catch (error) {
-      console.error('Login failed:', error);
-    }
-  };
-
-  if (!isAuthAvailable) {
+  if (!user) {
     return (
-      <div className="flex items-center gap-2 p-2">
-        <UserCircleIcon className="h-6 w-6 text-gray-400" />
-        {!isCollapsed && <span className="text-sm text-gray-400">Offline Mode</span>}
-      </div>
+      <button
+        onClick={onSignInClick}
+        className="flex items-center gap-2 w-full p-2 rounded-lg hover:bg-gray-50 transition-colors"
+      >
+        <UserCircleIcon className="w-8 h-8 text-gray-400" />
+        {!isCollapsed && (
+          <span className="text-sm text-gray-700">登录</span>
+        )}
+      </button>
     );
   }
 
   return (
     <Menu as="div" className="relative">
-      <Menu.Button className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 w-full">
-        <UserCircleIcon className="h-6 w-6 text-gray-600" />
-        {!isCollapsed && (
-          <span className="text-sm text-gray-700 truncate">
-            {user ? user.email : 'Sign In'}
-          </span>
-        )}
-      </Menu.Button>
+      {({ open }) => (
+        <>
+          <Menu.Button
+            className={`flex items-center gap-2 w-full p-2 rounded-lg transition-colors ${
+              open
+                ? 'bg-gray-100'
+                : 'hover:bg-gray-50'
+            }`}
+          >
+            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center text-white font-medium shadow-sm">
+              {user.email?.charAt(0).toUpperCase() || '?'}
+            </div>
+            {!isCollapsed && (
+              <span className="text-sm text-gray-700 truncate">
+                {user.email || '未登录'}
+              </span>
+            )}
+          </Menu.Button>
 
-      <Transition
-        as={Fragment}
-        enter="transition ease-out duration-100"
-        enterFrom="transform opacity-0 scale-95"
-        enterTo="transform opacity-100 scale-100"
-        leave="transition ease-in duration-75"
-        leaveFrom="transform opacity-100 scale-100"
-        leaveTo="transform opacity-0 scale-95"
-      >
-        <Menu.Items className={`absolute ${isCollapsed ? 'left-0' : 'right-0'} bottom-full mb-2 w-48 origin-bottom-right bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none`}>
-          {user ? (
-            <div className="py-1">
+          <Transition
+            as={Fragment}
+            enter="transition ease-out duration-100"
+            enterFrom="transform opacity-0 scale-95"
+            enterTo="transform opacity-100 scale-100"
+            leave="transition ease-in duration-75"
+            leaveFrom="transform opacity-100 scale-100"
+            leaveTo="transform opacity-0 scale-95"
+          >
+            <Menu.Items className="absolute bottom-full left-0 mb-2 w-48 origin-bottom-left rounded-xl bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
               <Menu.Item>
                 {({ active }) => (
                   <button
+                    onClick={logout}
                     className={`${
-                      active ? 'bg-gray-100' : ''
-                    } w-full text-left px-4 py-2 text-sm text-gray-700`}
-                    onClick={() => logout()}
+                      active ? 'bg-gray-50' : ''
+                    } flex w-full items-center px-4 py-2 text-sm text-gray-700`}
                   >
-                    Sign Out
+                    退出登录
                   </button>
                 )}
               </Menu.Item>
-            </div>
-          ) : (
-            <div className="py-1">
-              <Menu.Item>
-                {({ active }) => (
-                  <button
-                    className={`${
-                      active ? 'bg-gray-100' : ''
-                    } w-full text-left px-4 py-2 text-sm text-gray-700`}
-                    onClick={handleLogin}
-                  >
-                    Sign In
-                  </button>
-                )}
-              </Menu.Item>
-            </div>
-          )}
-        </Menu.Items>
-      </Transition>
+            </Menu.Items>
+          </Transition>
+        </>
+      )}
     </Menu>
   );
 };
