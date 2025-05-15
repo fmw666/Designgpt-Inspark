@@ -6,6 +6,8 @@ import { NewChatGuide } from '@/components/chat/NewChatGuide';
 import { getAllModels, ImageModel } from '@/services/modelService';
 import { serviceManager } from '@/services/serviceManager';
 import { StandardResponse } from '@/services/libs/baseService';
+import { useChat } from '@/hooks/useChat';
+import { useLocation } from 'react-router-dom';
 
 // 默认图片数组
 const DEFAULT_IMAGES = [
@@ -35,6 +37,28 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, isN
   const [models, setModels] = useState<ImageModel[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { currentChat } = useChat();
+  const location = useLocation();
+
+  // 获取聊天标题
+  const getChatTitle = () => {
+    // 如果是 new 页面且没有消息，返回 null
+    if (location.pathname === '/chat/new' && !currentChat?.messages?.length) {
+      return null;
+    }
+
+    if (!currentChat?.messages?.length) return '新对话';
+    const firstMessage = currentChat.messages[0];
+    if (firstMessage.role === 'user') {
+      // 如果消息太长，截取前30个字符
+      return firstMessage.content.length > 30
+        ? `${firstMessage.content.slice(0, 30)}...`
+        : firstMessage.content;
+    }
+    return '新对话';
+  };
+
+  const title = getChatTitle();
 
   useEffect(() => {
     const allModels = getAllModels();
@@ -271,6 +295,15 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, isN
 
   return (
     <div className="flex flex-col h-full">
+      {/* Chat Title - 只在有标题时显示 */}
+      {title && (
+        <div className="h-14 border-b border-gray-200 bg-white/50 backdrop-blur-sm flex items-center px-6 justify-center">
+          <h1 className="text-lg font-medium text-gray-900">
+            {title}
+          </h1>
+        </div>
+      )}
+      
       <div className="flex-1 overflow-y-auto p-4">
         {isNewChat && !messages.length ? (
           <NewChatGuide />

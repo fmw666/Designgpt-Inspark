@@ -37,13 +37,13 @@ export const useAuth = () => {
   const checkUser = async () => {
     try {
       const user = await authService.getCurrentUser();
-      setUser(user);
+        setUser(user);
     } catch (err) {
       setError(err as AuthError);
     } finally {
       setLoading(false);
-    }
-  };
+      }
+    };
 
   const sendVerificationCode = async (email: string) => {
     try {
