@@ -1,195 +1,89 @@
 import { useState, useEffect } from 'react';
-import {
-  User,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-  PhoneAuthProvider,
-  ApplicationVerifier,
-} from 'firebase/auth';
-import { auth } from '@/services/firebase';
+import { AuthService } from '@/services/auth';
+import type { User, AuthError } from '@/services/supabase';
+import { supabase } from '@/services/supabase';
+import { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
-interface UseAuthReturn {
-  user: User | null;
-  loading: boolean;
-  error: string | null;
-  isAuthAvailable: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-  sendVerificationCode: (phoneNumber: string) => Promise<string>;
-  verifyCode: (verificationId: string, code: string) => Promise<void>;
-  initRecaptcha: () => void;
-}
-
-export const useAuth = (): UseAuthReturn => {
+export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isAuthAvailable, setIsAuthAvailable] = useState(true);
-  const [recaptchaVerifier, setRecaptchaVerifier] = useState<RecaptchaVerifier | null>(null);
+  const [error, setError] = useState<AuthError | null>(null);
 
+  const authService = AuthService.getInstance();
+
+  // 检查用户登录状态
   useEffect(() => {
-    let unsubscribe: (() => void) | undefined;
-    try {
-      console.log('auth', auth);
+    checkUser();
 
-      unsubscribe = onAuthStateChanged(auth,
-        (user) => {
-          console.log('user', user);
-          setUser(user);
-          setLoading(false);
-        },
-        (error) => {
-          console.warn('Auth state change listener failed:', error);
-          setIsAuthAvailable(false);
-            setLoading(false);
-          },
-        () => {
-          console.log('Auth state change listener unsubscribed');
-        }
-      );
-    } catch (err) {
-      console.warn('Auth state change listener failed:', err);
-      setIsAuthAvailable(false);
-      setLoading(false);
-    }
+    // 监听认证状态变化
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email!,
+          created_at: session.user.created_at,
+          last_sign_in_at: session.user.last_sign_in_at || null,
+        });
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+      }
+    });
 
     return () => {
-      if (typeof unsubscribe === 'function') {
-        unsubscribe();
-      }
-      if (recaptchaVerifier) {
-        recaptchaVerifier.clear();
-      }
+      subscription.unsubscribe();
     };
   }, []);
 
-  const getRecaptchaVerifier = () => {
-    if (recaptchaVerifier) {
-      return recaptchaVerifier;
+  const checkUser = async () => {
+    try {
+      const user = await authService.getCurrentUser();
+      setUser(user);
+    } catch (err) {
+      setError(err as AuthError);
+    } finally {
+      setLoading(false);
     }
-
-    if (!document.getElementById('recaptcha-container')) {
-      console.log('recaptcha-container not found');
-      return null;
-    }
-
-    // 初始化 reCAPTCHA
-    const verifier = new RecaptchaVerifier(auth, 'send-code-button', {
-      size: 'invisible',
-      callback: () => {
-        // reCAPTCHA 验证成功
-        console.log('reCAPTCHA 验证成功');
-      },
-      'expired-callback': () => {
-        // reCAPTCHA 过期
-        console.log('reCAPTCHA 验证过期');
-        setError('验证已过期，请重新验证');
-      }
-    });
-    verifier.render();
-
-    setRecaptchaVerifier(verifier);
-    return verifier;
   };
 
-  const signIn = async (email: string, password: string) => {
+  const sendVerificationCode = async (email: string) => {
     try {
       setError(null);
-      await signInWithEmailAndPassword(auth, email, password);
+      await authService.sendEmailVerification(email);
     } catch (err) {
-      setError((err as Error).message);
+      setError(err as AuthError);
       throw err;
     }
   };
 
-  const signUp = async (email: string, password: string) => {
+  const verifyCode = async (email: string, code: string) => {
     try {
       setError(null);
-      await createUserWithEmailAndPassword(auth, email, password);
+      const user = await authService.verifyEmailCode(email, code);
+      setUser(user);
+      return user;
     } catch (err) {
-      setError((err as Error).message);
+      setError(err as AuthError);
       throw err;
     }
   };
 
-  const logout = async () => {
+  const signOut = async () => {
     try {
       setError(null);
-      await signOut(auth);
+      await authService.signOut();
+      setUser(null);
     } catch (err) {
-      setError((err as Error).message);
+      setError(err as AuthError);
       throw err;
     }
-  };
-
-  const sendVerificationCode = async (phoneNumber: string): Promise<string> => {
-    try {
-      setError(null);
-      const recaptchaVerifier = getRecaptchaVerifier();
-      if (!recaptchaVerifier) {
-        throw new Error('reCAPTCHA not initialized');
-      }
-      console.log('recaptchaVerifier', recaptchaVerifier);
-      const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
-      return confirmationResult.verificationId;
-    } catch (err) {
-      setError((err as Error).message);
-      throw err;
-    }
-  };
-
-  const verifyCode = async (verificationId: string, code: string) => {
-    try {
-      setError(null);
-      const credential = PhoneAuthProvider.credential(verificationId, code);
-      await signInWithPhoneNumber(auth, credential as unknown as string, recaptchaVerifier as unknown as ApplicationVerifier);
-    } catch (err) {
-      setError((err as Error).message);
-      throw err;
-    }
-  };
-
-  const initRecaptcha = () => {
-    if (recaptchaVerifier) {
-      return recaptchaVerifier;
-    }
-    if (!document.getElementById('captcha__container')) {
-      console.log('captcha__container not found');
-      return null;
-    }
-
-    const verifier = new RecaptchaVerifier(auth, 'captcha__container', {
-      size: 'invisible',
-      callback: () => {
-        // reCAPTCHA 验证成功
-        console.log('reCAPTCHA 验证成功');
-      },
-      'expired-callback': () => {
-        // reCAPTCHA 过期
-        console.log('reCAPTCHA 验证过期');
-        setError('验证已过期，请重新验证');
-      }
-    });
-    verifier.render();
-    setRecaptchaVerifier(verifier);
-    return verifier;
   };
 
   return {
     user,
     loading,
     error,
-    isAuthAvailable,
-    signIn,
-    signUp,
-    logout,
     sendVerificationCode,
     verifyCode,
-    initRecaptcha,
+    signOut,
   };
 };
