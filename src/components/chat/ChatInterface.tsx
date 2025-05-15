@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { PaperAirplaneIcon, SparklesIcon } from '@heroicons/react/24/solid';
 import ChatMessage, { Message, MessageImage } from './ChatMessage';
 import { ModelDrawer } from './ModelDrawer';
+import { NewChatGuide } from '@/components/chat/NewChatGuide';
 import { getAllModels, ImageModel } from '@/services/modelService';
 import { serviceManager } from '@/services/serviceManager';
 import { StandardResponse } from '@/services/libs/baseService';
@@ -23,9 +24,10 @@ interface SelectedModel {
 
 interface ChatInterfaceProps {
   onSendMessage?: (message: string, models: SelectedModel[]) => void;
+  isNewChat?: boolean;
 }
 
-export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage }) => {
+export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, isNewChat = false }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [selectedModels, setSelectedModels] = useState<SelectedModel[]>([]);
@@ -270,10 +272,16 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage }) =
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-4">
-        {messages.map((message) => (
-          <ChatMessage key={message.id} message={message} />
-        ))}
-        <div ref={messagesEndRef} />
+        {isNewChat && !messages.length ? (
+          <NewChatGuide />
+        ) : (
+          <>
+            {messages.map((message) => (
+              <ChatMessage key={message.id} message={message} />
+            ))}
+            <div ref={messagesEndRef} />
+          </>
+        )}
       </div>
 
       <div className="border-t border-primary-100 bg-white/50 backdrop-blur-sm p-4">

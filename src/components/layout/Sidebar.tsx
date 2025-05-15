@@ -1,12 +1,15 @@
 import { FC } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Logo } from './Logo';
 import { ChatHistory } from '../chat/ChatHistory';
 
 const Sidebar: FC = () => {
+  const navigate = useNavigate();
+
   const handleNewChat = () => {
-    // TODO: 实现新建聊天功能
+    navigate('/chat/new');
   };
 
   return (
@@ -35,4 +38,4 @@ const Sidebar: FC = () => {
   );
 };
 
-export default Sidebar; 
+export default Sidebar;

@@ -2,7 +2,6 @@ import { FC, ReactNode, useState } from 'react';
 import Sidebar from './Sidebar';
 import UserMenu from './UserMenu';
 import { SignInModal } from '@/components/auth/SignInModal';
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 interface ChatLayoutProps {
   children: ReactNode;
@@ -62,4 +61,4 @@ const ChatLayout: FC<ChatLayoutProps> = ({ children }) => {
   );
 };
 
-export default ChatLayout; 
+export default ChatLayout;

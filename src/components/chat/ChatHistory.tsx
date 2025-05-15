@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, isToday, isYesterday, isThisWeek, isThisMonth, isThisYear } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
+import { useNavigate, useParams } from 'react-router-dom';
 
 interface Chat {
   id: string;
@@ -16,7 +17,8 @@ interface GroupedChats {
 
 export const ChatHistory = () => {
   const [chats, setChats] = useState<Chat[]>([]);
-  const [selectedChat, setSelectedChat] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { chatId } = useParams();
 
   // 模拟获取聊天历史
   useEffect(() => {
@@ -65,6 +67,10 @@ export const ChatHistory = () => {
     return groups;
   }, {});
 
+  const handleChatClick = (chatId: string) => {
+    navigate(`/chat/${chatId}`);
+  };
+
   return (
     <div className="flex-1 overflow-y-auto px-4">
       <AnimatePresence>
@@ -83,9 +89,9 @@ export const ChatHistory = () => {
               {groupChats.map((chat) => (
                 <motion.button
                   key={chat.id}
-                  onClick={() => setSelectedChat(chat.id)}
+                  onClick={() => handleChatClick(chat.id)}
                   className={`w-full text-left px-3 py-2 rounded-lg transition-all duration-200 ${
-                    selectedChat === chat.id
+                    chatId === chat.id
                       ? 'bg-indigo-50 text-indigo-600'
                       : 'hover:bg-gray-50 text-gray-700'
                   }`}
