@@ -24,7 +24,7 @@ const ChatLayout: FC<ChatLayoutProps> = ({ children }) => {
           <Sidebar />
           
           {/* Collapse Toggle Button */}
-          <button
+          {/* <button
             onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
             className="absolute -right-3 top-1/2 transform -translate-y-1/2 bg-white border border-primary-200 rounded-full p-1.5 hover:bg-primary-50 transition-colors shadow-sm"
           >
@@ -33,7 +33,7 @@ const ChatLayout: FC<ChatLayoutProps> = ({ children }) => {
             ) : (
               <ChevronLeftIcon className="h-4 w-4 text-primary-500" />
             )}
-          </button>
+          </button> */}
 
           {/* User Info at Bottom */}
           <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-primary-100 bg-white/50 backdrop-blur-sm">
