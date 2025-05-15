@@ -58,9 +58,7 @@ export class AuthService {
     try {
       const { data: { user }, error } = await supabase.auth.getUser();
 
-      if (error) throw error;
-
-      if (!user) {
+      if (!user || error) {
         this.currentUser = null;
         return null;
       }

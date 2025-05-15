@@ -1,6 +1,7 @@
 import { gpt4oService, GPT4oRequest,  } from './libs/gpt4oService';
 import { doubaoService, DoubaoRequest, } from './libs/doubaoService';
 import { StandardResponse } from './libs/baseService';
+import { AuthMiddleware } from './authMiddleware';
 
 export type ServiceType = 'gpt4o' | 'doubao';
 
@@ -38,11 +39,13 @@ export class ServiceManager {
   private activeRequests: Map<ServiceType, number>;
   private lastRequestTime: Map<ServiceType, number>;
   private config: Record<ServiceType, ServiceConfig>;
+  private authMiddleware: AuthMiddleware;
 
   private constructor() {
     this.activeRequests = new Map();
     this.lastRequestTime = new Map();
     this.config = DEFAULT_CONFIG;
+    this.authMiddleware = AuthMiddleware.getInstance();
 
     // Initialize counters
     Object.keys(DEFAULT_CONFIG).forEach((service) => {
@@ -79,6 +82,12 @@ export class ServiceManager {
     serviceType: ServiceType,
     requestFn: () => Promise<T>
   ): Promise<T> {
+    // 首先进行认证检查
+    const isAuthenticated = await this.authMiddleware.checkAuth();
+    if (!isAuthenticated) {
+      throw new Error('AUTH_REQUIRED');
+    }
+
     await this.waitForServiceAvailability(serviceType);
 
     // Update counters
