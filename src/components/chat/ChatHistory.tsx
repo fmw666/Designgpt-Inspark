@@ -1,50 +1,36 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useChat } from '@/hooks/useChat';
+import { Chat } from '@/services/chatService';
+import { TrashIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, isToday, isYesterday, isThisWeek, isThisMonth, isThisYear } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
-import { useNavigate, useParams } from 'react-router-dom';
-
-interface Chat {
-  id: string;
-  title: string;
-  lastMessage: string;
-  timestamp: Date;
-}
 
 interface GroupedChats {
   [key: string]: Chat[];
 }
 
 export const ChatHistory = () => {
-  const [chats, setChats] = useState<Chat[]>([]);
-  const navigate = useNavigate();
-  const { chatId } = useParams();
+  const { chats, currentChat, loading, switchChat, deleteChat } = useChat();
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
-  // 模拟获取聊天历史
-  useEffect(() => {
-    // TODO: 从后端获取聊天历史
-    const mockChats: Chat[] = [
-      {
-        id: '1',
-        title: '设计一个登录页面',
-        lastMessage: '好的，我来帮你设计一个现代风格的登录页面...',
-        timestamp: new Date(),
-      },
-      {
-        id: '2',
-        title: '优化移动端布局',
-        lastMessage: '让我们来优化一下移动端的响应式布局...',
-        timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 昨天
-      },
-      // 添加更多模拟数据...
-    ];
-    setChats(mockChats);
-  }, []);
+  const handleSwitchChat = (chat: Chat) => {
+    switchChat(chat.id);
+  };
+
+  const handleDeleteChat = async (chatId: string) => {
+    setIsDeleting(chatId);
+    try {
+      await deleteChat(chatId);
+    } finally {
+      setIsDeleting(null);
+    }
+  };
 
   // 按日期分组聊天记录
   const groupedChats = chats.reduce<GroupedChats>((groups, chat) => {
     let groupKey: string;
-    const date = chat.timestamp;
+    const date = new Date(chat.created_at);
 
     if (isToday(date)) {
       groupKey = '今天';
@@ -67,9 +53,13 @@ export const ChatHistory = () => {
     return groups;
   }, {});
 
-  const handleChatClick = (chatId: string) => {
-    navigate(`/chat/${chatId}`);
-  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 overflow-y-auto px-4">
@@ -87,27 +77,52 @@ export const ChatHistory = () => {
             </h3>
             <div className="space-y-1">
               {groupChats.map((chat) => (
-                <motion.button
+                <motion.div
                   key={chat.id}
-                  onClick={() => handleChatClick(chat.id)}
-                  className={`w-full text-left px-3 py-2 rounded-lg transition-all duration-200 ${
-                    chatId === chat.id
+                  onClick={() => handleSwitchChat(chat)}
+                  className={`w-full text-left px-3 py-2 rounded-lg transition-all duration-200 cursor-pointer ${
+                    currentChat?.id === chat.id
                       ? 'bg-indigo-50 text-indigo-600'
                       : 'hover:bg-gray-50 text-gray-700'
                   }`}
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
                 >
-                  <div className="font-medium truncate">{chat.title}</div>
-                  <div className="text-sm text-gray-500 truncate">
-                    {chat.lastMessage}
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium truncate">{chat.title}</div>
+                      <div className="text-sm text-gray-500 truncate">
+                        {chat.messages[0]?.content || '暂无消息'}
+                      </div>
+                    </div>
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteChat(chat.id);
+                      }}
+                      className={`ml-2 p-1 text-gray-400 hover:text-red-500 transition-colors duration-200 cursor-pointer ${
+                        isDeleting === chat.id ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                    >
+                      {isDeleting === chat.id ? (
+                        <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <TrashIcon className="w-4 h-4" />
+                      )}
+                    </div>
                   </div>
-                </motion.button>
+                </motion.div>
               ))}
             </div>
           </motion.div>
         ))}
       </AnimatePresence>
+
+      {chats.length === 0 && (
+        <div className="flex flex-col items-center justify-center h-32 text-gray-500">
+          <p className="text-sm">暂无聊天记录</p>
+        </div>
+      )}
     </div>
   );
-}; 
+};

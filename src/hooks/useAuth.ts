@@ -1,8 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AuthService } from '@/services/auth';
 import type { User, AuthError } from '@/services/supabase';
 import { supabase } from '@/services/supabase';
 import { AuthChangeEvent, Session } from '@supabase/supabase-js';
+
+// 全局初始化标志
+let isInitialized = false;
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -11,12 +14,36 @@ export const useAuth = () => {
 
   const authService = AuthService.getInstance();
 
+  // 使用 useCallback 缓存 checkUser 函数
+  const checkUser = useCallback(async () => {
+    try {
+      const user = await authService.getCurrentUser();
+      setUser(user);
+    } catch (err) {
+      setError(err as AuthError);
+    } finally {
+      setLoading(false);
+    }
+  }, []); // 空依赖数组，因为这个函数不依赖任何外部变量
+
   // 检查用户登录状态
   useEffect(() => {
-    checkUser();
+    let mounted = true;
+
+    const initializeAuth = async () => {
+      // 只在未初始化时执行初始化
+      if (!isInitialized && mounted) {
+        isInitialized = true;
+        await checkUser();
+      }
+    };
+
+    initializeAuth();
 
     // 监听认证状态变化
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
+      if (!mounted) return;
+
       if (event === 'SIGNED_IN' && session?.user) {
         setUser({
           id: session.user.id,
@@ -30,20 +57,10 @@ export const useAuth = () => {
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
-
-  const checkUser = async () => {
-    try {
-      const user = await authService.getCurrentUser();
-        setUser(user);
-    } catch (err) {
-      setError(err as AuthError);
-    } finally {
-      setLoading(false);
-      }
-    };
+  }, [checkUser]); // 只依赖 checkUser 函数
 
   const sendVerificationCode = async (email: string) => {
     try {
@@ -72,6 +89,8 @@ export const useAuth = () => {
       setError(null);
       await authService.signOut();
       setUser(null);
+      // 重置初始化标志，允许重新初始化
+      isInitialized = false;
     } catch (err) {
       setError(err as AuthError);
       throw err;
