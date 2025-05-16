@@ -26,10 +26,10 @@ interface SelectedModel {
 
 interface ChatInterfaceProps {
   onSendMessage?: (message: string, models: SelectedModel[]) => void;
-  isNewChat?: boolean;
+  chatId?: string;
 }
 
-export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, isNewChat = false }) => {
+export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, chatId }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [selectedModels, setSelectedModels] = useState<SelectedModel[]>([]);
@@ -37,8 +37,25 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, isN
   const [models, setModels] = useState<ImageModel[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { currentChat } = useChat();
   const location = useLocation();
+  let currentChatId = null;
+
+  console.log('chatId', chatId);
+  if (!chatId || chatId === 'new') {
+    // 如果是新聊天，清空当前聊天
+    currentChatId = null;
+  } else {
+    // 切换到指定的聊天
+    currentChatId = chatId;
+  }
+
+  const { currentChat, chats, loading } = useChat();
+
+  console.log('\n\n\n000000000000000000000000000000');
+  console.log('currentChat', currentChat);
+  console.log('chats', chats);
+  console.log('loading', loading);
+  console.log('000000000000000000000000000000\n\n\n');
 
   // 获取聊天标题
   const getChatTitle = () => {
@@ -293,6 +310,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, isN
     }
   };
 
+  // if (!isLoading) {
+  //   return <div>Loading...</div>;
+  // }
+
   return (
     <div className="flex flex-col h-full">
       {/* Chat Title - 只在有标题时显示 */}
@@ -305,7 +326,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, isN
       )}
       
       <div className="flex-1 overflow-y-auto p-4">
-        {isNewChat && !messages.length ? (
+        {!currentChat && !messages.length ? (
           <NewChatGuide />
         ) : (
           <>

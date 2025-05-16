@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useChat } from '@/hooks/useChat';
 import { Chat } from '@/services/chatService';
 import { TrashIcon } from '@heroicons/react/24/outline';
@@ -11,11 +12,12 @@ interface GroupedChats {
 }
 
 export const ChatHistory = () => {
-  const { chats, currentChat, loading, switchChat, deleteChat } = useChat();
+  const navigate = useNavigate();
+  const { chats, currentChat, loading, deleteChat } = useChat();
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
-  const handleSwitchChat = (chat: Chat) => {
-    switchChat(chat.id);
+  const handleChatClick = (chat: Chat) => {
+    navigate(`/chat/${chat.id}`);
   };
 
   const handleDeleteChat = async (chatId: string) => {
@@ -79,7 +81,7 @@ export const ChatHistory = () => {
               {groupChats.map((chat) => (
                 <motion.div
                   key={chat.id}
-                  onClick={() => handleSwitchChat(chat)}
+                  onClick={() => handleChatClick(chat)}
                   className={`w-full text-left px-3 py-2 rounded-lg transition-all duration-200 cursor-pointer ${
                     currentChat?.id === chat.id
                       ? 'bg-indigo-50 text-indigo-600'

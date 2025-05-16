@@ -175,6 +175,22 @@ export class ChatService {
       throw error;
     }
   }
+
+  async getChat(chatId: string): Promise<Chat | null> {
+    try {
+      const { data, error } = await supabase
+        .from('chat_msg')
+        .select('*')
+        .eq('id', chatId)
+        .single();
+
+      if (error) throw error;
+      return data as Chat;
+    } catch (error) {
+      console.error('Error getting chat:', error);
+      return null;
+    }
+  }
 }
 
 // 导出单例实例

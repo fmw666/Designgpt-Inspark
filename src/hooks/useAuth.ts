@@ -19,6 +19,7 @@ export const useAuth = () => {
     try {
       const user = await authService.getCurrentUser();
       setUser(user);
+      console.log('user', user);
     } catch (err) {
       setError(err as AuthError);
     } finally {
