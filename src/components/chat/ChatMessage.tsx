@@ -37,7 +37,7 @@ const ChatMessage: FC<ChatMessageProps> = ({ message }) => {
 
   return (
     <>
-      <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+      <div className={`flex py-4 ${isUser ? 'justify-end' : 'justify-start'}`}>
         <div
           className={`flex gap-4 max-w-3xl ${
             isUser ? 'flex-row-reverse' : 'flex-row'
