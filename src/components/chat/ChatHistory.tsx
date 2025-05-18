@@ -42,6 +42,8 @@ export const ChatHistory = () => {
     let groupKey: string;
     const date = new Date(chat.created_at);
 
+    console.log('date', date);
+
     if (isToday(date)) {
       groupKey = '今天';
     } else if (isYesterday(date)) {

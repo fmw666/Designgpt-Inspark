@@ -8,7 +8,7 @@ const Chat: FC = () => {
 
   return (
     <ChatLayout>
-      <ChatInterface chatId={ chatId } />
+      <ChatInterface chatId={ chatId as string } />
     </ChatLayout>
   );
 };

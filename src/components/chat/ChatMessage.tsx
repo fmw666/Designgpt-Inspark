@@ -1,181 +1,157 @@
 import { FC, useState } from 'react';
-import { UserCircleIcon } from '@heroicons/react/24/solid';
-import { SparklesIcon, ExclamationCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { StandardResponse } from '@/services/libs/baseService';
+import { UserCircleIcon, SparklesIcon, ExclamationCircleIcon, XMarkIcon } from '@heroicons/react/24/solid';
 
-export interface MessageImage {
-  modelId: string;
-  modelName: string;
-  isLoading?: boolean;
-  error?: boolean;
-  errorMessage?: string;
-  results: StandardResponse[];
+interface Model {
+  id: string;
+  name: string;
+  count: number;
+}
+
+interface ImageResult {
+  url: string | null;
+  error: string | null;
+  errorMessage: string;
+}
+
+interface Results {
+  images: {
+    [key: string]: ImageResult[];
+  };
+  content: string;
 }
 
 export interface Message {
   id: string;
-  role: 'user' | 'assistant';
+  models: Model[];
   content: string;
-  images?: MessageImage[];
+  results: Results;
+  createdAt: string;
 }
 
 interface ChatMessageProps {
   message: Message;
 }
 
-const ChatMessage: FC<ChatMessageProps> = ({ message }) => {
-  const isUser = message.role === 'user';
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
-
-  const handleImageClick = (url: string) => {
-    setPreviewImage(url);
-  };
-
-  const handleClosePreview = () => {
-    setPreviewImage(null);
-  };
+export const ChatMessage: FC<ChatMessageProps> = ({ message }) => {
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   return (
-    <>
-      <div className={`flex py-4 ${isUser ? 'justify-end' : 'justify-start'}`}>
-        <div
-          className={`flex gap-4 max-w-3xl ${
-            isUser ? 'flex-row-reverse' : 'flex-row'
-          }`}
-        >
-          {/* Avatar */}
-          <div className="flex-shrink-0">
-            {isUser ? (
-              // 用户头像
-              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
-                <UserCircleIcon className="h-6 w-6 text-white" />
-              </div>
-            ) : (
-              // 机器人头像
-              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
-                <SparklesIcon className="h-6 w-6 text-white" />
-              </div>
-            )}
-          </div>
-
-          {/* Message Content */}
-          <div
-            className={`flex flex-col space-y-2 ${
-              isUser ? 'items-end' : 'items-start'
-            }`}
-          >
-            {/* Text Content */}
-            <div
-              className={`rounded-lg px-4 py-2 ${
-                isUser
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-white border border-gray-200'
-              }`}
-            >
+    <div className="flex flex-col space-y-4 mb-6">
+      {/* 用户消息 */}
+      <div className="flex justify-end p-3">
+        <div className="flex items-start gap-3 max-w-3xl">
+          <div className="flex-1 text-right">
+            <div className="inline-block bg-indigo-600 text-white rounded-lg px-4 py-2">
               <p className="text-sm">{message.content}</p>
             </div>
-
-            {/* Images Grid */}
-            {message.images && message.images.length > 0 && (
-              <div className="w-full space-y-6">
-                {message.images.map((imageGroup, groupIndex) => (
-                  <div key={groupIndex} className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <div className="h-6 w-6 rounded-full bg-indigo-100 flex items-center justify-center">
-                        <span className="text-xs font-medium text-indigo-700">
-                          {groupIndex + 1}
-                        </span>
-                      </div>
-                      <h4 className="text-sm font-medium text-gray-700">
-                        {imageGroup.modelName}
-                      </h4>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      {imageGroup.isLoading ? (
-                        <div className="col-span-2 flex items-center justify-center p-4">
-                          <SparklesIcon className="h-8 w-8 text-indigo-500 animate-pulse" />
-                        </div>
-                      ) : imageGroup.error ? (
-                        <div className="col-span-2 rounded-lg border border-red-200 bg-gradient-to-br from-red-50 to-red-100">
-                          <div className="flex items-start gap-3 p-3">
-                            <ExclamationCircleIcon className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
-                            <div className="flex-1 min-w-0">
-                              <span className="text-sm text-red-600 font-medium block mb-1">生成失败</span>
-                              {imageGroup.errorMessage && (
-                                <p className="text-xs text-red-500 whitespace-pre-wrap break-words">
-                                  {imageGroup.errorMessage}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        imageGroup.results.map((result, imageIndex) => (
-                          result.success ? (
-                            <div
-                              key={imageIndex}
-                              className="group relative aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-50 cursor-pointer"
-                              onClick={() => handleImageClick(result.imageUrl!)}
-                            >
-                              <img
-                                src={result.imageUrl!}
-                                alt={`Generated image ${imageIndex + 1}`}
-                                className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                              />
-                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-                            </div>
-                          ) : (
-                            <div
-                              key={imageIndex}
-                              className="col-span-2 rounded-lg border border-red-200 bg-gradient-to-br from-red-50 to-red-100"
-                            >
-                              <div className="flex items-start gap-3 p-3">
-                                <ExclamationCircleIcon className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
-                                <div className="flex-1 min-w-0">
-                                  <span className="text-sm text-red-600 font-medium block mb-1">错误！{result.error}</span>
-                                  {result.text && (
-                                    <p className="text-xs text-red-500 whitespace-pre-wrap break-words">
-                                      检测到文字返回：<i>{result.text}</i>
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          )
-                        ))
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+          </div>
+          <div className="flex-shrink-0">
+            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+              <UserCircleIcon className="h-6 w-6 text-white" />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Image Preview Modal */}
-      {previewImage && (
+      {/* 图片查看模态框 */}
+      {selectedImage && (
         <div 
           className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
-          onClick={handleClosePreview}
+          onClick={() => setSelectedImage(null)}
         >
           <button
-            onClick={handleClosePreview}
+            onClick={() => setSelectedImage(null)}
             className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors"
           >
             <XMarkIcon className="h-8 w-8" />
           </button>
           <div className="relative max-w-7xl max-h-[90vh] w-full h-full">
             <img
-              src={previewImage}
+              src={selectedImage}
               alt="Preview"
               className="w-full h-full object-contain"
             />
           </div>
         </div>
       )}
-    </>
+
+      {/* AI 回复 */}
+      <div className="flex justify-start p-3">
+        <div className="flex items-start gap-3 max-w-3xl">
+          <div className="flex-shrink-0">
+            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+              <SparklesIcon className="h-6 w-6 text-white" />
+            </div>
+          </div>
+          <div className="flex-1">
+            {/* AI 文字回复 */}
+            {message.results.content && (
+              <div className="inline-block bg-white border border-gray-200 rounded-lg px-4 py-2 mb-3">
+                <p className="text-sm text-gray-900">{message.results.content}</p>
+              </div>
+            )}
+
+            {/* AI 图片结果 */}
+            {Object.entries(message.results.images).map(([modelId, results], index) => (
+              <div key={index} className="mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="h-7 w-7 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center shadow-sm">
+                    <span className="text-xs font-semibold text-indigo-700">
+                      {index + 1}
+                    </span>
+                  </div>
+                  <h4 className="text-sm font-medium text-gray-800 flex items-center gap-1.5">
+                    <span className="text-indigo-600">{modelId}</span>
+                    <span className="text-gray-400">•</span>
+                    <span>{results.length} 张图片</span>
+                  </h4>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {results.map((result, index) => (
+                    <div 
+                      key={index} 
+                      className="group relative aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-50"
+                    >
+                      {result.error ? (
+                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100">
+                          <div className="flex flex-col items-center gap-2 p-4 text-center">
+                            <ExclamationCircleIcon className="h-6 w-6 text-red-500" />
+                            <div className="space-y-1">
+                              <span className="text-sm text-red-600 font-medium block">生成失败</span>
+                              <p className="text-xs text-red-500 line-clamp-2">
+                                {result.errorMessage}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ) : result.url ? (
+                        <>
+                        <div 
+                          key={index} 
+                          className="group relative aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-50 cursor-pointer"
+                          onClick={() => setSelectedImage(result.url)}
+                        >
+                          <img
+                            src={result.url}
+                            alt={`Generated image ${index + 1}`}
+                            className="w-full h-full object-cover transition-transform group-hover:scale-105 cursor-pointer"
+                          />
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                          </div>
+                        </>
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
+                          <span className="text-sm text-gray-500">加载中...</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
-
-export default ChatMessage;

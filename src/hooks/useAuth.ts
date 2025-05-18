@@ -16,7 +16,7 @@ export const useAuth = () => {
   const checkUser = useCallback(async () => {
     try {
       const user = await authService.getCurrentUser();
-      setUser(user);
+        setUser(user);
     } catch (err) {
       setError(err as AuthError);
     } finally {
