@@ -48,12 +48,16 @@ export class ChatService {
   }
 
   // 获取用户的所有聊天记录
-  async getUserChats(userId: string): Promise<Chat[]> {
+  async getUserChats(): Promise<Chat[]> {
     try {
+      const currentUser = await supabase.auth.getUser();
+      if (!currentUser.data.user) {
+        throw new Error('User not found');
+      }
       const { data, error } = await supabase
         .from('chat_msg')
         .select('*')
-        .eq('user_id', userId)
+        .eq('user_id', currentUser.data.user.id)
         .order('created_at', { ascending: false });
       
       console.log(data);

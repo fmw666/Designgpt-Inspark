@@ -4,13 +4,11 @@ import type { User, AuthError } from '@/services/supabase';
 import { supabase } from '@/services/supabase';
 import { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
-// 全局初始化标志
-let isInitialized = false;
-
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<AuthError | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const authService = AuthService.getInstance();
 
@@ -19,11 +17,11 @@ export const useAuth = () => {
     try {
       const user = await authService.getCurrentUser();
       setUser(user);
-      console.log('user', user);
     } catch (err) {
       setError(err as AuthError);
     } finally {
       setLoading(false);
+      setIsInitialized(true);
     }
   }, []); // 空依赖数组，因为这个函数不依赖任何外部变量
 
@@ -32,9 +30,7 @@ export const useAuth = () => {
     let mounted = true;
 
     const initializeAuth = async () => {
-      // 只在未初始化时执行初始化
       if (!isInitialized && mounted) {
-        isInitialized = true;
         await checkUser();
       }
     };
@@ -61,7 +57,7 @@ export const useAuth = () => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [checkUser]); // 只依赖 checkUser 函数
+  }, [checkUser, isInitialized]);
 
   const sendVerificationCode = async (email: string) => {
     try {
@@ -90,8 +86,7 @@ export const useAuth = () => {
       setError(null);
       await authService.signOut();
       setUser(null);
-      // 重置初始化标志，允许重新初始化
-      isInitialized = false;
+      setIsInitialized(false);
     } catch (err) {
       setError(err as AuthError);
       throw err;
@@ -102,6 +97,7 @@ export const useAuth = () => {
     user,
     loading,
     error,
+    isInitialized,
     sendVerificationCode,
     verifyCode,
     signOut,

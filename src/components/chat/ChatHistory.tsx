@@ -13,8 +13,16 @@ interface GroupedChats {
 
 export const ChatHistory = () => {
   const navigate = useNavigate();
-  const { chats, currentChat, loading, deleteChat } = useChat();
+  const { chats, currentChat, isLoading, deleteChat } = useChat();
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+
+
+  console.log('\n\n\n=============================');
+  // TODO: currentChat 并没有做好状态管理！
+  console.log('currentChat', currentChat);
+  console.log('chats', chats);
+  console.log('isLoading', isLoading);
+  console.log('=============================\n\n\n');
 
   const handleChatClick = (chat: Chat) => {
     navigate(`/chat/${chat.id}`);
@@ -55,7 +63,7 @@ export const ChatHistory = () => {
     return groups;
   }, {});
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />

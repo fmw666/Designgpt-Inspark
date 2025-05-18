@@ -38,44 +38,41 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const location = useLocation();
-  let currentChatId = null;
 
-  console.log('chatId', chatId);
-  if (!chatId || chatId === 'new') {
-    // 如果是新聊天，清空当前聊天
-    currentChatId = null;
-  } else {
-    // 切换到指定的聊天
-    currentChatId = chatId;
-  }
+  const { chats, currentChat, switchChat, isLoading } = useChat();
 
-  const { currentChat, chats, loading } = useChat();
+  useEffect(() => {
+    if (chats.length === 0) {
+      return;
+    }
+
+    let currentChatId = null;
+    if (!chatId || chatId === 'new') {
+      // 如果是新聊天，清空当前聊天
+      currentChatId = null;
+    } else {
+      // 切换到指定的聊天
+      currentChatId = chatId;
+    }
+
+    console.log('currentChatId', currentChatId);
+
+    if (currentChatId) {
+      const chat = chats.find(chat => chat.id === currentChatId);
+      if (chat) {
+        switchChat(chat.id);
+      }
+    } else {
+      switchChat(null);
+    }
+
+  }, [chats, currentChat, isLoading, chatId]);
 
   console.log('\n\n\n000000000000000000000000000000');
   console.log('currentChat', currentChat);
   console.log('chats', chats);
-  console.log('loading', loading);
+  console.log('isLoading', isLoading);
   console.log('000000000000000000000000000000\n\n\n');
-
-  // 获取聊天标题
-  const getChatTitle = () => {
-    // 如果是 new 页面且没有消息，返回 null
-    if (location.pathname === '/chat/new' && !currentChat?.messages?.length) {
-      return null;
-    }
-
-    if (!currentChat?.messages?.length) return '新对话';
-    const firstMessage = currentChat.messages[0];
-    if (firstMessage.role === 'user') {
-      // 如果消息太长，截取前30个字符
-      return firstMessage.content.length > 30
-        ? `${firstMessage.content.slice(0, 30)}...`
-        : firstMessage.content;
-    }
-    return '新对话';
-  };
-
-  const title = getChatTitle();
 
   useEffect(() => {
     const allModels = getAllModels();
@@ -310,17 +307,39 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
     }
   };
 
-  // if (!isLoading) {
-  //   return <div>Loading...</div>;
-  // }
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full bg-white/50 backdrop-blur-sm">
+        <div className="relative w-16 h-16">
+          {/* Outer ring */}
+          <div className="absolute inset-0 border-4 border-indigo-100 rounded-full animate-pulse"></div>
+          
+          {/* Spinning inner ring */}
+          <div className="absolute inset-0 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+          
+          {/* Center sparkle icon */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <SparklesIcon className="w-6 h-6 text-indigo-600 animate-bounce" />
+          </div>
+        </div>
+        
+        <p className="mt-4 text-lg font-medium text-gray-600">
+          正在加载对话...
+        </p>
+        <p className="mt-2 text-sm text-gray-500">
+          请稍候片刻
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full">
       {/* Chat Title - 只在有标题时显示 */}
-      {title && (
+      {currentChat?.title && (
         <div className="h-14 border-b border-gray-200 bg-white/50 backdrop-blur-sm flex items-center px-6 justify-center">
           <h1 className="text-lg font-medium text-gray-900">
-            {title}
+            {currentChat.title}
           </h1>
         </div>
       )}
