@@ -7,7 +7,7 @@ interface ChatState {
   currentChat: Chat | null;
   isLoading: boolean;
   isInitialized: boolean;
-  setChats: (chats: Chat[]) => void;
+  setChats: (chats: Chat[] | ((prev: Chat[]) => Chat[])) => void;
   setCurrentChat: (chat: Chat | null) => void;
   setIsLoading: (isLoading: boolean) => void;
   setIsInitialized: (isInitialized: boolean) => void;
@@ -24,7 +24,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
   currentChat: null,
   isLoading: false,
   isInitialized: false,
-  setChats: (chats) => set({ chats }),
+  setChats: (chats) => set({ 
+    chats: typeof chats === 'function' ? chats(get().chats) : chats 
+  }),
   setCurrentChat: (currentChat) => set({ currentChat }),
   setIsLoading: (isLoading) => set({ isLoading }),
   setIsInitialized: (isInitialized) => set({ isInitialized }),
@@ -66,7 +68,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
     try {
       const message: Message = {
         id: `msg_${Date.now()}`,
-        role: 'user',
         content,
         models,
         results: {
@@ -78,7 +79,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
       const updatedChat = await chatService.addMessage(currentChat.id, message);
       setCurrentChat(updatedChat);
-      setChats(prev => prev.map(chat => 
+      setChats((prev) => prev.map(chat => 
         chat.id === currentChat.id ? updatedChat : chat
       ));
 
