@@ -7,7 +7,8 @@ import { serviceManager } from '@/services/serviceManager';
 import { StandardResponse } from '@/services/libs/baseService';
 import { useChat } from '@/hooks/useChat';
 import { useNavigate } from 'react-router-dom';
-import { ChatMessage } from './ChatMessage';
+import { ChatMessage, Message } from './ChatMessage';
+import { chatService } from '@/services/chatService';
 
 // 默认图片数组
 const DEFAULT_IMAGES = [
@@ -112,27 +113,59 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
       setIsGenerating(true);
 
       try {
+        // 准备初始消息结果
+        const initialResults = {
+          content: '',
+          images: selectedModels.reduce((acc, model) => ({
+            ...acc,
+            [model.name]: Array(model.count).fill({
+              url: null,
+              error: null,
+              errorMessage: '',
+              isGenerating: true
+            })
+          }), {})
+        };
+
+        // 准备消息对象
+        const message: Message = {
+          id: `msg_${Date.now()}`,
+          content: input,
+          models: selectedModels,
+          results: initialResults,
+          createdAt: new Date().toISOString()
+        };
+
+        let currentMessageId: string;
+        let chatId: string;
+
         // 如果没有当前聊天，创建新聊天
         if (!currentChat) {
           // 使用用户输入作为标题，限制10个字符
           const title = input.length > 10 ? `${input.slice(0, 10)}...` : input;
-          const newChat = await createNewChat(title);
+          // 创建新聊天时直接包含初始消息
+          const newChat = await createNewChat(title, [message]);
           if (!newChat) {
             throw new Error('Failed to create new chat');
           }
+          currentMessageId = message.id;
+          chatId = newChat.id;
           // 创建成功后跳转到新聊天的路由
           navigate(`/chat/${newChat.id}`);
-        }
-
-        // 1. 添加用户消息到数据库
-        const message = await addMessage(input, selectedModels);
-        if (!message) {
-          throw new Error('Failed to add message');
+        } else {
+          // 添加到现有聊天
+          const addedMessage = await addMessage(input, selectedModels, initialResults);
+          if (!addedMessage) {
+            throw new Error('Failed to add message');
+          }
+          currentMessageId = addedMessage.id;
+          chatId = currentChat.id;
         }
 
         // 2. 为每个选中的模型生成图片
-        const imagePromises = selectedModels.map(async ({ id, count, category }) => {
+        const updatePromises = selectedModels.map(async ({ id, count, category }) => {
           const model = models.find(m => m.id === id);
+          const modelName = model?.name || id;
           
           try {
             let response;
@@ -162,43 +195,82 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
               };
             }
 
-            return {
-              modelId: model?.name || id,
-              results: response.results.map(result => ({
-                url: result.imageUrl,
-                error: !result.success,
-                errorMessage: result.error || ''
-              }))
+            // 检查响应是否有效
+            if (!response || !response.results || response.results.length === 0) {
+              throw new Error('Invalid response from service');
+            }
+
+            // 获取当前消息的最新状态
+            const latestChat = await chatService.getChat(chatId);
+            if (!latestChat) throw new Error('Chat not found');
+            
+            const currentMessage = latestChat.messages.find(msg => msg.id === currentMessageId);
+            if (!currentMessage) throw new Error('Message not found');
+
+            // 更新这个模型的结果，保持其他模型的状态不变
+            const updatedResults = {
+              content: '正在生成图片...',
+              images: {
+                ...currentMessage.results.images,
+                [modelName]: response.results.map(result => ({
+                  url: result.imageUrl || null,
+                  error: !result.success ? '生成失败' : null,
+                  errorMessage: result.error || '',
+                  isGenerating: false
+                }))
+              }
             };
+
+            await updateMessageResults(currentMessageId, updatedResults);
+            return updatedResults;
           } catch (error) {
             console.error(`Error generating images for model ${id}:`, error);
-            return {
-              modelId: model?.name || id,
-              results: [{
-                url: null,
-                error: true,
-                errorMessage: error instanceof Error ? error.message : '生成失败'
-              }]
+            
+            // 获取当前消息的最新状态
+            const latestChat = await chatService.getChat(chatId);
+            if (!latestChat) throw new Error('Chat not found');
+            
+            const currentMessage = latestChat.messages.find(msg => msg.id === currentMessageId);
+            if (!currentMessage) throw new Error('Message not found');
+
+            // 更新错误状态，保持其他模型的状态不变
+            const errorResults = {
+              content: '正在生成图片...',
+              images: {
+                ...currentMessage.results.images,
+                [modelName]: [{
+                  url: null,
+                  error: '生成失败',
+                  errorMessage: error instanceof Error ? error.message : '生成失败',
+                  isGenerating: false
+                }]
+              }
             };
+            await updateMessageResults(currentMessageId, errorResults);
+            return errorResults;
           }
         });
 
         // 3. 等待所有图片生成完成
-        const responses = await Promise.all(imagePromises);
+        await Promise.all(updatePromises);
 
-        // 4. 更新消息结果
-        const results = {
+        // 4. 获取最终状态
+        const latestChat = await chatService.getChat(chatId);
+        if (!latestChat) throw new Error('Chat not found');
+        
+        const currentMessage = latestChat.messages.find(msg => msg.id === currentMessageId);
+        if (!currentMessage) throw new Error('Message not found');
+
+        // 5. 更新最终状态，保持所有图片状态不变
+        const finalResults = {
           content: '✅ 图片生成完成！',
-          images: responses.reduce((acc, response) => ({
-            ...acc,
-            [response.modelId]: response.results
-          }), {})
+          images: currentMessage.results.images
         };
 
-        // 5. 更新数据库中的消息
-        await updateMessageResults(message.id, results);
+        // 6. 更新数据库中的消息
+        await updateMessageResults(currentMessageId, finalResults);
 
-        // 6. 调用外部回调
+        // 7. 调用外部回调
         onSendMessage?.(input, selectedModels);
 
       } catch (error) {

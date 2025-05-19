@@ -76,7 +76,7 @@ export class ChatService {
   }
 
   // 创建新聊天
-  async createChat(title: string = '新对话'): Promise<Chat> {
+  async createChat(title: string = '新对话', initialMessages: Message[] = []): Promise<Chat> {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -88,7 +88,7 @@ export class ChatService {
         .insert([{
           user_id: user.id,
           title,
-          messages: []
+          messages: initialMessages
         }])
         .select()
         .single();
@@ -204,3 +204,4 @@ export class ChatService {
 
 // 导出单例实例
 export const chatService = ChatService.getInstance();
+ 

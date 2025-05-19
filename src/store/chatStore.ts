@@ -12,8 +12,8 @@ interface ChatState {
   setIsLoading: (isLoading: boolean) => void;
   setIsInitialized: (isInitialized: boolean) => void;
   initialize: () => Promise<void>;
-  createNewChat: (title?: string) => Promise<Chat | null>;
-  addMessage: (content: string, models: { id: string; name: string; count: number }[]) => Promise<Message | null>;
+  createNewChat: (title?: string, initialMessages?: Message[]) => Promise<Chat | null>;
+  addMessage: (content: string, models: { id: string; name: string; count: number }[], initialResults?: Message['results']) => Promise<Message | null>;
   updateMessageResults: (messageId: string, results: Message['results']) => Promise<void>;
   switchChat: (chatId: string | null) => void;
   deleteChat: (chatId: string) => Promise<void>;
@@ -48,10 +48,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
   },
 
-  createNewChat: async (title: string = '新对话') => {
+  createNewChat: async (title: string = '新对话', initialMessages: Message[] = []) => {
     const { setChats, setCurrentChat } = get();
     try {
-      const newChat = await chatService.createChat(title);
+      const newChat = await chatService.createChat(title, initialMessages);
       setChats(prev => [newChat, ...prev]);
       setCurrentChat(newChat);
       return newChat;
@@ -61,7 +61,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
   },
 
-  addMessage: async (content: string, models: { id: string; name: string; count: number }[]) => {
+  addMessage: async (content: string, models: { id: string; name: string; count: number }[], initialResults?: Message['results']) => {
     const { currentChat, setCurrentChat, setChats } = get();
     if (!currentChat) return null;
 
@@ -70,7 +70,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         id: `msg_${Date.now()}`,
         content,
         models,
-        results: {
+        results: initialResults || {
           images: {},
           content: ''
         },
@@ -104,9 +104,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
       });
 
       setCurrentChat(updatedChat);
-    //   setChats(prev => prev.map(chat => 
-    //     chat.id === currentChat.id ? updatedChat : chat
-    //   ));
+      setChats(prev => prev.map(chat => 
+        chat.id === currentChat.id ? updatedChat : chat
+      ));
     } catch (error) {
       console.error('Error updating message results:', error);
     }
@@ -137,3 +137,4 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
   }
 }));
+ 

@@ -11,6 +11,7 @@ interface ImageResult {
   url: string | null;
   error: string | null;
   errorMessage: string;
+  isGenerating?: boolean;
 }
 
 interface Results {
@@ -18,6 +19,7 @@ interface Results {
     [key: string]: ImageResult[];
   };
   content: string;
+  isGenerating?: boolean;
 }
 
 export interface Message {
@@ -55,7 +57,7 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message }) => {
 
       {/* 图片查看模态框 */}
       {selectedImage && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
           onClick={() => setSelectedImage(null)}
         >
@@ -95,7 +97,7 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message }) => {
             {Object.entries(message.results.images).map(([modelId, results], index) => (
               <div key={index} className="mb-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="h-7 w-7 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center shadow-sm">
+                  <div className="h-5 w-5 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center shadow-sm">
                     <span className="text-xs font-semibold text-indigo-700">
                       {index + 1}
                     </span>
@@ -108,11 +110,18 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message }) => {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   {results.map((result, index) => (
-                    <div 
-                      key={index} 
+                    <div
+                      key={index}
                       className="group relative aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-50"
                     >
-                      {result.error ? (
+                      {result.isGenerating ? (
+                        <div className="absolute inset-0 flex items-center justify-center bg-white/80">
+                          <div className="flex flex-col items-center gap-2">
+                            <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+                            <span className="text-sm text-gray-600">生成中...</span>
+                          </div>
+                        </div>
+                      ) : result.error ? (
                         <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100">
                           <div className="flex flex-col items-center gap-2 p-4 text-center">
                             <ExclamationCircleIcon className="h-6 w-6 text-red-500" />
@@ -126,17 +135,17 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message }) => {
                         </div>
                       ) : result.url ? (
                         <>
-                        <div 
-                          key={index} 
-                          className="group relative aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-50 cursor-pointer"
-                          onClick={() => setSelectedImage(result.url)}
-                        >
-                          <img
-                            src={result.url}
-                            alt={`Generated image ${index + 1}`}
-                            className="w-full h-full object-cover transition-transform group-hover:scale-105 cursor-pointer"
-                          />
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                          <div
+                            key={index}
+                            className="group relative aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-50 cursor-pointer"
+                            onClick={() => setSelectedImage(result.url)}
+                          >
+                            <img
+                              src={result.url}
+                              alt={`Generated image ${index + 1}`}
+                              className="w-full h-full object-cover transition-transform group-hover:scale-105 cursor-pointer"
+                            />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
                           </div>
                         </>
                       ) : (
