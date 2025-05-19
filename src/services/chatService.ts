@@ -76,12 +76,17 @@ export class ChatService {
   }
 
   // 创建新聊天
-  async createChat(userId: string, title: string = '新对话'): Promise<Chat> {
+  async createChat(title: string = '新对话'): Promise<Chat> {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
       const { data, error } = await supabase
         .from('chat_msg')
         .insert([{
-          user_id: userId,
+          user_id: user.id,
           title,
           messages: []
         }])

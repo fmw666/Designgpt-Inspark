@@ -12,7 +12,7 @@ interface ChatState {
   setIsLoading: (isLoading: boolean) => void;
   setIsInitialized: (isInitialized: boolean) => void;
   initialize: () => Promise<void>;
-  createNewChat: () => Promise<Chat | null>;
+  createNewChat: (title?: string) => Promise<Chat | null>;
   addMessage: (content: string, models: { id: string; name: string; count: number }[]) => Promise<Message | null>;
   updateMessageResults: (messageId: string, results: Message['results']) => Promise<void>;
   switchChat: (chatId: string | null) => void;
@@ -48,10 +48,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
   },
 
-  createNewChat: async () => {
+  createNewChat: async (title: string = '新对话') => {
     const { setChats, setCurrentChat } = get();
     try {
-      const newChat = await chatService.createChat();
+      const newChat = await chatService.createChat(title);
       setChats(prev => [newChat, ...prev]);
       setCurrentChat(newChat);
       return newChat;
@@ -79,7 +79,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
       const updatedChat = await chatService.addMessage(currentChat.id, message);
       setCurrentChat(updatedChat);
-      setChats((prev) => prev.map(chat => 
+      setChats(prev => prev.map(chat => 
         chat.id === currentChat.id ? updatedChat : chat
       ));
 

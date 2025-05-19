@@ -44,7 +44,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
     switchChat, 
     isLoading,
     addMessage,
-    updateMessageResults 
+    updateMessageResults,
+    createNewChat
   } = useChat();
 
   useEffect(() => {
@@ -111,6 +112,18 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
       setIsGenerating(true);
 
       try {
+        // 如果没有当前聊天，创建新聊天
+        if (!currentChat) {
+          // 使用用户输入作为标题，限制10个字符
+          const title = input.length > 10 ? `${input.slice(0, 10)}...` : input;
+          const newChat = await createNewChat(title);
+          if (!newChat) {
+            throw new Error('Failed to create new chat');
+          }
+          // 创建成功后跳转到新聊天的路由
+          navigate(`/chat/${newChat.id}`);
+        }
+
         // 1. 添加用户消息到数据库
         const message = await addMessage(input, selectedModels);
         if (!message) {
