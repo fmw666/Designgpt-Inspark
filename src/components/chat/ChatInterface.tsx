@@ -9,6 +9,8 @@ import { useChat } from '@/hooks/useChat';
 import { useNavigate } from 'react-router-dom';
 import { ChatMessage, Message } from './ChatMessage';
 import { chatService } from '@/services/chatService';
+import { useAuth } from '@/hooks/useAuth';
+import { eventBus } from '@/utils/eventBus';
 
 // 默认图片数组
 const DEFAULT_IMAGES = [
@@ -39,6 +41,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const navigate = useNavigate();
 
+  const { user } = useAuth();
   const { 
     chats, 
     currentChat, 
@@ -48,6 +51,17 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
     updateMessageResults,
     createNewChat
   } = useChat();
+
+  // 检查用户认证状态和路由
+  useEffect(() => {
+    if (!user) {
+      // 未登录时，清空当前聊天并重定向到 /chat/new
+      switchChat(null);
+      if (chatId && chatId !== 'new') {
+        navigate('/chat/new');
+      }
+    }
+  }, [user, chatId]);
 
   useEffect(() => {
     if (chats.length === 0) {
@@ -62,8 +76,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
       // 切换到指定的聊天
       currentChatId = chatId;
     }
-
-    console.log('currentChatId', currentChatId);
 
     if (currentChatId) {
       const chat = chats.find(chat => chat.id === currentChatId);
@@ -107,12 +119,20 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // 处理提交前的认证检查
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // 如果用户未登录，触发登录事件
+    if (!user) {
+      eventBus.emit('needSignIn');
+      return;
+    }
+
     if (input.trim() && selectedModels.length > 0) {
       setIsGenerating(true);
-      const currentInput = input; // 保存当前输入内容
-      setInput(''); // 立即清空输入框
+      const currentInput = input;
+      setInput('');
 
       try {
         // 准备初始消息结果
@@ -132,7 +152,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
         // 准备消息对象
         const message: Message = {
           id: `msg_${Date.now()}`,
-          content: currentInput, // 使用保存的输入内容
+          content: currentInput,
           models: selectedModels,
           results: initialResults,
           createdAt: new Date().toISOString()
@@ -277,7 +297,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
 
       } catch (error) {
         console.error('Error in handleSubmit:', error);
-        setInput(currentInput); // 如果发生错误，恢复输入内容
+        setInput(currentInput);
       } finally {
         setIsGenerating(false);
       }
@@ -304,7 +324,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
 
           {/* Center sparkle icon */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <SparklesIcon className="w-6 h-6 text-indigo-600 animate-bounce" />
+            <SparklesIcon className="w-6 h-6 text-indigo-600 animate-bounce transform-gpu -translate-y-1/2" style={{animation: 'bounce 1s infinite'}} />
           </div>
         </div>
 
@@ -320,8 +340,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
 
   return (
     <div className="flex flex-col h-full">
-      {/* Chat Title - 只在有标题时显示 */}
-      {currentChat?.title && (
+      {/* Chat Title - 只在有标题且用户已登录时显示 */}
+      {user && currentChat?.title && (
         <div className="h-14 border-b border-gray-200 bg-white/50 backdrop-blur-sm flex items-center px-6 justify-center">
           <h1 className="text-lg font-medium text-gray-900">
             {currentChat.title}
@@ -330,7 +350,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
       )}
 
       <div className="flex-1 overflow-y-auto p-4">
-        {!currentChat || !currentChat!.messages!.length ? (
+        {!user || !currentChat || !currentChat!.messages!.length ? (
           <NewChatGuide />
         ) : (
           <>
@@ -349,18 +369,16 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
         />
         <form onSubmit={handleSubmit} className="mt-4">
           <div className="relative flex items-center">
-            {/* 输入框容器 */}
             <div className="flex-1 relative">
               <textarea
                 ref={textareaRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="输入提示词... (Enter 换行）"
+                placeholder={user ? "输入提示词... (Enter 换行）" : "请先登录后再开始对话"}
                 className="w-full max-h-[200px] py-3 pl-4 pr-12 text-sm text-gray-900 placeholder-gray-500 bg-white border border-gray-200 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none overflow-hidden transition-all duration-200 ease-in-out"
                 rows={1}
               />
-              {/* 发送按钮 */}
               <button
                 type="submit"
                 disabled={!input.trim() || selectedModels.length === 0 || isGenerating}

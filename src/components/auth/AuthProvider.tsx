@@ -1,37 +1,43 @@
-import { createContext, useContext, ReactNode } from 'react';
-import { useAuthGuard } from '@/hooks/useAuthGuard';
+import { createContext, useEffect, useState } from 'react';
+import { User } from '@/services/supabase';
 import { SignInModal } from './SignInModal';
+import { eventBus } from '@/utils/eventBus';
+import { useAuth } from '@/hooks/useAuth';
 
 interface AuthContextType {
-  showLoginModal: boolean;
-  setShowLoginModal: (show: boolean) => void;
-  checkAuth: () => Promise<boolean>;
-  handleAuthError: (error: Error) => Promise<boolean>;
+  user: User | null;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const useAuthContext = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuthContext must be used within an AuthProvider');
-  }
-  return context;
-};
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [showSignInModal, setShowSignInModal] = useState(false);
+  const { user } = useAuth();
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
+  // 单独处理登录事件监听
+  useEffect(() => {
+    const handleNeedSignIn = () => {
+      if (!user) {
+        setShowSignInModal(true);
+      }
+    };
 
-export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const authGuard = useAuthGuard();
+    eventBus.on('needSignIn', handleNeedSignIn);
+
+    return () => {
+      eventBus.off('needSignIn', handleNeedSignIn);
+    };
+  }, [user]); // 只在 user 状态变化时更新事件监听器
+
 
   return (
-    <AuthContext.Provider value={authGuard}>
+    <AuthContext.Provider value={{ user }}>
       {children}
-      <SignInModal 
-        isOpen={authGuard.showLoginModal} 
-        onClose={() => authGuard.setShowLoginModal(false)} 
+      {/* 登录模态框 */}
+      <SignInModal
+        isOpen={showSignInModal}
+        onClose={() => setShowSignInModal(false)}
+        onSuccess={() => setShowSignInModal(false)}
       />
     </AuthContext.Provider>
   );

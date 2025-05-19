@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useChat } from '@/hooks/useChat';
 import { Chat } from '@/services/chatService';
@@ -16,13 +16,58 @@ export const ChatHistory = () => {
   const { chats, currentChat, isLoading, deleteChat } = useChat();
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
-
   console.log('\n\n\n=============================');
   // TODO: currentChat 并没有做好状态管理！
   console.log('currentChat', currentChat);
   console.log('chats', chats);
   console.log('isLoading', isLoading);
   console.log('=============================\n\n\n');
+
+  // 使用 useMemo 缓存分组结果
+  const groupedChats = useMemo(() => {
+    if (!chats.length) return {};
+
+    return chats.reduce<GroupedChats>((groups, chat) => {
+      let groupKey: string;
+      const date = new Date(chat.created_at);
+      console.log("date", date)
+
+      if (isToday(date)) {
+        groupKey = '今天';
+      } else if (isYesterday(date)) {
+        groupKey = '昨天';
+      } else if (isThisWeek(date)) {
+        groupKey = '7天内';
+      } else if (isThisMonth(date)) {
+        groupKey = '30天内';
+      } else if (isThisYear(date)) {
+        groupKey = format(date, 'yyyy-MM', { locale: zhCN });
+      } else {
+        groupKey = format(date, 'yyyy', { locale: zhCN });
+      }
+
+      if (!groups[groupKey]) {
+        groups[groupKey] = [];
+      }
+      groups[groupKey].push(chat);
+      return groups;
+    }, {});
+  }, [chats]); // 只在 chats 变化时重新计算
+
+  // 使用 useMemo 缓存排序后的分组键
+  const sortedGroupKeys = useMemo(() => {
+    return Object.keys(groupedChats).sort((a, b) => {
+      if (a === '今天') return -1;
+      if (b === '今天') return 1;
+      if (a === '昨天') return -1;
+      if (b === '昨天') return 1;
+      if (a === '7天内') return -1;
+      if (b === '7天内') return 1;
+      if (a === '30天内') return -1;
+      if (b === '30天内') return 1;
+      return b.localeCompare(a); // 其他按日期倒序
+    });
+  }, [groupedChats]);
 
   const handleChatClick = (chat: Chat) => {
     navigate(`/chat/${chat.id}`);
@@ -37,38 +82,10 @@ export const ChatHistory = () => {
     }
   };
 
-  // 按日期分组聊天记录
-  const groupedChats = chats.reduce<GroupedChats>((groups, chat) => {
-    let groupKey: string;
-    const date = new Date(chat.created_at);
-
-    console.log('date', date);
-
-    if (isToday(date)) {
-      groupKey = '今天';
-    } else if (isYesterday(date)) {
-      groupKey = '昨天';
-    } else if (isThisWeek(date)) {
-      groupKey = '7天内';
-    } else if (isThisMonth(date)) {
-      groupKey = '30天内';
-    } else if (isThisYear(date)) {
-      groupKey = format(date, 'yyyy-MM', { locale: zhCN });
-    } else {
-      groupKey = format(date, 'yyyy', { locale: zhCN });
-    }
-
-    if (!groups[groupKey]) {
-      groups[groupKey] = [];
-    }
-    groups[groupKey].push(chat);
-    return groups;
-  }, {});
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
       </div>
     );
   }
@@ -76,19 +93,19 @@ export const ChatHistory = () => {
   return (
     <div className="flex-1 overflow-y-auto px-4">
       <AnimatePresence>
-        {Object.entries(groupedChats).map(([group, groupChats]) => (
+        {sortedGroupKeys.map((groupKey) => (
           <motion.div
-            key={group}
+            key={groupKey}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             className="mb-6"
           >
             <h3 className="text-xs font-medium text-gray-500 mb-2 px-2">
-              {group}
+              {groupKey}
             </h3>
             <div className="space-y-1">
-              {groupChats.map((chat) => (
+              {groupedChats[groupKey].map((chat) => (
                 <motion.div
                   key={chat.id}
                   onClick={() => handleChatClick(chat)}

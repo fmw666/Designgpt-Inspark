@@ -6,9 +6,10 @@ import { useAuth } from '@/hooks/useAuth';
 interface SignInModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
+export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const { sendVerificationCode, verifyCode } = useAuth();
   const [email, setEmail] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
@@ -82,7 +83,7 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => 
     setIsSubmitting(true);
     try {
       await verifyCode(email, verificationCode);
-      onClose();
+      onSuccess?.();
     } catch (err) {
       setError('验证码错误，请重试');
     } finally {

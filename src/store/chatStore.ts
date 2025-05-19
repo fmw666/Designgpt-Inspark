@@ -32,19 +32,38 @@ export const useChatStore = create<ChatState>((set, get) => ({
   setIsInitialized: (isInitialized) => set({ isInitialized }),
 
   initialize: async () => {
-    const { isInitialized, setIsLoading, setChats, setIsInitialized } = get();
-    if (isInitialized) return;
+    const { isInitialized } = get();
+    
+    if (isInitialized || get().isLoading) {
+      console.log('Chat store already initialized or loading, skipping...');
+      return;
+    }
 
+    console.log('Starting chat store initialization...');
+    
     try {
-      setIsLoading(true);
+      set(state => ({
+        ...state,
+        isLoading: true
+      }));
+
       const userChats = await chatService.getUserChats();
-      setChats(userChats);
+      console.log('Chats retrieved:', userChats.length);
+
+      set(state => ({
+        ...state,
+        chats: userChats,
+        isLoading: false,
+        isInitialized: true
+      }));
     } catch (error) {
       console.error('Error initializing chats:', error);
-      setChats([]);
-    } finally {
-      setIsLoading(false);
-      setIsInitialized(true);
+      set(state => ({
+        ...state,
+        chats: [],
+        isLoading: false,
+        isInitialized: true
+      }));
     }
   },
 

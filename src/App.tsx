@@ -7,13 +7,13 @@ import { AuthProvider } from '@/components/auth/AuthProvider';
 function App() {
   return (
     <AuthProvider>
-    <Routes>
+      <Routes>
         <Route path="/" element={<Navigate to="/chat/new" replace />} />
         <Route path="/chat" element={<Navigate to="/chat/new" replace />} />
         <Route path="/chat/:chatId" element={<Chat />} />
-      <Route path="/test" element={<TestLayout />} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+        <Route path="/test" element={<TestLayout />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
     </AuthProvider>
   );
 }

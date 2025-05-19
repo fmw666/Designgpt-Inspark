@@ -3,12 +3,15 @@ import { useAuth } from './useAuth';
 import { useChatStore } from '@/store/chatStore';
 
 export const useChat = () => {
-  const { isInitialized: isAuthInitialized } = useAuth();
+  const { user } = useAuth();
   const {
     chats,
     currentChat,
     isLoading,
     isInitialized,
+    setChats,
+    setCurrentChat,
+    setIsInitialized,
     initialize,
     createNewChat,
     addMessage,
@@ -18,19 +21,25 @@ export const useChat = () => {
   } = useChatStore();
 
   useEffect(() => {
-    if (isAuthInitialized && !isInitialized) {
+    if (user && !isInitialized) {
       initialize();
+    } else if (!user) {
+      setChats([]);
+      setCurrentChat(null);
+      setIsInitialized(false);
     }
-  }, [isAuthInitialized, isInitialized, initialize]);
+  }, [user, isInitialized]);
 
   return {
     chats,
     currentChat,
-    isLoading: isLoading || !isAuthInitialized,
-    createNewChat,
-    addMessage,
-    updateMessageResults,
-    switchChat,
-    deleteChat
+    isLoading,
+    isInitialized,
+    createNewChat: user ? createNewChat : async () => null,
+    addMessage: user ? addMessage : async () => null,
+    updateMessageResults: user ? updateMessageResults : async () => {},
+    switchChat: user ? switchChat : () => {},
+    deleteChat: user ? deleteChat : async () => {},
   };
 };
+ 

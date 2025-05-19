@@ -1,13 +1,8 @@
 import { supabase } from './supabase';
-import { AuthService } from './auth';
+import { authService } from './authService';
 
 export class AuthMiddleware {
   private static instance: AuthMiddleware;
-  private authService: AuthService;
-
-  private constructor() {
-    this.authService = AuthService.getInstance();
-  }
 
   public static getInstance(): AuthMiddleware {
     if (!AuthMiddleware.instance) {
@@ -22,7 +17,7 @@ export class AuthMiddleware {
       
       if (error || !session) {
         // 清除本地用户状态
-        this.authService.signOut();
+        authService.signOut();
         return false;
       }
 
@@ -30,7 +25,7 @@ export class AuthMiddleware {
       const now = Math.floor(Date.now() / 1000);
       if (session.expires_at && session.expires_at < now) {
         // token 过期，清除本地用户状态
-        this.authService.signOut();
+        authService.signOut();
         return false;
       }
 

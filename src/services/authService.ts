@@ -1,3 +1,4 @@
+import { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { supabase, User, AuthError } from './supabase';
 
 export class AuthService {
@@ -11,6 +12,23 @@ export class AuthService {
       AuthService.instance = new AuthService();
     }
     return AuthService.instance;
+  }
+
+  // 获取 session
+  public async getSession(): Promise<User | null> {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return null;
+    return {
+      id: session.user.id,
+      email: session.user.email!,
+      created_at: session.user.created_at,
+      last_sign_in_at: session.user.last_sign_in_at || null,
+    };
+  }
+
+  // 监听 session 变化
+  public onAuthStateChange(callback: (event: AuthChangeEvent, session: Session | null) => void): void {
+    supabase.auth.onAuthStateChange(callback);
   }
 
   // 发送邮箱验证码
@@ -106,3 +124,7 @@ export class AuthService {
     return this.currentUser;
   }
 }
+
+// 导出单例实例
+export const authService = AuthService.getInstance();
+ 
