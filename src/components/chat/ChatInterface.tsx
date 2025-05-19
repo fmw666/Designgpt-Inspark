@@ -111,6 +111,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
     e.preventDefault();
     if (input.trim() && selectedModels.length > 0) {
       setIsGenerating(true);
+      const currentInput = input; // 保存当前输入内容
+      setInput(''); // 立即清空输入框
 
       try {
         // 准备初始消息结果
@@ -130,7 +132,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
         // 准备消息对象
         const message: Message = {
           id: `msg_${Date.now()}`,
-          content: input,
+          content: currentInput, // 使用保存的输入内容
           models: selectedModels,
           results: initialResults,
           createdAt: new Date().toISOString()
@@ -142,7 +144,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
         // 如果没有当前聊天，创建新聊天
         if (!currentChat) {
           // 使用用户输入作为标题，限制10个字符
-          const title = input.length > 10 ? `${input.slice(0, 10)}...` : input;
+          const title = currentInput.length > 10 ? `${currentInput.slice(0, 10)}...` : currentInput;
           // 创建新聊天时直接包含初始消息
           const newChat = await createNewChat(title, [message]);
           if (!newChat) {
@@ -154,7 +156,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
           navigate(`/chat/${newChat.id}`);
         } else {
           // 添加到现有聊天
-          const addedMessage = await addMessage(input, selectedModels, initialResults);
+          const addedMessage = await addMessage(currentInput, selectedModels, initialResults);
           if (!addedMessage) {
             throw new Error('Failed to add message');
           }
@@ -172,13 +174,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
             // 根据模型类别调用不同的服务
             if (category === '豆包') {
               response = await serviceManager.generateImageWithDoubao({
-                prompt: input,
+                prompt: currentInput,
                 count: count,
                 model: id as any,
               });
             } else if (category === 'OpenAI') {
               response = await serviceManager.generateImageWithGPT4o({
-                prompt: input,
+                prompt: currentInput,
                 model: id as any,
                 count: count,
               });
@@ -271,13 +273,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
         await updateMessageResults(currentMessageId, finalResults);
 
         // 7. 调用外部回调
-        onSendMessage?.(input, selectedModels);
+        onSendMessage?.(currentInput, selectedModels);
 
       } catch (error) {
         console.error('Error in handleSubmit:', error);
+        setInput(currentInput); // 如果发生错误，恢复输入内容
       } finally {
         setIsGenerating(false);
-        setInput('');
       }
     }
   };
