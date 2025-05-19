@@ -28,7 +28,7 @@ const ModelSelector: FC<ModelSelectorProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, ] = useState(false);
 
   // Group models by category
   const groupedModels = models.reduce((acc, model) => {
@@ -58,7 +58,7 @@ const ModelSelector: FC<ModelSelectorProps> = ({
     });
   };
 
-  const filteredModels = Object.entries(groupedModels).filter(([category, models]) => {
+  const filteredModels = Object.entries(groupedModels).filter(([_, models]) => {
     if (!searchTerm) return true;
     return models.some(model => 
       model.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

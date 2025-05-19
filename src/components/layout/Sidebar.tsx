@@ -4,11 +4,18 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Logo } from './Logo';
 import { ChatHistory } from '../chat/ChatHistory';
+import { useAuth } from '@/hooks/useAuth';
+import { eventBus } from '@/utils/eventBus';
 
 const Sidebar: FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const handleNewChat = () => {
+    if (!user) {
+      eventBus.emit('needSignIn');
+      return;
+    }
     navigate('/chat/new');
   };
 

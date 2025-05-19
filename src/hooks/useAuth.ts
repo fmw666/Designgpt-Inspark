@@ -7,7 +7,6 @@ export const useAuth = () => {
     isInitialized,
     initialize,
     isLoading,
-    signIn,
     signOut,
     sendVerificationCode,
     verifyCode
@@ -22,7 +21,6 @@ export const useAuth = () => {
   return {
     user,
     isLoading,
-    signIn,
     signOut,
     sendVerificationCode,
     verifyCode
