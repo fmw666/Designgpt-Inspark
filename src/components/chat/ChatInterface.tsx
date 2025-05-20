@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { PaperAirplaneIcon, SparklesIcon } from '@heroicons/react/24/solid';
+import { PaperAirplaneIcon, SparklesIcon, PencilIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import { ModelDrawer } from './ModelDrawer';
 import { NewChatGuide } from '@/components/chat/NewChatGuide';
 import { getAllModels, ImageModel } from '@/services/modelService';
@@ -40,6 +40,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const navigate = useNavigate();
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editedTitle, setEditedTitle] = useState('');
+  const titleInputRef = useRef<HTMLInputElement>(null);
 
   const { user } = useAuth();
   const { 
@@ -49,7 +52,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
     isLoading,
     addMessage,
     updateMessageResults,
-    createNewChat
+    createNewChat,
+    setChats,
+    setCurrentChat
   } = useChat();
 
   // 检查用户认证状态和路由
@@ -114,6 +119,22 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
       textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
     }
   }, [input]);
+
+  // 当进入编辑模式时，自动聚焦输入框
+  useEffect(() => {
+    if (isEditingTitle && titleInputRef.current) {
+      titleInputRef.current.focus();
+      titleInputRef.current.select();
+    }
+  }, [isEditingTitle]);
+
+  // 监听 currentChat 变化，如果变化则取消编辑状态
+  useEffect(() => {
+    if (isEditingTitle) {
+      setIsEditingTitle(false);
+      setEditedTitle('');
+    }
+  }, [currentChat?.id]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -312,6 +333,62 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
     }
   };
 
+  // 处理标题编辑
+  const handleTitleEdit = () => {
+    if (currentChat) {
+      setEditedTitle(currentChat.title);
+      setIsEditingTitle(true);
+    }
+  };
+
+  // 处理标题输入变化
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value.length <= 13) {
+      setEditedTitle(value);
+    }
+  };
+
+  // 保存标题
+  const handleTitleSave = async () => {
+    if (!currentChat || !editedTitle.trim()) return;
+
+    try {
+      const updatedChat = await chatService.updateChat(currentChat.id, {
+        title: editedTitle.trim()
+      });
+      
+      if (updatedChat) {
+        // 更新本地状态
+        const updatedChats = chats.map(chat => 
+          chat.id === currentChat.id ? updatedChat : chat
+        );
+        setChats(updatedChats);
+        setCurrentChat(updatedChat);
+      }
+    } catch (error) {
+      console.error('Error updating chat title:', error);
+    } finally {
+      setIsEditingTitle(false);
+    }
+  };
+
+  // 取消编辑
+  const handleTitleCancel = () => {
+    setIsEditingTitle(false);
+    setEditedTitle('');
+  };
+
+  // 处理按键事件
+  const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleTitleSave();
+    } else if (e.key === 'Escape') {
+      handleTitleCancel();
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-full bg-white/50 backdrop-blur-sm">
@@ -342,10 +419,50 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
     <div className="flex flex-col h-full">
       {/* Chat Title - 只在有标题且用户已登录时显示 */}
       {user && currentChat?.title && (
-        <div className="h-14 border-b border-gray-200 bg-white/50 backdrop-blur-sm flex items-center px-6 justify-center">
-          <h1 className="text-lg font-medium text-gray-900">
-            {currentChat.title}
-          </h1>
+        <div className="h-14 border-b border-gray-200 bg-white/50 backdrop-blur-sm flex items-center px-6 justify-center group">
+          {isEditingTitle ? (
+            <div className="flex items-center gap-2 w-full max-w-md">
+              <div className="flex-1 relative">
+                <input
+                  ref={titleInputRef}
+                  type="text"
+                  value={editedTitle}
+                  onChange={handleTitleChange}
+                  onKeyDown={handleTitleKeyDown}
+                  className="w-full px-2 py-1 text-lg font-medium text-gray-900 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  placeholder="输入新标题..."
+                  maxLength={10}
+                />
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+                  {editedTitle.length}/13
+                </div>
+              </div>
+              <button
+                onClick={handleTitleSave}
+                className="p-1 text-green-600 hover:text-green-700 transition-colors"
+              >
+                <CheckIcon className="w-5 h-5" />
+              </button>
+              <button
+                onClick={handleTitleCancel}
+                className="p-1 text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-medium text-gray-900">
+                {currentChat.title}
+              </h1>
+              <button
+                onClick={handleTitleEdit}
+                className="p-1 text-gray-400 hover:text-gray-600 transition-colors opacity-0 group-hover:opacity-100"
+              >
+                <PencilIcon className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
       )}
 

@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useAuth } from './useAuth';
 import { useChatStore } from '@/store/chatStore';
+import type { Chat, Message } from '@/services/chatService';
 
 export const useChat = () => {
   const { user } = useAuth();
@@ -35,11 +36,14 @@ export const useChat = () => {
     currentChat,
     isLoading,
     isInitialized,
+    setChats,
+    setCurrentChat,
     createNewChat: user ? createNewChat : async () => null,
     addMessage: user ? addMessage : async () => null,
     updateMessageResults: user ? updateMessageResults : async () => {},
     switchChat: user ? switchChat : () => {},
     deleteChat: user ? deleteChat : async () => {},
+    initialize
   };
 };
  

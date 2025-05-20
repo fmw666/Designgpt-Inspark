@@ -85,7 +85,7 @@ export const ChatHistory = () => {
   return (
     <div className="flex flex-col h-full">
       {/* 聊天历史列表 - 使用新的滚动条样式 */}
-      <div className="h-[calc(100%-80px)] overflow-y-auto px-4 scrollbar-custom">
+      <div className="h-[calc(100%-80px)] overflow-y-auto pl-4 pr-2 scrollbar-custom">
         <AnimatePresence>
           {sortedGroupKeys.map((groupKey) => (
             <motion.div
