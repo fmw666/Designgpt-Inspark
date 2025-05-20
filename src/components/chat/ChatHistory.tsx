@@ -16,13 +16,6 @@ export const ChatHistory = () => {
   const { chats, currentChat, isLoading, deleteChat } = useChat();
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
-  console.log('\n\n\n=============================');
-  // TODO: currentChat 并没有做好状态管理！
-  console.log('currentChat', currentChat);
-  console.log('chats', chats);
-  console.log('isLoading', isLoading);
-  console.log('=============================\n\n\n');
-
   // 使用 useMemo 缓存分组结果
   const groupedChats = useMemo(() => {
     if (!chats.length) return {};
@@ -30,7 +23,6 @@ export const ChatHistory = () => {
     return chats.reduce<GroupedChats>((groups, chat) => {
       let groupKey: string;
       const date = new Date(chat.created_at);
-      console.log("date", date)
 
       if (isToday(date)) {
         groupKey = '今天';
@@ -52,7 +44,7 @@ export const ChatHistory = () => {
       groups[groupKey].push(chat);
       return groups;
     }, {});
-  }, [chats]); // 只在 chats 变化时重新计算
+  }, [chats]);
 
   // 使用 useMemo 缓存排序后的分组键
   const sortedGroupKeys = useMemo(() => {
@@ -65,7 +57,7 @@ export const ChatHistory = () => {
       if (b === '7天内') return 1;
       if (a === '30天内') return -1;
       if (b === '30天内') return 1;
-      return b.localeCompare(a); // 其他按日期倒序
+      return b.localeCompare(a);
     });
   }, [groupedChats]);
 
@@ -91,67 +83,70 @@ export const ChatHistory = () => {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto px-4">
-      <AnimatePresence>
-        {sortedGroupKeys.map((groupKey) => (
-          <motion.div
-            key={groupKey}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="mb-6"
-          >
-            <h3 className="text-xs font-medium text-gray-500 mb-2 px-2">
-              {groupKey}
-            </h3>
-            <div className="space-y-1">
-              {groupedChats[groupKey].map((chat) => (
-                <motion.div
-                  key={chat.id}
-                  onClick={() => handleChatClick(chat)}
-                  className={`w-full text-left px-3 py-2 rounded-lg transition-all duration-200 cursor-pointer ${
-                    currentChat?.id === chat.id
-                      ? 'bg-indigo-50 text-indigo-600'
-                      : 'hover:bg-gray-50 text-gray-700'
-                  }`}
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium truncate">{chat.title}</div>
-                      <div className="text-sm text-gray-500 truncate">
-                        {chat.messages[0]?.content || '暂无消息'}
+    <div className="flex flex-col h-full">
+      {/* 聊天历史列表 - 使用 calc 计算高度，预留底部用户信息区域的空间 */}
+      <div className="h-[calc(100%-80px)] overflow-y-auto px-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
+        <AnimatePresence>
+          {sortedGroupKeys.map((groupKey) => (
+            <motion.div
+              key={groupKey}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="mb-6"
+            >
+              <h3 className="text-xs font-medium text-gray-500 mb-2 px-2 sticky top-0 bg-white py-1 z-10">
+                {groupKey}
+              </h3>
+              <div className="space-y-1">
+                {groupedChats[groupKey].map((chat) => (
+                  <motion.div
+                    key={chat.id}
+                    onClick={() => handleChatClick(chat)}
+                    className={`w-full text-left px-3 py-2 rounded-lg transition-all duration-200 cursor-pointer ${
+                      currentChat?.id === chat.id
+                        ? 'bg-indigo-50 text-indigo-600'
+                        : 'hover:bg-gray-50 text-gray-700'
+                    }`}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium truncate">{chat.title}</div>
+                        <div className="text-sm text-gray-500 truncate">
+                          {chat.messages[0]?.content || '暂无消息'}
+                        </div>
+                      </div>
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteChat(chat.id);
+                        }}
+                        className={`ml-2 p-1 text-gray-400 hover:text-red-500 transition-colors duration-200 cursor-pointer ${
+                          isDeleting === chat.id ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                      >
+                        {isDeleting === chat.id ? (
+                          <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <TrashIcon className="w-4 h-4" />
+                        )}
                       </div>
                     </div>
-                    <div
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteChat(chat.id);
-                      }}
-                      className={`ml-2 p-1 text-gray-400 hover:text-red-500 transition-colors duration-200 cursor-pointer ${
-                        isDeleting === chat.id ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
-                    >
-                      {isDeleting === chat.id ? (
-                        <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <TrashIcon className="w-4 h-4" />
-                      )}
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        ))}
-      </AnimatePresence>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
 
-      {chats.length === 0 && (
-        <div className="flex flex-col items-center justify-center h-32 text-gray-500">
-          <p className="text-sm">暂无聊天记录</p>
-        </div>
-      )}
+        {chats.length === 0 && (
+          <div className="flex flex-col items-center justify-center h-32 text-gray-500">
+            <p className="text-sm">暂无聊天记录</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

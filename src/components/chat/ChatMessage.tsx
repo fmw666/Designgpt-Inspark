@@ -38,7 +38,7 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   return (
-    <div className="flex flex-col space-y-4 mb-6">
+    <div className="flex flex-col mb-6">
       {/* 用户消息 */}
       <div className="flex justify-end p-3">
         <div className="flex items-start gap-3 max-w-3xl">
