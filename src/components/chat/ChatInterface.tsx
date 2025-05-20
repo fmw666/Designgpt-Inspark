@@ -349,7 +349,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-4 scrollbar-custom">
         {!user || !currentChat || !currentChat!.messages!.length ? (
           <NewChatGuide />
         ) : (

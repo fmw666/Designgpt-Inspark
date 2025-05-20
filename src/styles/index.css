@@ -8,6 +8,47 @@
   }
 }
 
+/* 全局滚动条样式 */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.15);
+  border-radius: 2px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(239, 68, 68, 0.5);
+}
+
+/* 自定义滚动条容器样式 */
+.scrollbar-custom {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(180 171 255 / 78%) transparent;
+}
+
+.scrollbar-custom::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.15);
+  border-radius: 2px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 @layer components {
   .btn {
     @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200;
@@ -34,4 +75,4 @@
   .text-shadow {
     text-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
-} 
+}

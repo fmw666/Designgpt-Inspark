@@ -84,8 +84,8 @@ export const ChatHistory = () => {
 
   return (
     <div className="flex flex-col h-full">
-      {/* 聊天历史列表 - 使用 calc 计算高度，预留底部用户信息区域的空间 */}
-      <div className="h-[calc(100%-80px)] overflow-y-auto px-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
+      {/* 聊天历史列表 - 使用新的滚动条样式 */}
+      <div className="h-[calc(100%-80px)] overflow-y-auto px-4 scrollbar-custom">
         <AnimatePresence>
           {sortedGroupKeys.map((groupKey) => (
             <motion.div
@@ -95,7 +95,7 @@ export const ChatHistory = () => {
               exit={{ opacity: 0, y: -20 }}
               className="mb-6"
             >
-              <h3 className="text-xs font-medium text-gray-500 mb-2 px-2 sticky top-0 bg-white py-1 z-10">
+              <h3 className="text-xs font-medium text-gray-500 mb-3 px-2 sticky top-0 bg-white py-1.5 z-10 border-b border-gray-100">
                 {groupKey}
               </h3>
               <div className="space-y-1">
@@ -103,9 +103,9 @@ export const ChatHistory = () => {
                   <motion.div
                     key={chat.id}
                     onClick={() => handleChatClick(chat)}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition-all duration-200 cursor-pointer ${
+                    className={`group relative w-full text-left px-3 py-2.5 rounded-xl transition-all duration-200 cursor-pointer ${
                       currentChat?.id === chat.id
-                        ? 'bg-indigo-50 text-indigo-600'
+                        ? 'bg-indigo-50 text-indigo-600 shadow-sm'
                         : 'hover:bg-gray-50 text-gray-700'
                     }`}
                     whileHover={{ scale: 1.01 }}
@@ -113,8 +113,10 @@ export const ChatHistory = () => {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium truncate">{chat.title}</div>
-                        <div className="text-sm text-gray-500 truncate">
+                        <div className="font-medium truncate">
+                          {chat.title}
+                        </div>
+                        <div className="text-xs text-gray-500 truncate mt-0.5">
                           {chat.messages[0]?.content || '暂无消息'}
                         </div>
                       </div>
@@ -123,9 +125,9 @@ export const ChatHistory = () => {
                           e.stopPropagation();
                           handleDeleteChat(chat.id);
                         }}
-                        className={`ml-2 p-1 text-gray-400 hover:text-red-500 transition-colors duration-200 cursor-pointer ${
+                        className={`ml-2 p-1.5 text-gray-400 hover:text-red-500 transition-colors duration-200 cursor-pointer rounded-lg ${
                           isDeleting === chat.id ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
+                        } ${currentChat?.id === chat.id ? 'group-hover:bg-white/50' : 'group-hover:bg-gray-100'}`}
                       >
                         {isDeleting === chat.id ? (
                           <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
@@ -150,3 +152,4 @@ export const ChatHistory = () => {
     </div>
   );
 };
+ 
