@@ -6,6 +6,7 @@ import { TrashIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, isToday, isYesterday, isThisWeek, isThisMonth, isThisYear } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
+import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 
 interface GroupedChats {
   [key: string]: Chat[];
@@ -13,7 +14,8 @@ interface GroupedChats {
 
 export const ChatHistory = () => {
   const navigate = useNavigate();
-  const { chats, currentChat, isLoading, deleteChat } = useChat();
+  const { chats, currentChat, isLoading, deleteChat, switchChat } = useChat();
+  const [chatToDelete, setChatToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
   // 使用 useMemo 缓存分组结果
@@ -61,16 +63,25 @@ export const ChatHistory = () => {
     });
   }, [groupedChats]);
 
-  const handleChatClick = (chat: Chat) => {
-    navigate(`/chat/${chat.id}`);
+  const handleChatClick = (chatId: string) => {
+    switchChat(chatId);
+    navigate(`/chat/${chatId}`);
   };
 
-  const handleDeleteChat = async (chatId: string) => {
-    setIsDeleting(chatId);
-    try {
-      await deleteChat(chatId);
-    } finally {
-      setIsDeleting(null);
+  const handleDeleteClick = (e: React.MouseEvent, chatId: string) => {
+    e.stopPropagation();
+    setChatToDelete(chatId);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (chatToDelete) {
+      setIsDeleting(chatToDelete);
+      try {
+        await deleteChat(chatToDelete);
+      } finally {
+        setIsDeleting(null);
+        setChatToDelete(null);
+      }
     }
   };
 
@@ -102,7 +113,7 @@ export const ChatHistory = () => {
                 {groupedChats[groupKey].map((chat) => (
                   <motion.div
                     key={chat.id}
-                    onClick={() => handleChatClick(chat)}
+                    onClick={() => handleChatClick(chat.id)}
                     className={`group relative w-full text-left px-3 py-2.5 rounded-xl transition-all duration-200 cursor-pointer ${
                       currentChat?.id === chat.id
                         ? 'bg-indigo-50 text-indigo-600 shadow-sm'
@@ -121,10 +132,7 @@ export const ChatHistory = () => {
                         </div>
                       </div>
                       <div
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteChat(chat.id);
-                        }}
+                        onClick={(e) => handleDeleteClick(e, chat.id)}
                         className={`ml-2 p-1.5 text-gray-400 hover:text-red-500 transition-colors duration-200 cursor-pointer rounded-lg ${
                           isDeleting === chat.id ? 'opacity-50 cursor-not-allowed' : ''
                         } ${currentChat?.id === chat.id ? 'group-hover:bg-white/50' : 'group-hover:bg-gray-100'}`}
@@ -149,6 +157,16 @@ export const ChatHistory = () => {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={!!chatToDelete}
+        onClose={() => setChatToDelete(null)}
+        onConfirm={handleConfirmDelete}
+        title="删除对话"
+        message="确定要删除这个对话吗？此操作无法撤销。"
+        confirmText="删除"
+        cancelText="取消"
+      />
     </div>
   );
 };
