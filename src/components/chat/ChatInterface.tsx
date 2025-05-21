@@ -317,7 +317,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
 
             // 更新这个模型的结果，保持其他模型的状态不变
             const updatedResults = {
-              content: '正在生成图片...',
+              content: '🚀 正在生成图片...',
               images: {
                 ...currentMessage.results.images,
                 [modelName]: response.results.map(result => ({
@@ -343,7 +343,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
 
             // 更新错误状态，保持其他模型的状态不变
             const errorResults = {
-              content: '正在生成图片...',
+              content: '🚫 生成失败',
               images: {
                 ...currentMessage.results.images,
                 [modelName]: [{
