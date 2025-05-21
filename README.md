@@ -1,4 +1,4 @@
-# ImgModelPlatform
+# DesignGPT AI
 
 一个强大的 AI 图像生成平台，支持多种模型和自定义提示词。
 
