@@ -31,7 +31,11 @@
 /* 自定义滚动条容器样式 */
 .scrollbar-custom {
   scrollbar-width: thin;
-  scrollbar-color: rgb(180 171 255 / 78%) transparent;
+  scrollbar-color: rgba(139, 129, 233, 0.78) transparent;
+}
+
+.scrollbar-custom:hover {
+  scrollbar-color: rgba(102, 89, 224, 0.78) transparent;
 }
 
 .scrollbar-custom::-webkit-scrollbar {
@@ -48,6 +52,11 @@
   border-radius: 2px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+  background: rgba(239, 68, 68, 0.5);
+}
+
 
 @layer components {
   .btn {
