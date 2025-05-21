@@ -36,7 +36,7 @@ const ChatLayout: FC<ChatLayoutProps> = ({ children }) => {
           </button> */}
 
           {/* User Info at Bottom - 使用 fixed 定位确保在最上层 */}
-          <div className="fixed bottom-0 left-0 w-64 p-4 border-t border-primary-100 bg-white/50 backdrop-blur-sm z-[9999]">
+          <div className="fixed bottom-0 left-0 w-64 p-4 border-t border-r border-gray-200 bg-white/50 backdrop-blur-sm z-[9999]">
             <UserMenu 
               // isCollapsed={isSidebarCollapsed} 
               onSignInClick={() => setIsSignInModalOpen(true)}

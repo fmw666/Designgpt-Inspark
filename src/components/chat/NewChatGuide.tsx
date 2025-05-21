@@ -12,7 +12,7 @@ export const NewChatGuide: FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="flex-1 flex items-center justify-center p-8"
+          className="flex-1 flex items-center justify-center px-8 pt-16"
         >
           <div className="max-w-2xl w-full">
             {/* 欢迎信息 */}
