@@ -124,9 +124,46 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
     setModels(allModels);
   }, []);
 
+  const scrollToBottom = () => {
+    // 如果消息列表为空，则不滚动
+    if (currentChat?.messages.length === 0) {
+      return;
+    }
+    // 如果有图片正在加载，则等待加载完再滚动
+    const images = currentChat?.messages.flatMap(msg => 
+      Object.values(msg.results?.images || {}).flat()
+    ).filter(img => img?.url) || [];
+
+    // 等待所有图片加载完成
+    Promise.all(
+      images.map(img => {
+        if (!img.url) return Promise.resolve();
+        return new Promise((resolve) => {
+          const image = new Image();
+          image.onload = resolve;
+          image.onerror = resolve; // 即使加载失败也继续
+          image.src = img.url as string;
+        });
+      })
+    ).then(() => {
+      // 所有图片加载完成后滚动
+    setTimeout(() => {
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
+      }, 100);
+    });
+  };
+
+  // 监听消息变化，立即滚动到底部
   useEffect(() => {
     scrollToBottom();
   }, [currentChat?.messages]);
+
+  // 监听聊天切换，立即滚动到底部
+  useEffect(() => {
+    scrollToBottom();
+  }, [currentChat?.id]);
 
   // 自动调整文本框高度
   useEffect(() => {
@@ -152,10 +189,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
       setEditedTitle('');
     }
   }, [currentChat?.id]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
 
   // 处理提交前的认证检查
   const handleSubmit = async (e: React.FormEvent) => {
