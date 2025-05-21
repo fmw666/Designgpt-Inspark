@@ -44,6 +44,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editedTitle, setEditedTitle] = useState('');
   const titleInputRef = useRef<HTMLInputElement>(null);
+  const [isScrolling, setIsScrolling] = useState(false);
 
   const { user, isLoading: isUserLoading, isInitialized: isUserInitialized } = useAuth();
   const { 
@@ -129,6 +130,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
     if (currentChat?.messages.length === 0) {
       return;
     }
+
+    // 设置滚动状态，显示加载动画
+    setIsScrolling(true);
+
     // 如果有图片正在加载，则等待加载完再滚动
     const images = currentChat?.messages.flatMap(msg => 
       Object.values(msg.results?.images || {}).flat()
@@ -147,10 +152,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
       })
     ).then(() => {
       // 所有图片加载完成后滚动
-    setTimeout(() => {
-      if (messagesEndRef.current) {
-        messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-      }
+      setTimeout(() => {
+        if (messagesEndRef.current) {
+          messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+          // 滚动完成后，延迟关闭加载状态
+          setTimeout(() => {
+            setIsScrolling(false);
+          }, 500); // 等待滚动动画完成
+        }
       }, 100);
     });
   };
@@ -523,7 +532,17 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto p-4 scrollbar-custom">
+      <div className="flex-1 overflow-y-auto p-4 scrollbar-custom relative">
+        {/* 加载动画遮罩 - 使用 fixed 定位 */}
+        {isScrolling && (
+          <div className="fixed inset-0 bg-white/50 backdrop-blur-sm z-10 flex items-center justify-center">
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+              <span className="text-sm text-gray-600">正在加载消息...</span>
+            </div>
+          </div>
+        )}
+
         {!user || !currentChat || !currentChat!.messages!.length ? (
           <NewChatGuide />
         ) : (
