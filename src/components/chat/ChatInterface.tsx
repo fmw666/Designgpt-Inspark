@@ -45,12 +45,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
   const [editedTitle, setEditedTitle] = useState('');
   const titleInputRef = useRef<HTMLInputElement>(null);
 
-  const { user } = useAuth();
+  const { user, isLoading: isUserLoading, isInitialized: isUserInitialized } = useAuth();
   const { 
     chats, 
     currentChat, 
     switchChat, 
     isLoading,
+    isInitialized: isChatInitialized,
     addMessage,
     updateMessageResults,
     createNewChat,
@@ -60,16 +61,29 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
 
   // 检查用户认证状态和路由
   useEffect(() => {
+    if (!isUserInitialized) {
+      return;
+    }
+    if (isUserLoading) {
+      return;
+    }
     if (!user) {
+      console.log('fmw     user', user);
       // 未登录时，清空当前聊天并重定向到 /chat/new
       switchChat(null);
       if (chatId && chatId !== 'new') {
         navigate('/chat/new');
       }
     }
-  }, [user, chatId]);
+  }, [user, chatId, isUserLoading]);
 
   useEffect(() => {
+    if (!isChatInitialized) {
+      return;
+    }
+    if (isLoading) {
+      return;
+    }
     if (chats.length === 0) {
       return;
     }
@@ -88,11 +102,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
       if (chat) {
         switchChat(chat.id);
       } else {
+        switchChat(null);
         // 跳转到路由 /chat/new
         navigate('/chat/new');
       }
     } else {
       switchChat(null);
+      navigate('/chat/new');
     }
 
   }, [chats, currentChat, isLoading, chatId]);

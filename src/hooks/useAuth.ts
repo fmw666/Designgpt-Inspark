@@ -21,6 +21,7 @@ export const useAuth = () => {
   return {
     user,
     isLoading,
+    isInitialized,
     signOut,
     sendVerificationCode,
     verifyCode
