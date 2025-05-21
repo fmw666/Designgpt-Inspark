@@ -36,6 +36,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
   const [input, setInput] = useState('');
   const [selectedModels, setSelectedModels] = useState<SelectedModel[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const [models, setModels] = useState<ImageModel[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -151,9 +152,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
     }
 
     if (input.trim() && selectedModels.length > 0) {
-      setIsGenerating(true);
+      setIsSending(true);
       const currentInput = input;
-      setInput('');
 
       try {
         // 准备初始消息结果
@@ -205,6 +205,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
           chatId = currentChat.id;
         }
 
+        // 消息已添加到聊天区域，现在可以清空输入框
+        setInput('');
+        setIsSending(false);
+
+        // 开始生成图片
+        setIsGenerating(true);
+        
         // 2. 为每个选中的模型生成图片
         const updatePromises = selectedModels.map(async ({ id, count, category }) => {
           const model = models.find(m => m.id === id);
@@ -319,6 +326,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
       } catch (error) {
         console.error('Error in handleSubmit:', error);
         setInput(currentInput);
+        setIsSending(false);
       } finally {
         setIsGenerating(false);
       }
@@ -483,6 +491,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
         <ModelDrawer
           selectedModels={selectedModels}
           onModelChange={setSelectedModels}
+          disabled={isGenerating}
         />
         <form onSubmit={handleSubmit} className="mt-4">
           <div className="relative flex items-center">
@@ -492,16 +501,27 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder={user ? "输入提示词... (Enter 换行）" : "请先登录后再开始对话"}
-                className="w-full max-h-[200px] py-3 pl-4 pr-12 text-sm text-gray-900 placeholder-gray-500 bg-white border border-gray-200 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none overflow-hidden transition-all duration-200 ease-in-out"
+                placeholder={
+                  isGenerating 
+                    ? "正在生成图片，请稍候..." 
+                    : user 
+                      ? "输入提示词... (Enter 换行）" 
+                      : "请先登录后再开始对话"
+                }
+                disabled={isSending || isGenerating}
+                className={`w-full max-h-[200px] py-3 pl-4 pr-12 text-sm text-gray-900 placeholder-gray-500 bg-white border border-gray-200 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none overflow-hidden transition-all duration-200 ease-in-out ${
+                  (isSending || isGenerating) ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
                 rows={1}
               />
               <button
                 type="submit"
-                disabled={!input.trim() || selectedModels.length === 0 || isGenerating}
+                disabled={!input.trim() || selectedModels.length === 0 || isSending || isGenerating}
                 className="absolute right-2 bottom-2 p-2 text-gray-400 hover:text-indigo-600 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors duration-200 rounded-lg hover:bg-gray-100 disabled:hover:bg-transparent"
               >
-                {isGenerating ? (
+                {isSending ? (
+                  <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+                ) : isGenerating ? (
                   <SparklesIcon className="h-5 w-5 animate-pulse text-indigo-500" />
                 ) : (
                   <PaperAirplaneIcon className="h-5 w-5" />
@@ -529,6 +549,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
                 <span className="flex items-center">
                   <SparklesIcon className="h-4 w-4 mr-1" />
                   已选择 {selectedModels.length} 个模型
+                </span>
+              )}
+              {isGenerating && (
+                <span className="flex items-center text-indigo-600">
+                  <SparklesIcon className="h-4 w-4 mr-1 animate-pulse" />
+                  正在生成图片...
                 </span>
               )}
             </div>

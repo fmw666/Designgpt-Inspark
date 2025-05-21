@@ -13,11 +13,13 @@ interface SelectedModel {
 interface ModelDrawerProps {
   selectedModels: SelectedModel[];
   onModelChange: (models: SelectedModel[]) => void;
+  disabled?: boolean;
 }
 
 export const ModelDrawer: React.FC<ModelDrawerProps> = ({
   selectedModels,
   onModelChange,
+  disabled = false
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [models, setModels] = useState<ImageModel[]>([]);
@@ -101,7 +103,7 @@ export const ModelDrawer: React.FC<ModelDrawerProps> = ({
   };
 
   return (
-    <div className="relative" ref={drawerRef}>
+    <div className={`relative ${disabled ? 'opacity-50 pointer-events-none' : ''}`} ref={drawerRef}>
       {/* 已选模型标签和添加按钮 */}
       <div className="flex flex-wrap items-center gap-2">
         {selectedModels.length > 0 && (

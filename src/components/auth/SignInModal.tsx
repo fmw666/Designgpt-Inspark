@@ -293,3 +293,4 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
     </AnimatePresence>
   );
 };
+ 
