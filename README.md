@@ -32,9 +32,7 @@ npm install
 
 3. 配置环境变量
 ```bash
-# 复制环境变量模板文件
 cp .env.example .env
-
 # 编辑 .env 文件，填入必要的环境变量
 ```
 
@@ -45,85 +43,25 @@ npm run dev
 
 ### 一键部署
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Ffmw666%2FDesigngpt-Inspark)
+[![Deploy with Vercel by clone](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Ffmw666%2FDesigngpt-Inspark)
+
+[![Deploy with Vercel by import](https://vercel.com/button)](https://vercel.com/new/import?s=https%3A%2F%2Fgithub.com%2Ffmw666%2FDesigngpt-Inspark&teamSlug=maovos-projects)
 
 点击上方按钮，按照以下步骤部署：
 
 1. 登录或注册 Vercel 账号
 2. 导入 GitHub 仓库
-3. 配置环境变量（见下方说明）
+3. 配置环境变量
 4. 点击部署
 
-## 环境变量配置
+## 环境变量
 
-### 本地开发环境
-
-1. 复制 `.env.example` 文件为 `.env`
-2. 在 `.env` 文件中填入实际的环境变量值
-
-### Vercel 部署环境
-
-在 Vercel 中配置环境变量有两种方式：
-
-#### 方式一：通过 Vercel 仪表板
-
-1. 登录 [Vercel 仪表板](https://vercel.com/dashboard)
-2. 选择你的项目
-3. 点击 "Settings" 标签
-4. 在左侧菜单找到 "Environment Variables"
-5. 点击 "Add New" 添加以下环境变量：
+部署时需要配置以下环境变量：
 
 ```env
-# Supabase 配置
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-
-# API 配置（如果需要）
-VITE_DOUBAO_API_KEY=your_doubao_api_key
-VITE_DOUBAO_API_SECRET=your_doubao_api_secret
-VITE_DOUBAO_API_ENDPOINT=https://api.doubao.com
 ```
-
-#### 方式二：通过 Vercel CLI
-
-```bash
-# 安装 Vercel CLI
-npm i -g vercel
-
-# 登录
-vercel login
-
-# 添加环境变量
-vercel env add VITE_SUPABASE_URL
-vercel env add VITE_SUPABASE_ANON_KEY
-vercel env add VITE_DOUBAO_API_KEY
-vercel env add VITE_DOUBAO_API_SECRET
-vercel env add VITE_DOUBAO_API_ENDPOINT
-```
-
-### 在项目中使用环境变量
-
-在 React 组件中使用环境变量：
-
-```typescript
-// 使用环境变量
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-// 示例：初始化 Supabase 客户端
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-);
-```
-
-注意事项：
-1. 所有环境变量必须以 `VITE_` 开头
-2. 环境变量在构建时被注入
-3. 修改环境变量后需要重新部署
-4. 敏感信息不要提交到代码仓库
 
 ## 技术栈
 
