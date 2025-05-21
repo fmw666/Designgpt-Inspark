@@ -1,7 +1,6 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect } from 'react';
 import { useAuth } from './useAuth';
 import { useChatStore } from '@/store/chatStore';
-import type { Chat, Message } from '@/services/chatService';
 
 export const useChat = () => {
   const { user } = useAuth();
