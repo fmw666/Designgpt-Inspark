@@ -127,7 +127,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
 
   const scrollToBottom = () => {
     // 如果消息列表为空，则不滚动
-    if (currentChat?.messages.length === 0) {
+    if (!currentChat || currentChat?.messages.length === 0) {
       return;
     }
 

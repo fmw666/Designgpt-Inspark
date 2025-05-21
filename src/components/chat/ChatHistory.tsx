@@ -95,7 +95,7 @@ export const ChatHistory = () => {
 
   return (
     <div className="flex flex-col h-full">
-      {/* 聊天历史列表 - 使用新的滚动条样式 */}
+      {/* 聊天历史列表 - 使用新的滚动条样式，添加底部padding避免被用户菜单遮挡 */}
       <div className="h-[calc(100%-80px)] overflow-y-auto pl-4 pr-2 scrollbar-custom">
         <AnimatePresence>
           {sortedGroupKeys.map((groupKey) => (

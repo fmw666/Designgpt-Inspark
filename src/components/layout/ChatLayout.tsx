@@ -20,9 +20,7 @@ const ChatLayout: FC<ChatLayoutProps> = ({ children }) => {
             isSidebarCollapsed ? 'w-16' : 'w-64'
           } bg-white/80 backdrop-blur-sm border-r border-primary-100 flex-shrink-0 transition-all duration-300 relative shadow-md`}
         > */}
-        <div
-          className={`w-64 bg-white/80 backdrop-blur-sm border-r border-primary-100 flex-shrink-0 transition-all duration-300 relative shadow-md`}
-        >
+        <div className="w-64 bg-white/80 backdrop-blur-sm border-r border-primary-100 flex-shrink-0 transition-all duration-300 relative shadow-md">
           <Sidebar />
           
           {/* Collapse Toggle Button */}
@@ -37,8 +35,8 @@ const ChatLayout: FC<ChatLayoutProps> = ({ children }) => {
             )}
           </button> */}
 
-          {/* User Info at Bottom */}
-          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-primary-100 bg-white/50 backdrop-blur-sm">
+          {/* User Info at Bottom - 使用 fixed 定位确保在最上层 */}
+          <div className="fixed bottom-0 left-0 w-64 p-4 border-t border-primary-100 bg-white/50 backdrop-blur-sm z-[9999]">
             <UserMenu 
               // isCollapsed={isSidebarCollapsed} 
               onSignInClick={() => setIsSignInModalOpen(true)}
