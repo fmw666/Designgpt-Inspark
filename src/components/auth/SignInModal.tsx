@@ -83,7 +83,15 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
     setIsSubmitting(true);
     try {
       await verifyCode(email, verificationCode);
+      // 先调用 onSuccess 回调
       onSuccess?.();
+      // 然后关闭模态框
+      onClose();
+      // 重置表单状态
+      setEmail('');
+      setVerificationCode('');
+      setInviteCode('');
+      setIsInviteVerified(false);
     } catch (err) {
       setError('验证码错误，请重试');
     } finally {

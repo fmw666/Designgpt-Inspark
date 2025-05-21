@@ -14,7 +14,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [showSignInModal, setShowSignInModal] = useState(false);
   const { user } = useAuth();
 
-  // 单独处理登录事件监听
+  // 监听用户状态变化
+  useEffect(() => {
+    if (user) {
+      setShowSignInModal(false);
+    }
+  }, [user]);
+
+  // 处理登录事件
   useEffect(() => {
     const handleNeedSignIn = () => {
       if (!user) {
@@ -27,17 +34,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       eventBus.off('needSignIn', handleNeedSignIn);
     };
-  }, [user]); // 只在 user 状态变化时更新事件监听器
-
+  }, [user]);
 
   return (
     <AuthContext.Provider value={{ user }}>
       {children}
-      {/* 登录模态框 */}
       <SignInModal
         isOpen={showSignInModal}
         onClose={() => setShowSignInModal(false)}
-        onSuccess={() => setShowSignInModal(false)}
+        onSuccess={() => {
+          // 登录成功后的处理
+          setShowSignInModal(false);
+        }}
       />
     </AuthContext.Provider>
   );
