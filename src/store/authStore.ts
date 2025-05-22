@@ -28,12 +28,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     
     // 如果已经初始化过，直接返回
     if (isInitialized || get().isLoading) {
-      console.log('Auth already initialized or loading, skipping...');
       return;
     }
 
-    console.log('Starting auth initialization...');
-    
     try {
       set(state => ({
         ...state,
@@ -41,7 +38,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }));
 
       const user = await authService.getSession();
-      console.log('Auth session retrieved:', user ? 'User found' : 'No user');
       
       set(state => ({
         ...state,

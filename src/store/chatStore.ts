@@ -35,12 +35,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
     const { isInitialized } = get();
     
     if (isInitialized || get().isLoading) {
-      console.log('Chat store already initialized or loading, skipping...');
       return;
     }
 
-    console.log('Starting chat store initialization...');
-    
     try {
       set(state => ({
         ...state,
@@ -48,7 +45,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
       }));
 
       const userChats = await chatService.getUserChats();
-      console.log('Chats retrieved:', userChats.length);
 
       set(state => ({
         ...state,

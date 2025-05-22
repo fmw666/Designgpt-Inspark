@@ -14,7 +14,7 @@ interface UserProfileModalProps {
 
 export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, user }) => {
   useEffect(() => {
-    console.log('UserProfileModal mounted with user:', user);
+    // console.log('UserProfileModal mounted with user:', user);
   }, [user]);
 
   if (!user) {

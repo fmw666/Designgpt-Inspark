@@ -69,7 +69,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
       return;
     }
     if (!user) {
-      console.log('fmw     user', user);
       // 未登录时，清空当前聊天并重定向到 /chat/new
       switchChat(null);
       if (chatId && chatId !== 'new') {
@@ -113,12 +112,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
     }
 
   }, [chats, currentChat, isLoading, chatId]);
-
-  console.log('\n\n\n000000000000000000000000000000');
-  console.log('currentChat', currentChat);
-  console.log('chats', chats);
-  console.log('isLoading', isLoading);
-  console.log('000000000000000000000000000000\n\n\n');
 
   useEffect(() => {
     const allModels = getAllModels();
@@ -585,7 +578,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
               <button
                 type="submit"
                 disabled={!input.trim() || selectedModels.length === 0 || isSending || isGenerating}
-                className="absolute right-2 bottom-2 p-2 text-gray-400 hover:text-indigo-600 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors duration-200 rounded-lg hover:bg-gray-100 disabled:hover:bg-transparent"
+                className="absolute right-2 bottom-2 p-2 text-indigo-500 hover:text-indigo-600 disabled:text-indigo-400 disabled:cursor-not-allowed transition-colors duration-200 rounded-lg hover:bg-gray-100 disabled:hover:bg-transparent"
               >
                 {isSending ? (
                   <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />

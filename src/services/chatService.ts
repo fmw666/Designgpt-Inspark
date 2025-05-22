@@ -60,9 +60,6 @@ export class ChatService {
         .eq('user_id', currentUser.data.user.id)
         .order('created_at', { ascending: false });
       
-      console.log(data);
-      console.log(error);
-
       if (error) throw error;
 
       return data.map(chat => ({
