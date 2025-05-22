@@ -273,12 +273,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
             // 根据模型类别调用不同的服务
             if (category === '豆包') {
               response = await serviceManager.generateImageWithDoubao({
+                chatId: currentMessageId,
                 prompt: currentInput,
                 count: count,
                 model: id as any,
               });
             } else if (category === 'OpenAI') {
               response = await serviceManager.generateImageWithGPT4o({
+                chatId: currentMessageId,
                 prompt: currentInput,
                 model: id as any,
                 count: count,
@@ -290,8 +292,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
               );
               response = {
                 results: urls.map(url => ({
-                  success: true,
-                  imageUrl: url,
+                  id: currentMessageId,
+                  status: 'success',
+                  results: {
+                    url: url,
+                    text: null,
+                    error: null,
+                    errorMessage: null,
+                  }
                 })) as StandardResponse[],
               };
             }
@@ -300,6 +308,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
             if (!response || !response.results || response.results.length === 0) {
               throw new Error('Invalid response from service');
             }
+
+            console.log(response);
 
             // 获取当前消息的最新状态
             const latestChat = await chatService.getChat(chatId);
@@ -314,9 +324,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
               images: {
                 ...currentMessage.results.images,
                 [modelName]: response.results.map(result => ({
-                  url: result.imageUrl || null,
-                  error: !result.success ? '生成失败' : null,
-                  errorMessage: result.error || '',
+                  url: `https://inspark.oss-cn-shenzhen.aliyuncs.com/${result.results.url}` || null,
+                  error: result.status === 'error' ? '生成失败' : null,
+                  errorMessage: result.results.errorMessage || '',
                   isGenerating: false
                 }))
               }

@@ -190,4 +190,4 @@ export const getModelById = (id: string): ImageModel | undefined => {
 export const getModelDemo = (modelId: string) => {
   const model = IMAGE_MODELS.find(m => m.id === modelId);
   return model?.demo;
-}; 
+};

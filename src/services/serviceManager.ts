@@ -1,7 +1,6 @@
-import { gpt4oService, GPT4oRequest,  } from './libs/gpt4oService';
-import { doubaoService, DoubaoRequest, } from './libs/doubaoService';
 import { StandardResponse } from './libs/baseService';
 import { AuthMiddleware } from './authMiddleware';
+import { fcService } from './fcService';
 
 export type ServiceType = 'gpt4o' | 'doubao';
 
@@ -10,15 +9,14 @@ interface ServiceConfig {
   cooldownMs: number;
 }
 
-interface GPT4oServiceRequest extends GPT4oRequest {
+interface ServiceRequest {
   count?: number;
+  prompt: string;
+  model?: string;
+  chatId?: string;
 }
 
-interface DoubaoServiceRequest extends DoubaoRequest {
-  count?: number;
-}
-
-interface GenerationResponse {
+interface ServiceResponse {
   results: StandardResponse[];
   metadata?: any;
 }
@@ -105,9 +103,9 @@ export class ServiceManager {
 
   private async generateMultipleImages(
     serviceType: ServiceType,
-    request: GPT4oServiceRequest | DoubaoServiceRequest,
+    request: ServiceRequest,
     generateFn: (req: any) => Promise<any>
-  ): Promise<GenerationResponse> {
+  ): Promise<ServiceResponse> {
     const count = request.count || 1;
     const errors: Error[] = [];
     const results: StandardResponse[] = [];
@@ -121,8 +119,14 @@ export class ServiceManager {
       } catch (error) {
         errors.push(error as Error);
         results.push({
-          success: false,
-          error: error instanceof Error ? error.message : '未知错误',
+          id: request.chatId || '',
+          status: 'error',
+          results: {
+            url: null,
+            text: null,
+            error: error instanceof Error ? error.message : '未知错误',
+            errorMessage: error instanceof Error ? error.message : '未知错误',
+          }
         });
       }
     }
@@ -135,28 +139,34 @@ export class ServiceManager {
       results: results,
       metadata: {
         totalRequested: count,
-        successful: results.filter(r => r.success).length,
+        successful: results.filter(r => r.status === 'success').length,
         failed: errors.length
       }
     };
   }
 
-  public async generateImageWithGPT4o(request: GPT4oServiceRequest): Promise<GenerationResponse> {
+  public async generateImageWithGPT4o(request: ServiceRequest): Promise<ServiceResponse> {
     return this.generateMultipleImages('gpt4o', request, (req) => 
-      gpt4oService.generateImage({
-        prompt: req.prompt,
-        // Add other GPT4o specific parameters here
-      })
+      fcService.invokeFunction(JSON.stringify({
+        id: req.chatId,
+        model: {
+          // id: req.model,
+          id: 'gpt_4o',
+        },
+        content: req.prompt,
+      }))
     );
   }
 
-  public async generateImageWithDoubao(request: DoubaoServiceRequest): Promise<GenerationResponse> {
-    return this.generateMultipleImages('doubao', request, (req) => 
-      doubaoService.generateImage({
-        prompt: req.prompt,
-        model: req.model,
-        // Add other Doubao specific parameters here
-      })
+  public async generateImageWithDoubao(request: ServiceRequest): Promise<ServiceResponse> {
+    return this.generateMultipleImages('doubao', request, (req) =>
+      fcService.invokeFunction(JSON.stringify({
+        id: req.chatId,
+        model: {
+          id: req.model,
+        },
+        content: req.prompt,
+      }))
     );
   }
 

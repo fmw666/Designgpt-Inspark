@@ -1,9 +1,12 @@
 
 // 添加标准响应接口
 export interface StandardResponse {
-  success: boolean;
-  message?: string;
-  imageUrl?: string;
-  error?: string;
-  text?: string;
+  id: string;
+  status: 'success' | 'error';
+  results: {
+    url: string | null;
+    text: string | null;
+    error: string | null;
+    errorMessage: string | null;
+  }
 }
