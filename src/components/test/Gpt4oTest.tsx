@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { SparklesIcon, PhotoIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
-import { gpt4oService } from '@/services/libs/gpt4oService';
 import ReactMarkdown from 'react-markdown';
 
 // 示例提示词
@@ -77,26 +76,27 @@ const Gpt4oTest = () => {
     let currentImages: string[] = [];
 
     try {
-      const response = await gpt4oService.generateImage({
-        prompt,
-        model: 'gpt-4o-image',
-        stream: true,
-        onContent: (content) => {
-          if (content.type === 'text') {
-            currentText += content.content;
-            setResult(prev => ({
-              ...prev!,
-              text: currentText,
-            }));
-          } else {
-            currentImages.push(content.content);
-            setResult(prev => ({
-              ...prev!,
-              images: [...currentImages],
-            }));
-          }
-        }
-      });
+      let response: any = "todo"
+      // const response = await gpt4oService.generateImage({
+      //   prompt,
+      //   model: 'gpt-4o-image',
+      //   stream: true,
+      //   onContent: (content) => {
+      //     if (content.type === 'text') {
+      //       currentText += content.content;
+      //       setResult(prev => ({
+      //         ...prev!,
+      //         text: currentText,
+      //       }));
+      //     } else {
+      //       currentImages.push(content.content);
+      //       setResult(prev => ({
+      //         ...prev!,
+      //         images: [...currentImages],
+      //       }));
+      //     }
+      //   }
+      // });
 
       if (response.success) {
         setResult({

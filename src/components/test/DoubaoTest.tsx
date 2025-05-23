@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react';
-import { doubaoService, DoubaoModel } from '@/services/libs/doubaoService';
 import { SparklesIcon, PhotoIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+
+type DoubaoModel = 
+  | 'high_aes_general_v21_L'  // 通用2.1-文生图
+  | 'high_aes_general_v20_L'  // 通用2.0Pro-文生图
+  | 'high_aes_general_v20'  // 通用2.0-文生图
+  | 'high_aes_general_v14'  // 通用1.4-文生图
+  | 't2i_xl_sft'  // 通用XL pro-文生图
 
 // 模型名称映射
 const MODEL_NAMES: Record<DoubaoModel, string> = {
@@ -84,10 +90,11 @@ const DoubaoTest = () => {
     setResult(null);
 
     try {
-      const response = await doubaoService.generateImage({
-        prompt,
-        model: selectedModel,
-      });
+      let response: any = "todo"
+      // const response = await doubaoService.generateImage({
+      //   prompt,
+      //   model: selectedModel,
+      // });
 
       if (response?.imageUrl) {
         const imageUrl = response.imageUrl;

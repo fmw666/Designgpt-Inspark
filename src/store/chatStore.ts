@@ -13,8 +13,8 @@ interface ChatState {
   setIsInitialized: (isInitialized: boolean) => void;
   initialize: () => Promise<void>;
   createNewChat: (title?: string, initialMessages?: Message[]) => Promise<Chat | null>;
-  addMessage: (content: string, models: { id: string; name: string; count: number }[], initialResults?: Message['results']) => Promise<Message | null>;
-  updateMessageResults: (messageId: string, results: Message['results']) => Promise<void>;
+  addMessage: (message: Message) => Promise<void>;
+  updateMessageResults: (messageId: string, results: Message['results'], updateInDatabase?: boolean) => Promise<void>;
   switchChat: (chatId: string | null) => void;
   deleteChat: (chatId: string) => Promise<void>;
 }
@@ -76,52 +76,50 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
   },
 
-  addMessage: async (content: string, models: { id: string; name: string; count: number }[], initialResults?: Message['results']) => {
-    const { currentChat, setCurrentChat, setChats } = get();
-    if (!currentChat) return null;
-
-    try {
-      const message: Message = {
-        id: `msg_${Date.now()}`,
-        content,
-        models,
-        results: initialResults || {
-          images: {},
-          content: ''
-        },
-        createdAt: new Date().toISOString()
-      };
-
-      const updatedChat = await chatService.addMessage(currentChat.id, message);
-      setCurrentChat(updatedChat);
-      setChats(prev => prev.map(chat => 
-        chat.id === currentChat.id ? updatedChat : chat
-      ));
-
-      return message;
-    } catch (error) {
-      console.error('Error adding message:', error);
-      return null;
-    }
-  },
-
-  updateMessageResults: async (messageId: string, results: Message['results']) => {
+  addMessage: async (message: Message) => {
     const { currentChat, setCurrentChat, setChats } = get();
     if (!currentChat) return;
 
     try {
-      const updatedMessages = currentChat.messages.map(msg => 
-        msg.id === messageId ? { ...msg, results } : msg
-      );
-
-      const updatedChat = await chatService.updateChat(currentChat.id, {
-        messages: updatedMessages
-      });
-
+      const updatedChat = await chatService.addMessage(currentChat, message);
       setCurrentChat(updatedChat);
       setChats(prev => prev.map(chat => 
         chat.id === currentChat.id ? updatedChat : chat
       ));
+    } catch (error) {
+      console.error('Error adding message:', error);
+      throw error;
+    }
+  },
+
+  updateMessageResults: async (messageId: string, results: Message['results'], updateInDatabase: boolean = true) => {
+    const { currentChat, setCurrentChat, setChats } = get();
+    if (!currentChat) return;
+
+    try {
+      // 1. 更新本地状态
+      const updatedMessages = currentChat.messages.map(msg => 
+        msg.id === messageId ? { ...msg, results } : msg
+      );
+
+      // 2. 创建更新后的聊天对象
+      const updatedChat = {
+        ...currentChat,
+        messages: updatedMessages
+      };
+
+      // 3. 更新本地状态
+      setCurrentChat(updatedChat);
+      setChats(prev => prev.map(chat => 
+        chat.id === currentChat.id ? updatedChat : chat
+      ));
+
+      // 4. 如果需要，更新数据库
+      if (updateInDatabase) {
+        await chatService.updateChat(currentChat.id, {
+          messages: updatedMessages
+        });
+      }
     } catch (error) {
       console.error('Error updating message results:', error);
     }

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { MagnifyingGlassIcon, XMarkIcon, PlusIcon } from '@heroicons/react/24/outline';
-import { getAllModels, ImageModel } from '@/services/modelService';
+import { ImageModel, modelService } from '@/services/modelService';
 import { getDefaultSelectedModels } from '@/utils/modelUtils';
 
 interface SelectedModel {
@@ -30,7 +30,7 @@ export const ModelDrawer: React.FC<ModelDrawerProps> = ({
   const isInitialMount = useRef(true);
 
   useEffect(() => {
-    const allModels = getAllModels();
+    const allModels = modelService.getAllModels();
     // 按发布日期排序
     const sortedModels = [...allModels].sort((a, b) => {
       const dateA = new Date(a.publishDate || 0);

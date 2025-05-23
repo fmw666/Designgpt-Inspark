@@ -1,3 +1,17 @@
+
+// 添加标准响应接口
+export interface StandardResponse {
+  id: string;
+  status: 'success' | 'error';
+  results: {
+    url: string | null;
+    text: string | null;
+    error: string | null;
+    errorMessage: string | null;
+  }
+}
+
+
 export class FCService {
   private static instance: FCService;
   private apiUrl: string;
@@ -18,7 +32,7 @@ export class FCService {
    * @param params 函数调用参数
    * @returns 函数执行结果
    */
-  async invokeFunction(params: any): Promise<any> {
+  async invokeFunction(params: any): Promise<StandardResponse> {
     try {
       const response = await fetch(this.apiUrl, {
         method: 'POST',

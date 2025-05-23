@@ -1,4 +1,3 @@
-
 export interface ImageModel {
   id: string;
   name: string;
@@ -10,6 +9,69 @@ export interface ImageModel {
     prompt: string;
     images: string[];
   };
+  config: {
+    maxConcurrent: number;  // 最大并发数
+    cooldownMs: number;  // 冷却时间
+    group: string;  // 模型组, 只有同一组的模型才会共享速率限制（同一分类不一定同一组）
+  };
+}
+
+export class ModelService {
+  private static instance: ModelService;
+  private models: ImageModel[];
+
+  private constructor() {
+    this.models = IMAGE_MODELS;
+  }
+
+  public static getInstance(): ModelService {
+    if (!ModelService.instance) {
+      ModelService.instance = new ModelService();
+    }
+    return ModelService.instance;
+  }
+
+  // 获取所有模型
+  public getAllModels(): ImageModel[] {
+    return this.models;
+  }
+
+  // 获取指定类别的模型
+  public getModelsByCategory(category: string): ImageModel[] {
+    return this.models.filter(model => model.category === category);
+  }
+
+  // 获取所有类别
+  public getAllCategories(): string[] {
+    return [...new Set(this.models.map(model => model.category))];
+  }
+
+  // 根据ID获取模型
+  public getModelById(id: string): ImageModel | undefined {
+    return this.models.find(model => model.id === id);
+  }
+
+  // 获取模型演示
+  public getModelDemo(modelId: string) {
+    const model = this.models.find(m => m.id === modelId);
+    return model?.demo;
+  }
+
+  // 获取模型配置
+  public getModelConfig(model: ImageModel) {
+    return model.config;
+  }
+
+  // 更新模型配置
+  public updateModelConfig(modelId: string, config: Partial<ImageModel['config']>) {
+    const model = this.getModelById(modelId);
+    if (model) {
+      model.config = {
+        ...this.getModelConfig(model),
+        ...config
+      };
+    }
+  }
 }
 
 // Demo images for testing
@@ -35,7 +97,7 @@ const demoImages = {
 };
 
 // 模型列表
-export const IMAGE_MODELS: ImageModel[] = [
+const IMAGE_MODELS: ImageModel[] = [
   // 豆包模型
   {
     id: 'high_aes_general_v21_L',
@@ -47,6 +109,11 @@ export const IMAGE_MODELS: ImageModel[] = [
     demo: {
       prompt: '一只可爱的熊猫在竹林中玩耍，水彩风格',
       images: ['https://picsum.photos/seed/doubao-general-2.1/512/512'],
+    },
+    config: {
+      maxConcurrent: 2,
+      cooldownMs: 1000,
+      group: 'doubao',
     },
   },
   {
@@ -60,6 +127,11 @@ export const IMAGE_MODELS: ImageModel[] = [
       prompt: '一幅山水画，国画风格，云雾缭绕',
       images: ['https://picsum.photos/seed/doubao-general-2.0-pro/512/512'],
     },
+    config: {
+      maxConcurrent: 2,
+      cooldownMs: 1000,
+      group: 'doubao',
+    },
   },
   {
     id: 'high_aes_general_v20',
@@ -71,6 +143,11 @@ export const IMAGE_MODELS: ImageModel[] = [
     demo: {
       prompt: '一片樱花林，水彩风格，柔和的粉色和白色',
       images: ['https://picsum.photos/seed/doubao-general-2.0/512/512'],
+    },
+    config: {
+      maxConcurrent: 2,
+      cooldownMs: 1000,
+      group: 'doubao',
     },
   },
   {
@@ -84,6 +161,11 @@ export const IMAGE_MODELS: ImageModel[] = [
       prompt: '一只可爱的猫咪，写实风格',
       images: ['https://picsum.photos/seed/doubao-general-1.4/512/512'],
     },
+    config: {
+      maxConcurrent: 2,
+      cooldownMs: 1000,
+      group: 'doubao',
+    },
   },
   {
     id: 't2i_xl_sft',
@@ -95,6 +177,11 @@ export const IMAGE_MODELS: ImageModel[] = [
     demo: {
       prompt: '一幅宏伟的宫殿，写实风格',
       images: ['https://picsum.photos/seed/doubao-general-xl-pro/512/512'],
+    },
+    config: {
+      maxConcurrent: 2,
+      cooldownMs: 1000,
+      group: 'doubao',
     },
   },
   {
@@ -108,6 +195,11 @@ export const IMAGE_MODELS: ImageModel[] = [
       prompt: 'A whimsical illustration of a tea party in a garden',
       images: demoImages.dalle,
     },
+    config: {
+      maxConcurrent: 2,
+      cooldownMs: 1000,
+      group: 'openai',
+    },
   },
   {
     id: 'cogView-4-250304',
@@ -119,6 +211,11 @@ export const IMAGE_MODELS: ImageModel[] = [
     demo: {
       prompt: 'A dreamy portrait of a mermaid in an underwater palace',
       images: demoImages.midjourney,
+    },
+    config: {
+      maxConcurrent: 2,
+      cooldownMs: 1000,
+      group: 'cogview',
     },
   },
   {
@@ -132,6 +229,11 @@ export const IMAGE_MODELS: ImageModel[] = [
       prompt: 'A dreamy portrait of a mermaid in an underwater palace',
       images: demoImages.midjourney,
     },
+    config: {
+      maxConcurrent: 2,
+      cooldownMs: 1000,
+      group: 'wenxin',
+    },
   },
   {
     id: 'wanx2.0-t2i-turbo',
@@ -143,6 +245,11 @@ export const IMAGE_MODELS: ImageModel[] = [
     demo: {
       prompt: 'A dreamy portrait of a mermaid in an underwater palace',
       images: demoImages.midjourney,
+    },
+    config: {
+      maxConcurrent: 2,
+      cooldownMs: 1000,
+      group: 'wanxiang',
     },
   },
   {
@@ -156,6 +263,11 @@ export const IMAGE_MODELS: ImageModel[] = [
       prompt: 'A dreamy portrait of a mermaid in an underwater palace',
       images: demoImages.midjourney,
     },
+    config: {
+      maxConcurrent: 2,
+      cooldownMs: 1000,
+      group: 'wanxiang',
+    },
   },
   {
     id: 'wanx2.1-t2i-plus',
@@ -168,6 +280,11 @@ export const IMAGE_MODELS: ImageModel[] = [
       prompt: 'A dreamy portrait of a mermaid in an underwater palace',
       images: demoImages.midjourney,
     },
+    config: {
+      maxConcurrent: 2,
+      cooldownMs: 1000,
+      group: 'wanxiang',
+    },
   },
   {
     id: 'jimeng_high_aes_general_v21_L',
@@ -179,6 +296,11 @@ export const IMAGE_MODELS: ImageModel[] = [
     demo: {
       prompt: 'A dreamy portrait of a mermaid in an underwater palace',
       images: demoImages.midjourney,
+    },
+    config: {
+      maxConcurrent: 2,
+      cooldownMs: 1000,
+      group: 'jimeng',
     },
   },
   // {
@@ -194,28 +316,5 @@ export const IMAGE_MODELS: ImageModel[] = [
   // },
 ];
 
-// 获取所有模型
-export const getAllModels = (): ImageModel[] => {
-  return IMAGE_MODELS;
-};
-
-// 获取指定类别的模型
-export const getModelsByCategory = (category: string): ImageModel[] => {
-  return IMAGE_MODELS.filter(model => model.category === category);
-};
-
-// 获取所有类别
-export const getAllCategories = (): string[] => {
-  return [...new Set(IMAGE_MODELS.map(model => model.category))];
-};
-
-// 根据ID获取模型
-export const getModelById = (id: string): ImageModel | undefined => {
-  return IMAGE_MODELS.find(model => model.id === id);
-};
-
-// 获取模型演示
-export const getModelDemo = (modelId: string) => {
-  const model = IMAGE_MODELS.find(m => m.id === modelId);
-  return model?.demo;
-};
+// 导出单例实例
+export const modelService = ModelService.getInstance();

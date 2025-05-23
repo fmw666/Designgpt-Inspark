@@ -6,7 +6,7 @@ interface Model {
   count: number;
 }
 
-interface ImageResult {
+export interface ImageResult {
   url: string | null;
   error: string | null;
   errorMessage: string;
@@ -125,24 +125,15 @@ export class ChatService {
   }
 
   // 添加消息到聊天
-  async addMessage(chatId: string, message: Message): Promise<Chat> {
+  async addMessage(chat: Chat, message: Message): Promise<Chat> {
     try {
-      // 先获取当前聊天
-      const { data: currentChat, error: fetchError } = await supabase
-        .from('chat_msg')
-        .select('*')
-        .eq('id', chatId)
-        .single();
-
-      if (fetchError) throw fetchError;
-
       // 更新消息数组
-      const updatedMessages = [...(currentChat.messages || []), message];
+      const updatedMessages = [...(chat.messages || []), message];
       
       // 如果是第一条消息，使用消息内容作为标题
-      const title = currentChat.messages?.length === 0 
+      const title = chat.messages?.length === 0 
         ? message.content.slice(0, 30) 
-        : currentChat.title;
+        : chat.title;
 
       // 更新聊天记录
       const { data, error } = await supabase
@@ -151,7 +142,7 @@ export class ChatService {
           messages: updatedMessages,
           title
         })
-        .eq('id', chatId)
+        .eq('id', chat.id)
         .select()
         .single();
 
