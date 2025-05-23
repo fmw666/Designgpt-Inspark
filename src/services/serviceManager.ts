@@ -77,7 +77,7 @@ export class ServiceManager {
   }
 
   private async executeRequest<T>(
-    serviceType: ServiceType,
+    serviceType: ServiceType | null,
     requestFn: () => Promise<T>
   ): Promise<T> {
     // 首先进行认证检查
@@ -86,23 +86,27 @@ export class ServiceManager {
       throw new Error('AUTH_REQUIRED');
     }
 
-    await this.waitForServiceAvailability(serviceType);
+    if (serviceType) {
+      await this.waitForServiceAvailability(serviceType);
 
-    // Update counters
-    this.activeRequests.set(serviceType, (this.activeRequests.get(serviceType) || 0) + 1);
-    this.lastRequestTime.set(serviceType, Date.now());
+      // Update counters
+      this.activeRequests.set(serviceType, (this.activeRequests.get(serviceType) || 0) + 1);
+      this.lastRequestTime.set(serviceType, Date.now());
+    }
 
     try {
       const result = await requestFn();
       return result;
     } finally {
       // Decrease active requests count
-      this.activeRequests.set(serviceType, (this.activeRequests.get(serviceType) || 0) - 1);
+      if (serviceType) {
+        this.activeRequests.set(serviceType, (this.activeRequests.get(serviceType) || 0) - 1);
+      }
     }
   }
 
   private async generateMultipleImages(
-    serviceType: ServiceType,
+    serviceType: ServiceType | null,
     request: ServiceRequest,
     generateFn: (req: any) => Promise<any>
   ): Promise<ServiceResponse> {
@@ -143,6 +147,18 @@ export class ServiceManager {
         failed: errors.length
       }
     };
+  }
+
+  public async generateImages(request: ServiceRequest): Promise<ServiceResponse> {
+    return this.generateMultipleImages(null, request, (req) => 
+      fcService.invokeFunction(JSON.stringify({
+        id: req.chatId,
+        model: {
+          id: req.model,
+        },
+        content: req.prompt,
+      }))
+    );
   }
 
   public async generateImageWithGPT4o(request: ServiceRequest): Promise<ServiceResponse> {

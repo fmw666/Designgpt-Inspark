@@ -269,40 +269,30 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
           const modelName = model?.name || id;
           
           try {
-            let response;
-            // 根据模型类别调用不同的服务
-            if (category === '豆包') {
-              response = await serviceManager.generateImageWithDoubao({
-                chatId: currentMessageId,
-                prompt: currentInput,
-                count: count,
-                model: id as any,
-              });
-            } else if (category === 'OpenAI') {
-              response = await serviceManager.generateImageWithGPT4o({
-                chatId: currentMessageId,
-                prompt: currentInput,
-                model: id as any,
-                count: count,
-              });
-            } else {
-              // 其他模型使用默认图片
-              const urls = Array(count).fill(null).map((_, index) =>
-                DEFAULT_IMAGES[index % DEFAULT_IMAGES.length]
-              );
-              response = {
-                results: urls.map(url => ({
-                  id: currentMessageId,
-                  status: 'success',
-                  results: {
-                    url: url,
-                    text: null,
-                    error: null,
-                    errorMessage: null,
-                  }
-                })) as StandardResponse[],
-              };
-            }
+            let response = await serviceManager.generateImages({
+              chatId: currentMessageId,
+              prompt: currentInput,
+              model: id as any,
+              count: count,
+            });
+            // } else {
+            //   // 其他模型使用默认图片
+            //   const urls = Array(count).fill(null).map((_, index) =>
+            //     DEFAULT_IMAGES[index % DEFAULT_IMAGES.length]
+            //   );
+            //   response = {
+            //     results: urls.map(url => ({
+            //       id: currentMessageId,
+            //       status: 'success',
+            //       results: {
+            //         url: url,
+            //         text: null,
+            //         error: null,
+            //         errorMessage: null,
+            //       }
+            //     })) as StandardResponse[],
+            //   };
+            // }
 
             // 检查响应是否有效
             if (!response || !response.results || response.results.length === 0) {
