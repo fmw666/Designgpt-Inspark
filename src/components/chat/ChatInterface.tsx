@@ -117,6 +117,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
       Object.values(msg.results?.images || {}).flat()
     ).filter(img => img?.url) || [];
 
+    if (images.length === 0) {
+      setIsScrolling(false);
+      return;
+    }
+
     // 等待所有图片加载完成
     Promise.all(
       images.map(img => {
