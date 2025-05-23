@@ -106,6 +106,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
   const scrollToBottom = () => {
     // 如果消息列表为空，则不滚动
     if (!currentChat || currentChat?.messages.length === 0) {
+      setIsScrolling(false);
       return;
     }
 
@@ -176,6 +177,33 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
     }
   }, [currentChat?.id]);
 
+  // 添加页面关闭和刷新拦截
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // 当正在生成或发送时显示提示
+      if (isSending || isGenerating) {
+        e.preventDefault();
+        e.returnValue = '图片正在生成中，刷新页面将丢失生成进度，确定要离开吗？';
+        return e.returnValue;
+      }
+    };
+
+    // 处理页面关闭事件
+    const handleUnload = () => {
+      if (isSending || isGenerating) {
+        return '图片正在生成中，离开页面将丢失生成进度，确定要离开吗？';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('unload', handleUnload);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('unload', handleUnload);
+    };
+  }, [isSending, isGenerating]);
+
   // 处理提交前的认证检查
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -193,7 +221,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
       try {
         // 准备初始消息结果
         const initialResults = {
-          content: '',
+          content: '🚀 正在生成图片...',
           images: selectedModels.reduce((acc, model) => ({
             ...acc,
             [model.name]: Array(model.count).fill({
@@ -266,7 +294,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
             };
 
             message.results = updatedResults;
-            updateMessageResults(message.id, updatedResults, false);
+            // 立即保存到数据库
+            await updateMessageResults(message.id, updatedResults, true);
             return updatedResults;
           }
           
@@ -298,7 +327,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
             };
 
             message.results = updatedResults;
-            updateMessageResults(message.id, updatedResults, false);
+            // 立即保存到数据库
+            await updateMessageResults(message.id, updatedResults, true);
             return updatedResults;
           } catch (error) {
             console.error(`Error generating images for model ${id}:`, error);
@@ -317,7 +347,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
               }
             };
             message.results = errorResults;
-            updateMessageResults(message.id, errorResults, false);
+            // 立即保存到数据库
+            await updateMessageResults(message.id, errorResults, true);
             return errorResults;
           }
         });
