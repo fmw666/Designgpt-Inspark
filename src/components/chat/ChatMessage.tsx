@@ -1,5 +1,6 @@
 import { FC, useState } from 'react';
 import { UserCircleIcon, SparklesIcon, ExclamationCircleIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import { ImageFeedback } from '@/components/feedback/ImageFeedback';
 
 interface Model {
   id: string;
@@ -146,6 +147,10 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message }) => {
                               className="w-full h-full object-cover transition-transform group-hover:scale-105 cursor-pointer"
                             />
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                          </div>
+                          {/* 反馈按钮 */}
+                          <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <ImageFeedback imageUrl={result.url} modelName={modelId} />
                           </div>
                         </>
                       ) : (

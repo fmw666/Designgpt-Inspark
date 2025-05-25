@@ -7,7 +7,7 @@ import { serviceManager } from '@/services/serviceManager';
 import { useChat } from '@/hooks/useChat';
 import { useNavigate } from 'react-router-dom';
 import { ChatMessage, Message } from './ChatMessage';
-import { Chat, chatService, ImageResult } from '@/services/chatService';
+import { Chat, chatService } from '@/services/chatService';
 import { useAuth } from '@/hooks/useAuth';
 import { eventBus } from '@/utils/eventBus';
 
@@ -16,6 +16,15 @@ interface SelectedModel {
   name: string;
   category: string;
   count: number;
+}
+
+interface FeedbackState {
+  isOpen: boolean;
+  imageUrl: string | null;
+  modelName: string;
+  rating: number;
+  reasons: string[];
+  comment: string;
 }
 
 interface ChatInterfaceProps {
@@ -35,6 +44,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
   const [editedTitle, setEditedTitle] = useState('');
   const titleInputRef = useRef<HTMLInputElement>(null);
   const [isScrolling, setIsScrolling] = useState(false);
+  const [feedbackState, setFeedbackState] = useState<FeedbackState>({
+    isOpen: false,
+    imageUrl: null,
+    modelName: '',
+    rating: 0,
+    reasons: [],
+    comment: ''
+  });
 
   const { user, isLoading: isUserLoading, isInitialized: isUserInitialized } = useAuth();
   const { 
@@ -475,6 +492,148 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
     }
   };
 
+  // 处理反馈提交
+  const handleFeedbackSubmit = async () => {
+    try {
+      // 这里可以调用后端 API 保存反馈
+      console.log('Feedback submitted:', feedbackState);
+      
+      // 关闭反馈弹窗
+      setFeedbackState(prev => ({ ...prev, isOpen: false }));
+      
+      // 显示成功提示
+      // TODO: 添加 toast 提示
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+    }
+  };
+
+  // 打开反馈弹窗
+  const openFeedback = (imageUrl: string, modelName: string) => {
+    setFeedbackState({
+      isOpen: true,
+      imageUrl,
+      modelName,
+      rating: 0,
+      reasons: [],
+      comment: ''
+    });
+  };
+
+  // 渲染反馈弹窗
+  const renderFeedbackModal = () => {
+    if (!feedbackState.isOpen) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-medium text-gray-900">图片反馈</h3>
+            <button
+              onClick={() => setFeedbackState(prev => ({ ...prev, isOpen: false }))}
+              className="text-gray-400 hover:text-gray-500"
+            >
+              <XMarkIcon className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* 预览图片 */}
+          {feedbackState.imageUrl && (
+            <div className="mb-4">
+              <img
+                src={feedbackState.imageUrl}
+                alt="Preview"
+                className="w-full h-48 object-cover rounded-lg"
+              />
+            </div>
+          )}
+
+          {/* 评分 */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              评分
+            </label>
+            <div className="flex gap-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  onClick={() => setFeedbackState(prev => ({ ...prev, rating: star }))}
+                  className={`p-2 rounded-full ${
+                    feedbackState.rating >= star
+                      ? 'text-yellow-400'
+                      : 'text-gray-300'
+                  }`}
+                >
+                  ⭐
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 原因选择 */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              原因（可多选）
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                '图片质量好',
+                '符合预期',
+                '创意独特',
+                '细节丰富',
+                '风格合适',
+                '构图合理',
+                '其他'
+              ].map((reason) => (
+                <label
+                  key={reason}
+                  className="flex items-center space-x-2 p-2 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    checked={feedbackState.reasons.includes(reason)}
+                    onChange={(e) => {
+                      const newReasons = e.target.checked
+                        ? [...feedbackState.reasons, reason]
+                        : feedbackState.reasons.filter(r => r !== reason);
+                      setFeedbackState(prev => ({ ...prev, reasons: newReasons }));
+                    }}
+                    className="rounded text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <span className="text-sm text-gray-700">{reason}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* 文字反馈 */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              其他建议
+            </label>
+            <textarea
+              value={feedbackState.comment}
+              onChange={(e) => setFeedbackState(prev => ({ ...prev, comment: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              rows={3}
+              placeholder="请输入您的建议..."
+            />
+          </div>
+
+          {/* 提交按钮 */}
+          <div className="flex justify-end">
+            <button
+              onClick={handleFeedbackSubmit}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              提交反馈
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-full bg-white/50 backdrop-blur-sm">
@@ -568,9 +727,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
         ) : (
           <>
             {currentChat?.messages.map((message) => (
-              <ChatMessage key={message.id} message={message} />
-            ))}
-            <div ref={messagesEndRef} />
+              <ChatMessage 
+                key={message.id} 
+                message={message} 
+                // onFeedback={openFeedback}
+              />
+        ))}
+        <div ref={messagesEndRef} />
           </>
         )}
       </div>
@@ -583,12 +746,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
         />
         <form onSubmit={handleSubmit} className="mt-4">
           <div className="relative flex items-center">
-            <div className="flex-1 relative">
-              <textarea
-                ref={textareaRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
+          <div className="flex-1 relative">
+            <textarea
+              ref={textareaRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
                 placeholder={
                   isGenerating 
                     ? "正在生成图片，请稍候..." 
@@ -600,10 +763,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
                 className={`w-full max-h-[200px] py-3 pl-4 pr-12 text-sm text-gray-900 placeholder-gray-500 bg-white border border-gray-200 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none overflow-hidden transition-all duration-200 ease-in-out ${
                   (isSending || isGenerating) ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
-                rows={1}
-              />
-              <button
-                type="submit"
+              rows={1}
+            />
+          <button
+            type="submit"
                 disabled={!input.trim() || selectedModels.length === 0 || isSending || isGenerating}
                 className="absolute right-2 bottom-2 p-2 text-indigo-500 hover:text-indigo-600 disabled:text-indigo-400 disabled:cursor-not-allowed transition-colors duration-200 rounded-lg hover:bg-gray-100 disabled:hover:bg-transparent"
               >
@@ -611,10 +774,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
                   <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
                 ) : isGenerating ? (
                   <SparklesIcon className="h-5 w-5 animate-pulse text-indigo-500" />
-                ) : (
-                  <PaperAirplaneIcon className="h-5 w-5" />
-                )}
-              </button>
+            ) : (
+              <PaperAirplaneIcon className="h-5 w-5" />
+            )}
+          </button>
             </div>
           </div>
 
@@ -652,6 +815,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
           </div>
         </form>
       </div>
+
+      {/* 添加反馈弹窗 */}
+      {renderFeedbackModal()}
     </div>
   );
 };
