@@ -389,8 +389,31 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // 如果按下 Ctrl + Enter，则提交表单
+    // 如果按下 Ctrl + Enter，则换行
     if (e.key === 'Enter' && e.ctrlKey) {
+      e.preventDefault();
+      const textarea = e.target as HTMLTextAreaElement;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const value = textarea.value;
+      
+      // 在光标位置插入换行符
+      const newValue = value.substring(0, start) + '\n' + value.substring(end);
+      setInput(newValue);
+      
+      // 设置新的光标位置
+      setTimeout(() => {
+        textarea.selectionStart = textarea.selectionEnd = start + 1;
+      }, 0);
+      
+      // 自动调整高度
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto';
+        textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+      }
+    }
+    // 如果按下 Enter，则提交表单
+    if (e.key === 'Enter' && !e.ctrlKey) {
       e.preventDefault();
       handleSubmit(e);
     }
@@ -570,7 +593,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
                   isGenerating 
                     ? "正在生成图片，请稍候..." 
                     : user 
-                      ? "输入提示词... (Enter 换行）" 
+                      ? "输入提示词... (Ctrl + Enter 换行）" 
                       : "请先登录后再开始对话"
                 }
                 disabled={isSending || isGenerating}
@@ -602,13 +625,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
                 <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
-                Ctrl + Enter 发送
+                Enter 发送
               </span>
               <span className="flex items-center">
                 <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" />
                 </svg>
-                Enter 换行
+                Ctrl + Enter 换行
               </span>
               {selectedModels.length > 0 && (
                 <span className="flex items-center">
