@@ -100,6 +100,23 @@ const demoImages = {
 const IMAGE_MODELS: ImageModel[] = [
   // 豆包模型
   {
+    id: 'doubao-seedream-3-0-t2i-250415',
+    name: '豆包通用3.0',
+    publishDate: new Date('2025-04-15'),
+    description: '最新的通用文生图模型，支持高质量图像生成',
+    maxImages: 1,
+    category: '豆包',
+    demo: {
+      prompt: '一只可爱的熊猫在竹林中玩耍，水彩风格',
+      images: ['https://picsum.photos/seed/doubao-general-2.1/512/512'],
+    },
+    config: {
+      maxConcurrent: 2,
+      cooldownMs: 1000,
+      group: 'doubao',
+    },
+  },
+  {
     id: 'high_aes_general_v21_L',
     name: '豆包通用2.1',
     publishDate: new Date('2024-11-11'),

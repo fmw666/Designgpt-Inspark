@@ -9,6 +9,7 @@ interface FeedbackState {
   rating: number;
   reasons: string[];
   comment: string;
+  otherReason: string;
 }
 
 interface ImageFeedbackProps {
@@ -23,7 +24,8 @@ export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelNam
     modelName: '',
     rating: 0,
     reasons: [],
-    comment: ''
+    comment: '',
+    otherReason: ''
   });
 
   // 处理 ESC 键关闭弹窗
@@ -60,7 +62,8 @@ export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelNam
       modelName,
       rating: 0,
       reasons: [],
-      comment: ''
+      comment: '',
+      otherReason: ''
     });
   };
 
@@ -159,6 +162,32 @@ export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelNam
     );
   };
 
+  // 处理其他原因变化
+  const handleOtherReasonChange = (value: string) => {
+    setFeedbackState(prev => ({ ...prev, otherReason: value }));
+  };
+
+  // 处理原因选择变化
+  const handleReasonChange = (reason: string, checked: boolean) => {
+    let newReasons = checked
+      ? [...feedbackState.reasons, reason]
+      : feedbackState.reasons.filter(r => r !== reason);
+    
+    // 如果取消选择"其他"，清空其他原因
+    if (reason === '其他' && !checked) {
+      setFeedbackState(prev => ({
+        ...prev,
+        reasons: newReasons,
+        otherReason: ''
+      }));
+    } else {
+      setFeedbackState(prev => ({
+        ...prev,
+        reasons: newReasons
+      }));
+    }
+  };
+
   return (
     <>
       {/* 反馈按钮 */}
@@ -233,23 +262,43 @@ export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelNam
                   '构图合理',
                   '其他'
                 ].map((reason) => (
-                  <label
-                    key={reason}
-                    className="flex items-center space-x-2 p-2 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={feedbackState.reasons.includes(reason)}
-                      onChange={(e) => {
-                        const newReasons = e.target.checked
-                          ? [...feedbackState.reasons, reason]
-                          : feedbackState.reasons.filter(r => r !== reason);
-                        setFeedbackState(prev => ({ ...prev, reasons: newReasons }));
-                      }}
-                      className="rounded text-indigo-600 focus:ring-indigo-500"
-                    />
-                    <span className="text-sm text-gray-700">{reason}</span>
-                  </label>
+                  <div key={reason}>
+                    <label
+                      className="flex items-center space-x-2 p-2 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={feedbackState.reasons.includes(reason)}
+                        onChange={(e) => handleReasonChange(reason, e.target.checked)}
+                        className="rounded text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span className="text-sm text-gray-700">{reason}</span>
+                    </label>
+                    {/* 其他选项的输入框 */}
+                    {reason === '其他' && feedbackState.reasons.includes('其他') && (
+                      <div className="mt-2">
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={feedbackState.otherReason}
+                            onChange={(e) => handleOtherReasonChange(e.target.value.slice(0, 8))}
+                            placeholder="请输入其他原因..."
+                            maxLength={8}
+                            className="w-full px-3 py-2 pr-16 text-sm text-gray-900 placeholder-gray-500 bg-white border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200 ease-in-out"
+                          />
+                          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                            <span className="text-xs text-gray-400">{feedbackState.otherReason.length}/8</span>
+                            <button
+                              onClick={() => handleOtherReasonChange('')}
+                              className="p-1 text-gray-400 hover:text-gray-600"
+                            >
+                              <XMarkIcon className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>
@@ -262,7 +311,7 @@ export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelNam
               <textarea
                 value={feedbackState.comment}
                 onChange={(e) => setFeedbackState(prev => ({ ...prev, comment: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 text-sm text-gray-900 placeholder-gray-500 bg-white border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none transition-all duration-200 ease-in-out"
                 rows={3}
                 placeholder="请输入您的建议..."
               />
@@ -273,7 +322,7 @@ export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelNam
               <button
                 onClick={handleFeedbackSubmit}
                 disabled={feedbackState.rating === 0}
-                className={`px-4 py-2 rounded-md text-white transition-colors ${
+                className={`px-4 py-2 rounded-2xl text-white transition-colors ${
                   feedbackState.rating === 0
                     ? 'bg-gray-400 cursor-not-allowed'
                     : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
