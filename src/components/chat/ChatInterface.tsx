@@ -508,18 +508,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
     }
   };
 
-  // 打开反馈弹窗
-  const openFeedback = (imageUrl: string, modelName: string) => {
-    setFeedbackState({
-      isOpen: true,
-      imageUrl,
-      modelName,
-      rating: 0,
-      reasons: [],
-      comment: ''
-    });
-  };
-
   // 渲染反馈弹窗
   const renderFeedbackModal = () => {
     if (!feedbackState.isOpen) return null;
@@ -676,7 +664,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
                   onKeyDown={handleTitleKeyDown}
                   className="w-full px-2 py-1 text-lg font-medium text-gray-900 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   placeholder="输入新标题..."
-                  maxLength={10}
+                  maxLength={13}
                 />
                 <div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">
                   {editedTitle.length}/13
@@ -730,7 +718,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
               <ChatMessage 
                 key={message.id} 
                 message={message} 
-                // onFeedback={openFeedback}
               />
         ))}
         <div ref={messagesEndRef} />
