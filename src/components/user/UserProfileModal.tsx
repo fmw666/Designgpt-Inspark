@@ -7,6 +7,7 @@ import { zhCN } from 'date-fns/locale';
 import { User } from '@/services/supabase';
 import { useAuthStore } from '@/store/authStore';
 import { toast } from 'react-hot-toast';
+import { getAvatarText, getAvatarClasses, getAvatarSizeClasses } from '@/utils/avatar';
 
 interface UserProfileModalProps {
   isOpen: boolean;
@@ -23,15 +24,6 @@ export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, u
   useEffect(() => {
     setDisplayName(user.user_metadata?.display_name || '');
   }, [user]);
-
-  // 获取头像文字
-  const getAvatarText = () => {
-    const name = user.user_metadata?.display_name;
-    if (name) {
-      return name.charAt(0).toUpperCase();
-    }
-    return user.email.split('@')[0].charAt(0).toUpperCase();
-  };
 
   // 处理保存用户名
   const handleSaveDisplayName = async () => {
@@ -112,9 +104,9 @@ export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, u
 
                 {/* 头像和用户名区域 */}
                 <div className="flex flex-col items-center mb-6">
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center text-white font-medium shadow-lg mb-6">
-                    <span className="text-4xl font-medium">
-                      {getAvatarText()}
+                  <div className={`${getAvatarClasses()} ${getAvatarSizeClasses('lg')} mb-6`}>
+                    <span>
+                      {getAvatarText(user)}
                     </span>
                   </div>
                   

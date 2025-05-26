@@ -10,6 +10,7 @@ import { ChatMessage, Message } from './ChatMessage';
 import { Chat, chatService } from '@/services/chatService';
 import { useAuth } from '@/hooks/useAuth';
 import { eventBus } from '@/utils/eventBus';
+import { getAvatarText } from '@/utils/avatar';
 
 interface SelectedModel {
   id: string;
@@ -167,7 +168,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
   // 监听消息变化和聊天切换，立即滚动到底部
   useEffect(() => {
     scrollToBottom();
-  }, [currentChat?.messages, currentChat?.id]);
+  }, [currentChat?.id]);
 
   // 自动调整文本框高度
   useEffect(() => {
@@ -289,6 +290,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
 
         // 开始生成图片
         setIsGenerating(true);
+        scrollToBottom();
 
         // 2. 为每个选中的模型生成图片
         const updatePromises = selectedModels.map(async ({ id, count }) => {
@@ -718,6 +720,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
               <ChatMessage 
                 key={message.id} 
                 message={message} 
+                userAvatar={getAvatarText(user)}
               />
         ))}
         <div ref={messagesEndRef} />

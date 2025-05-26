@@ -1,6 +1,7 @@
 import { FC, useState } from 'react';
-import { UserCircleIcon, SparklesIcon, ExclamationCircleIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import { SparklesIcon, ExclamationCircleIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import { ImageFeedback } from '@/components/feedback/ImageFeedback';
+import { getAvatarClasses, getAvatarSizeClasses } from '@/utils/avatar';
 
 interface Model {
   id: string;
@@ -33,9 +34,10 @@ export interface Message {
 
 interface ChatMessageProps {
   message: Message;
+  userAvatar: string;
 }
 
-export const ChatMessage: FC<ChatMessageProps> = ({ message }) => {
+export const ChatMessage: FC<ChatMessageProps> = ({ message, userAvatar }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   return (
@@ -50,7 +52,11 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message }) => {
           </div>
           <div className="flex-shrink-0">
             <div className="h-8 w-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-              <UserCircleIcon className="h-6 w-6 text-white" />
+              <div className={`${getAvatarClasses()} ${getAvatarSizeClasses('sm')}`}>
+                <span>
+                  {userAvatar}
+                </span>
+              </div>
             </div>
           </div>
         </div>

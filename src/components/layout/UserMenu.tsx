@@ -5,6 +5,7 @@ import { UserIcon, ArrowRightOnRectangleIcon, Cog6ToothIcon } from '@heroicons/r
 import { useAuth } from '@/hooks/useAuth';
 import { SettingsModal } from '../user/SettingsModal';
 import { UserProfileModal } from '../user/UserProfileModal';
+import { getAvatarClasses, getAvatarSizeClasses, getAvatarText } from '@/utils/avatar';
 
 interface UserMenuProps {
   isCollapsed?: boolean;
@@ -52,7 +53,11 @@ const UserMenu: FC<UserMenuProps> = ({ isCollapsed, onSignInClick }) => {
               }`}
             >
               <div className="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center text-white font-medium shadow-sm">
-                {user.email?.charAt(0).toUpperCase() || '?'}
+                <div className={`${getAvatarClasses()} ${getAvatarSizeClasses('sm')}`}>
+                  <span>
+                    {getAvatarText(user)}
+                  </span>
+                </div>
               </div>
               {!isCollapsed && (
                 <span className="text-sm text-gray-700 truncate">
