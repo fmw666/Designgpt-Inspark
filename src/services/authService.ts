@@ -1,5 +1,6 @@
 import { AuthChangeEvent, Session } from '@supabase/supabase-js';
-import { supabase, User, AuthError } from './supabase';
+import { supabase, AuthError } from './supabase';
+import type { User } from './supabase';
 
 export class AuthService {
   private static instance: AuthService;
@@ -23,6 +24,25 @@ export class AuthService {
       email: session.user.email!,
       created_at: session.user.created_at,
       last_sign_in_at: session.user.last_sign_in_at || null,
+      user_metadata: session.user.user_metadata
+    };
+  }
+
+  // 更新用户元数据
+  async updateUserMetadata(metadata: { display_name?: string }): Promise<User> {
+    const { data: { user }, error } = await supabase.auth.updateUser({
+      data: metadata
+    });
+
+    if (error) throw error;
+    if (!user) throw new Error('User not found');
+
+    return {
+      id: user.id,
+      email: user.email!,
+      created_at: user.created_at,
+      last_sign_in_at: user.last_sign_in_at || null,
+      user_metadata: user.user_metadata
     };
   }
 
@@ -62,6 +82,7 @@ export class AuthService {
         email: data.user.email!,
         created_at: data.user.created_at,
         last_sign_in_at: data.user.last_sign_in_at || null,
+        user_metadata: data.user.user_metadata
       };
 
       return this.currentUser;
@@ -86,6 +107,7 @@ export class AuthService {
         email: user.email!,
         created_at: user.created_at,
         last_sign_in_at: user.last_sign_in_at || null,
+        user_metadata: user.user_metadata
       };
 
       return this.currentUser;

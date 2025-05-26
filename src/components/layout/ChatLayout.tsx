@@ -75,18 +75,18 @@ const ChatLayout: FC<ChatLayoutProps> = ({ children }) => {
         }`}
       >
         <div className="w-64 h-full bg-white/80 backdrop-blur-sm border-r border-primary-100 flex-shrink-0 transition-all duration-300 relative shadow-md">
-          <Sidebar />
-          
-          {/* Collapse Toggle Button */}
+        <Sidebar />
+        
+        {/* Collapse Toggle Button */}
           {/* <button
             onClick={() => setIsSidebarCollapsed(false)}
-            className="absolute -right-3 top-1/2 transform -translate-y-1/2 bg-white border border-primary-200 rounded-full p-1.5 hover:bg-primary-50 transition-colors shadow-sm"
-          >
-            {isSidebarCollapsed ? (
-              <ChevronRightIcon className="h-4 w-4 text-primary-500" />
-            ) : (
-              <ChevronLeftIcon className="h-4 w-4 text-primary-500" />
-            )}
+          className="absolute -right-3 top-1/2 transform -translate-y-1/2 bg-white border border-primary-200 rounded-full p-1.5 hover:bg-primary-50 transition-colors shadow-sm"
+        >
+          {isSidebarCollapsed ? (
+            <ChevronRightIcon className="h-4 w-4 text-primary-500" />
+          ) : (
+            <ChevronLeftIcon className="h-4 w-4 text-primary-500" />
+          )}
           </button> */}
 
           {/* User Info at Bottom - 使用 fixed 定位确保在最上层 */}
@@ -119,4 +119,4 @@ const ChatLayout: FC<ChatLayoutProps> = ({ children }) => {
   );
 };
 
-export default ChatLayout;
+export default ChatLayout; 

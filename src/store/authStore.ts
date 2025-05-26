@@ -11,6 +11,7 @@ interface AuthState {
   signOut: () => Promise<void>;
   sendVerificationCode: (email: string) => Promise<void>;
   verifyCode: (email: string, code: string) => Promise<void>;
+  updateDisplayName: (displayName: string) => Promise<void>;
   isLoading: boolean;
   setIsLoading: (isLoading: boolean) => void;
 }
@@ -65,6 +66,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             email: session.user.email!,
             created_at: session.user.created_at,
             last_sign_in_at: session.user.last_sign_in_at || null,
+            user_metadata: session.user.user_metadata
           }
         }));
       } else {
@@ -107,4 +109,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
+  updateDisplayName: async (displayName: string) => {
+    const { setUser } = get();
+    try {
+      const updatedUser = await authService.updateUserMetadata({ display_name: displayName });
+      setUser(updatedUser);
+    } catch (error) {
+      console.error('Error updating display name:', error);
+      throw error;
+    }
+  },
 }));
