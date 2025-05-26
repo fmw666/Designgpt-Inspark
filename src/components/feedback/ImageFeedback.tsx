@@ -126,7 +126,7 @@ export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelNam
         onClick={(e) => handleClick(e, index)}
         onMouseMove={(e) => handleMouseMove(e, index)}
         onMouseLeave={handleMouseLeave}
-        className="group relative p-1"
+        className="group relative pr-1"
       >
         <div className="relative w-8 h-8">
           {/* 灰色背景星星 */}

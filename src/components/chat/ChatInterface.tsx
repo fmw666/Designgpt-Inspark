@@ -45,6 +45,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
   const [editedTitle, setEditedTitle] = useState('');
   const titleInputRef = useRef<HTMLInputElement>(null);
   const [isScrolling, setIsScrolling] = useState(false);
+  const [isLoadingTimeout, setIsLoadingTimeout] = useState(false);
+  const loadingTimeoutRef = useRef<NodeJS.Timeout>();
   const [feedbackState, setFeedbackState] = useState<FeedbackState>({
     isOpen: false,
     imageUrl: null,
@@ -125,11 +127,21 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
     // 如果消息列表为空，则不滚动
     if (!currentChat || currentChat?.messages.length === 0) {
       setIsScrolling(false);
+      setIsLoadingTimeout(false);
       return;
     }
 
     // 设置滚动状态，显示加载动画
     setIsScrolling(true);
+    setIsLoadingTimeout(false);
+
+    // 设置超时检测
+    if (loadingTimeoutRef.current) {
+      clearTimeout(loadingTimeoutRef.current);
+    }
+    loadingTimeoutRef.current = setTimeout(() => {
+      setIsLoadingTimeout(true);
+    }, 10000); // 10秒超时
 
     // 如果有图片正在加载，则等待加载完再滚动
     const images = currentChat?.messages.flatMap(msg => 
@@ -138,6 +150,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
 
     if (images.length === 0) {
       setIsScrolling(false);
+      setIsLoadingTimeout(false);
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
       return;
     }
 
@@ -160,11 +176,31 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
           // 滚动完成后，延迟关闭加载状态
           setTimeout(() => {
             setIsScrolling(false);
+            setIsLoadingTimeout(false);
+            if (loadingTimeoutRef.current) {
+              clearTimeout(loadingTimeoutRef.current);
+            }
           }, 500); // 等待滚动动画完成
         }
       }, 100);
     });
   };
+
+  // 添加刷新处理函数
+  const handleRefresh = () => {
+    setIsLoadingTimeout(false);
+    scrollToBottom();
+  };
+
+  // 清理超时定时器
+  useEffect(() => {
+    return () => {
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+    };
+  }, []);
+
   // 监听消息变化和聊天切换，立即滚动到底部
   useEffect(() => {
     scrollToBottom();
@@ -718,6 +754,17 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
             <div className="flex flex-col items-center gap-2">
               <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
               <span className="text-sm text-gray-600">正在加载消息...</span>
+              {isLoadingTimeout && (
+                <button
+                  onClick={handleRefresh}
+                  className="mt-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 flex items-center gap-2 animate-fadeIn"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  刷新
+                </button>
+              )}
             </div>
           </div>
         )}
