@@ -458,6 +458,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
   const handleTitleSave = async () => {
     if (!currentChat || !editedTitle.trim()) return;
 
+    // 如果标题没有变化，直接关闭编辑状态
+    if (editedTitle.trim() === currentChat.title) {
+      setIsEditingTitle(false);
+      return;
+    }
+
     try {
       const updatedChat = await chatService.updateChat(currentChat.id, {
         title: editedTitle.trim()
@@ -473,6 +479,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
       }
     } catch (error) {
       console.error('Error updating chat title:', error);
+      // 发生错误时恢复原标题
+      setEditedTitle(currentChat.title);
     } finally {
       setIsEditingTitle(false);
     }
@@ -655,49 +663,51 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
       {/* Chat Title - 只在有标题且用户已登录时显示 */}
       {user && currentChat?.title && (
         <div className="h-14 border-b border-gray-200 bg-white/50 backdrop-blur-sm flex items-center px-6 justify-center group">
-          {isEditingTitle ? (
-            <div className="flex items-center gap-2 w-full max-w-md">
-              <div className="flex-1 relative">
-                <input
-                  ref={titleInputRef}
-                  type="text"
-                  value={editedTitle}
-                  onChange={handleTitleChange}
-                  onKeyDown={handleTitleKeyDown}
-                  className="w-full px-2 py-1 text-lg font-medium text-gray-900 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  placeholder="输入新标题..."
-                  maxLength={13}
-                />
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">
-                  {editedTitle.length}/13
+          <div className="relative w-full max-w-md">
+            {isEditingTitle ? (
+              <div className="flex items-center gap-2 animate-fadeIn">
+                <div className="flex-1 relative">
+                  <input
+                    ref={titleInputRef}
+                    type="text"
+                    value={editedTitle}
+                    onChange={handleTitleChange}
+                    onKeyDown={handleTitleKeyDown}
+                    className="w-full px-2 py-1 text-lg font-medium text-gray-900 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                    placeholder="输入新标题..."
+                    maxLength={13}
+                  />
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400 transition-opacity duration-200">
+                    {editedTitle.length}/13
+                  </div>
                 </div>
+                <button
+                  onClick={handleTitleSave}
+                  className="p-1 text-green-600 hover:text-green-700 transition-colors hover:bg-green-50 rounded-lg"
+                >
+                  <CheckIcon className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={handleTitleCancel}
+                  className="p-1 text-gray-500 hover:text-gray-700 transition-colors hover:bg-gray-50 rounded-lg"
+                >
+                  <XMarkIcon className="w-5 h-5" />
+                </button>
               </div>
-              <button
-                onClick={handleTitleSave}
-                className="p-1 text-green-600 hover:text-green-700 transition-colors"
-              >
-                <CheckIcon className="w-5 h-5" />
-              </button>
-              <button
-                onClick={handleTitleCancel}
-                className="p-1 text-gray-500 hover:text-gray-700 transition-colors"
-              >
-                <XMarkIcon className="w-5 h-5" />
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-medium text-gray-900">
-                {currentChat.title}
-              </h1>
-              <button
-                onClick={handleTitleEdit}
-                className="p-1 text-gray-400 hover:text-gray-600 transition-colors opacity-0 group-hover:opacity-100"
-              >
-                <PencilIcon className="w-4 h-4" />
-              </button>
-            </div>
-          )}
+            ) : (
+              <div className="flex items-center justify-center gap-2 group-hover:bg-gray-50/50 rounded-lg transition-all duration-200">
+                <h1 className="text-lg font-medium text-gray-900 transition-all duration-200">
+                  {currentChat.title}
+                </h1>
+                <button
+                  onClick={handleTitleEdit}
+                  className="p-1 text-gray-400 hover:text-gray-600 transition-all duration-200 opacity-0 group-hover:opacity-100 hover:bg-gray-100 rounded-lg"
+                >
+                  <PencilIcon className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
 

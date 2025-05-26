@@ -32,6 +32,12 @@ export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, u
       return;
     }
 
+    // 如果用户名没有变化，直接关闭编辑状态
+    if (displayName.trim() === user.user_metadata?.display_name) {
+      setIsEditingName(false);
+      return;
+    }
+
     try {
       await updateDisplayName(displayName.trim());
       toast.success('用户名已更新');
