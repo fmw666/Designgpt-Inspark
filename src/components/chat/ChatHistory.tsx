@@ -4,9 +4,25 @@ import { useChat } from '@/hooks/useChat';
 import { Chat } from '@/services/chatService';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
-import { format, isToday, isYesterday, isThisWeek, isThisMonth, isThisYear } from 'date-fns';
+import { format, isToday, isYesterday, isThisYear } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
+
+// 添加一个判断是否在最近 7 天内的函数
+const isWithinLast7Days = (date: Date) => {
+  const now = new Date();
+  const diffTime = Math.abs(now.getTime() - date.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays <= 7;
+};
+
+// 添加一个判断是否在最近 30 天内的函数
+const isWithinLast30Days = (date: Date) => {
+  const now = new Date();
+  const diffTime = Math.abs(now.getTime() - date.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays <= 30;
+};
 
 interface GroupedChats {
   [key: string]: Chat[];
@@ -30,9 +46,9 @@ export const ChatHistory = () => {
         groupKey = '今天';
       } else if (isYesterday(date)) {
         groupKey = '昨天';
-      } else if (isThisWeek(date)) {
+      } else if (isWithinLast7Days(date)) {
         groupKey = '7天内';
-      } else if (isThisMonth(date)) {
+      } else if (isWithinLast30Days(date)) {
         groupKey = '30天内';
       } else if (isThisYear(date)) {
         groupKey = format(date, 'yyyy-MM', { locale: zhCN });
