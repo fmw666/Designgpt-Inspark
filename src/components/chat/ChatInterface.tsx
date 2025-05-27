@@ -600,7 +600,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto p-4 scrollbar-custom relative bg-gray-50 dark:bg-gray-800">
+      <div className="flex-1 overflow-y-auto p-4 relative bg-gray-50 dark:bg-gray-800">
         {/* 加载动画遮罩 - 使用 fixed 定位 */}
         {isScrolling && (
           <div className="fixed inset-0 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm z-10 flex items-center justify-center">
@@ -668,7 +668,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
           <button
             type="submit"
                 disabled={!input.trim() || selectedModels.length === 0 || isSending || isGenerating}
-                className="absolute right-2 bottom-2 p-2 text-indigo-500 hover:text-indigo-600 disabled:text-indigo-400 disabled:cursor-not-allowed transition-colors duration-200 rounded-lg hover:bg-gray-100 disabled:hover:bg-transparent"
+                className="absolute right-2 bottom-2 p-2 text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 disabled:text-indigo-400 disabled:cursor-not-allowed transition-colors duration-200 rounded-lg hover:bg-gray-800 disabled:hover:bg-transparent"
               >
                 {isSending ? (
                   <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
@@ -703,13 +703,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
                 </span>
               )}
               {isGenerating && (
-                <span className="flex items-center text-indigo-600">
+                <span className="flex items-center text-indigo-600 dark:text-indigo-400">
                   <SparklesIcon className="h-4 w-4 mr-1 animate-pulse" />
                   正在生成图片...
                 </span>
               )}
             </div>
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-gray-500 dark:text-gray-400">
               {input.length > 0 && `${input.length} 字符`}
             </div>
           </div>

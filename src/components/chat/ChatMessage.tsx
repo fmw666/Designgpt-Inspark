@@ -122,10 +122,10 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message, userAvatar }) => {
                       className="group relative aspect-square rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900"
                     >
                       {result.isGenerating ? (
-                        <div className="absolute inset-0 flex items-center justify-center bg-white/80">
+                        <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-gray-900">
                           <div className="flex flex-col items-center gap-2">
                             <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-                            <span className="text-sm text-gray-600">生成中...</span>
+                            <span className="text-sm text-gray-600 dark:text-gray-300">生成中...</span>
                           </div>
                         </div>
                       ) : result.error ? (
@@ -133,8 +133,8 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message, userAvatar }) => {
                           <div className="flex flex-col items-center gap-2 p-4 text-center">
                             <ExclamationCircleIcon className="h-6 w-6 text-red-500" />
                             <div className="space-y-1">
-                              <span className="text-sm text-red-600 font-medium block">生成失败</span>
-                              <p className="text-xs text-red-500 line-clamp-2">
+                              <span className="text-sm text-red-600 dark:text-red-400 font-medium block">生成失败</span>
+                              <p className="text-xs text-red-500 dark:text-red-400 line-clamp-2">
                                 {result.errorMessage}
                               </p>
                             </div>

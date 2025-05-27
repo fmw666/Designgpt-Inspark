@@ -4,10 +4,10 @@
 
 @layer base {
   :root {
-    --color-scrollbar: #0ea5e9;
+    --color-scrollbar: rgba(142, 134, 218, 0.78);
   }
   .dark {
-    --color-scrollbar: #0ea5e9;
+    --color-scrollbar: rgba(102, 89, 224, 0.78);
   }
 
   html {
@@ -24,21 +24,11 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-gray-200 dark:bg-gray-800;
+    background-color: var(--color-scrollbar);
+    border-radius: 5px;
   }
 }
 
-@layer components {
-  
-  /* 自定义滚动条容器样式 */
-  .scrollbar-custom {
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-scrollbar);
-
-    &::-webkit-scrollbar {
-      @apply w-1 h-1;
-    }
-  }
-}
+@layer components {}
 
 @layer utilities {}
