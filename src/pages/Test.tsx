@@ -5,4 +5,4 @@ const Test: FC = () => {
   return <TestLayout />;
 };
 
-export default Test; 
+export default Test;

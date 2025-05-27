@@ -20,7 +20,7 @@ const Sidebar: FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white border-r border-gray-200">
+    <div className="flex flex-col h-full bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800">
       {/* Logo */}
       <Logo />
 

@@ -74,7 +74,7 @@ const ChatLayout: FC<ChatLayoutProps> = ({ children }) => {
             : 'relative'
         }`}
       >
-        <div className="w-64 h-full bg-white/80 backdrop-blur-sm border-r border-primary-100 flex-shrink-0 transition-all duration-300 relative shadow-md">
+        <div className="w-64 h-full backdrop-blur-sm border-r border-primary-100 dark:border-gray-800 flex-shrink-0 transition-all duration-300 relative shadow-md">
         <Sidebar />
         
         {/* Collapse Toggle Button */}
@@ -94,7 +94,7 @@ const ChatLayout: FC<ChatLayoutProps> = ({ children }) => {
             isMobileWidth 
               ? 'fixed bottom-0 left-0' 
               : 'absolute bottom-0 left-0'
-          } w-64 p-4 border-t border-r border-gray-200 bg-white/50 backdrop-blur-sm z-[9999]`}>
+          } w-64 p-4 border-t border-r border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-gray-900 backdrop-blur-sm z-[9999]`}>
             <UserMenu 
               // isCollapsed={isSidebarCollapsed} 
               onSignInClick={() => setIsSignInModalOpen(true)}

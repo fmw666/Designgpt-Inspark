@@ -111,19 +111,19 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="w-full max-w-md bg-white rounded-2xl shadow-xl"
+            className="w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl shadow-xl"
           >
             {/* 顶部导航栏 */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
               <div className="w-8" /> {/* 占位，保持标题居中 */}
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500" />
-                <h2 className="text-lg font-medium text-gray-900">欢迎登录</h2>
+                <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">欢迎登录</h2>
                 <div className="w-2 h-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500" />
               </div>
               <button
                 onClick={onClose}
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors"
               >
                 <XMarkIcon className="w-6 h-6" />
               </button>
@@ -133,31 +133,39 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
             <div className="p-6">
               {/* 欢迎文本 */}
               <div className="text-center mb-8">
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent mb-2">
                   欢迎使用 AI 绘图平台
                 </h1>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   邀请码+邮箱验证码 登录
                 </p>
               </div>
 
               {/* 错误提示 */}
-              {error && (
-                <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg">
-                  {error}
-                </div>
-              )}
+              <AnimatePresence>
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="mb-4 p-3 bg-red-50 dark:bg-red-900 text-red-600 dark:text-red-400 text-sm rounded-lg"
+                  >
+                    {error}
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* 表单 */}
               <form onSubmit={handleSignIn} className="space-y-6">
                 {/* 邀请码输入框 */}
                 <div>
-                  <label htmlFor="inviteCode" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="inviteCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     邀请码
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <TicketIcon className="h-5 w-5 text-gray-400" />
+                      <TicketIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                     </div>
                     <input
                       type="text"
@@ -166,9 +174,9 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
                       onChange={(e) => setInviteCode(e.target.value)}
                       placeholder="请输入邀请码"
                       disabled={isInviteVerified}
-                      className={`block w-full pl-10 pr-32 py-3.5 border ${
-                        isInviteVerified ? 'border-green-500 bg-green-50' : 'border-gray-200'
-                      } rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200 text-base`}
+                      className={`block w-full outline-none pl-10 pr-32 py-3.5 border ${
+                        isInviteVerified ? 'border-green-500 bg-green-50 dark:bg-green-900 dark:text-gray-400' : 'border-gray-200 dark:border-gray-800'
+                      } rounded-xl bg-white dark:bg-gray-900 shadow-sm placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200 text-base dark:text-gray-100`}
                     />
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                       <button
@@ -177,8 +185,8 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
                         disabled={isInviteVerified || !inviteCode}
                         className={`text-sm font-medium ${
                           isInviteVerified || !inviteCode
-                            ? 'text-gray-400 cursor-not-allowed'
-                            : 'text-indigo-600 hover:text-indigo-700'
+                            ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                            : 'text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-500'
                         }`}
                       >
                         {isInviteVerified ? '已验证' : '验证'}
@@ -189,12 +197,12 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
 
                 {/* 邮箱输入框 */}
                 <div className={`transition-opacity duration-200 ${isInviteVerified ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     邮箱
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <EnvelopeIcon className="h-5 w-5 text-gray-400" />
+                      <EnvelopeIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                     </div>
                     <input
                       type="email"
@@ -203,19 +211,19 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="请输入邮箱"
                       disabled={!isInviteVerified}
-                      className="block w-full pl-10 pr-3 py-3.5 border border-gray-200 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200 text-base"
+                      className="block w-full bg-white dark:bg-gray-900 outline-none pl-10 pr-3 py-3.5 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200 text-base dark:text-gray-100"
                     />
                   </div>
                 </div>
 
                 {/* 验证码输入框 */}
                 <div className={`transition-opacity duration-200 ${isInviteVerified ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
-                  <label htmlFor="code" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="code" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     验证码
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <KeyIcon className="h-5 w-5 text-gray-400" />
+                      <KeyIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                     </div>
                     <input
                       type="text"
@@ -224,7 +232,7 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
                       onChange={(e) => setVerificationCode(e.target.value)}
                       placeholder="请输入验证码"
                       disabled={!isInviteVerified}
-                      className="block w-full pl-10 pr-32 py-3.5 border border-gray-200 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200 text-base"
+                      className="block w-full bg-white dark:bg-gray-900 outline-none pl-10 pr-32 py-3.5 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200 text-base dark:text-gray-100"
                     />
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                       <button
@@ -233,13 +241,13 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
                         disabled={countdown > 0 || !email || !isInviteVerified || isSendingCode}
                         className={`text-sm font-medium ${
                           countdown > 0 || !email || !isInviteVerified || isSendingCode
-                            ? 'text-gray-400 cursor-not-allowed'
-                            : 'text-indigo-600 hover:text-indigo-700'
+                            ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                            : 'text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-500'
                         }`}
                       >
                         {isSendingCode ? (
                           <div className="flex items-center">
-                            <div className="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mr-1" />
+                            <div className="w-4 h-4 border-2 border-indigo-600 dark:border-indigo-400 border-t-transparent rounded-full animate-spin mr-1" />
                             发送中
                           </div>
                         ) : countdown > 0 ? (
@@ -275,13 +283,13 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
 
               {/* 底部提示 */}
               <div className="mt-8 text-center">
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   登录即表示您同意我们的
-                  <a href="#" className="text-indigo-600 hover:text-indigo-700 mx-1">
+                  <a href="#" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-500 mx-1">
                     服务条款
                   </a>
                   和
-                  <a href="#" className="text-indigo-600 hover:text-indigo-700 mx-1">
+                  <a href="#" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-500 mx-1">
                     隐私政策
                   </a>
                 </p>

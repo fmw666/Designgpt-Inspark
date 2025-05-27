@@ -3,85 +3,42 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --color-scrollbar: #0ea5e9;
+  }
+  .dark {
+    --color-scrollbar: #0ea5e9;
+  }
+
   html {
     font-family: "Inter var", system-ui, sans-serif;
   }
-}
 
-/* 全局滚动条样式 */
-::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
-}
+  /* 全局滚动条样式 */
+  ::-webkit-scrollbar {
+    @apply w-1 h-1;
+  }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(156, 163, 175, 0.15);
-  border-radius: 2px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-200 dark:bg-gray-800;
+  }
 }
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(239, 68, 68, 0.5);
-}
-
-/* 自定义滚动条容器样式 */
-.scrollbar-custom {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(139, 129, 233, 0.78) transparent;
-}
-
-.scrollbar-custom:hover {
-  scrollbar-color: rgba(102, 89, 224, 0.78) transparent;
-}
-
-.scrollbar-custom::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
-}
-
-.scrollbar-custom::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.scrollbar-custom::-webkit-scrollbar-thumb {
-  background: rgba(156, 163, 175, 0.15);
-  border-radius: 2px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.scrollbar-custom::-webkit-scrollbar-thumb:hover {
-  background: rgba(239, 68, 68, 0.5);
-}
-
 
 @layer components {
-  .btn {
-    @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200;
-  }
   
-  .btn-primary {
-    @apply bg-primary-600 text-white hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
-  }
-  
-  .btn-secondary {
-    @apply bg-secondary-100 text-secondary-900 hover:bg-secondary-200 focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2;
-  }
+  /* 自定义滚动条容器样式 */
+  .scrollbar-custom {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-scrollbar);
 
-  .input {
-    @apply block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500;
-  }
-
-  .card {
-    @apply bg-white rounded-lg shadow-sm p-6;
+    &::-webkit-scrollbar {
+      @apply w-1 h-1;
+    }
   }
 }
 
-@layer utilities {
-  .text-shadow {
-    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-}
+@layer utilities {}

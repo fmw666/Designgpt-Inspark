@@ -95,7 +95,7 @@ const ModelSelector: FC<ModelSelectorProps> = ({
               placeholder="Search models..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-primary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
+              className="w-full px-3 py-2 text-sm border border-primary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm"
             />
             {isLoading && (
               <div className="absolute right-2 top-1/2 -translate-y-1/2">

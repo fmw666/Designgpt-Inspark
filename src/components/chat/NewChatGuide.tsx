@@ -27,17 +27,17 @@ export const NewChatGuide: FC = () => {
               <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
                 开始新的设计对话
               </h1>
-              <p className="text-gray-600 text-lg">
+              <p className="text-gray-600 dark:text-gray-400 text-lg">
                 让我们开始一段创意之旅，探索无限可能
               </p>
             </div>
 
             {/* 使用提示 */}
-            <div className="bg-indigo-50 rounded-xl p-6">
-              <h3 className="text-lg font-semibold text-indigo-900 mb-4">
+            <div className="bg-indigo-50 dark:bg-gray-900 rounded-xl p-6">
+              <h3 className="text-lg font-semibold text-indigo-900 dark:text-indigo-500 mb-4">
                 使用提示
               </h3>
-              <ul className="space-y-3 text-indigo-700">
+              <ul className="space-y-3 text-indigo-700 dark:text-indigo-400">
                 <li className="flex items-start">
                   <span className="inline-block w-1.5 h-1.5 rounded-full bg-indigo-500 mt-2 mr-2" />
                   一只可爱的熊猫在竹林中玩耍，水彩风格

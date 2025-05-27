@@ -88,21 +88,21 @@ export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, u
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-900 p-6 text-left align-middle shadow-xl transition-all">
                 {/* 标题栏 */}
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-2">
-                    <UserCircleIcon className="h-6 w-6 text-gray-500" />
+                    <UserCircleIcon className="h-6 w-6 text-gray-500 dark:text-gray-400" />
                     <Dialog.Title
                       as="h3"
-                      className="text-lg font-medium leading-6 text-gray-900"
+                      className="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100"
                     >
                       个人信息
                     </Dialog.Title>
                   </div>
                   <button
                     onClick={onClose}
-                    className="text-gray-400 hover:text-gray-500 transition-colors"
+                    className="text-gray-400 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 transition-colors"
                   >
                     <XMarkIcon className="h-6 w-6" />
                   </button>
@@ -119,12 +119,12 @@ export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, u
                   {/* 用户名编辑区域 */}
                   <div className="flex items-center justify-center w-full">
                     {isEditingName ? (
-                      <div className="flex items-center gap-2 bg-white rounded-xl shadow-sm border border-gray-200 p-1.5">
+                      <div className="flex items-center gap-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-1.5">
                         <input
                           type="text"
                           value={displayName}
                           onChange={(e) => setDisplayName(e.target.value)}
-                          className="px-4 py-2 text-lg font-medium text-gray-900 bg-transparent border-none focus:outline-none focus:ring-0 w-48 placeholder:text-gray-400"
+                          className="px-4 py-2 text-lg font-medium text-gray-900 dark:text-gray-100 bg-transparent border-none focus:outline-none focus:ring-0 w-48 placeholder:text-gray-400 dark:placeholder:text-gray-600"
                           placeholder="输入用户名..."
                           maxLength={10}
                           autoFocus
@@ -132,14 +132,14 @@ export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, u
                         <div className="flex items-center gap-1 pr-1">
                           <button
                             onClick={handleSaveDisplayName}
-                            className="p-1.5 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors"
+                            className="p-1.5 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 hover:bg-green-50 dark:hover:bg-green-900 rounded-lg transition-colors"
                             title="保存"
                           >
                             <CheckIcon className="w-5 h-5" />
                           </button>
                           <button
                             onClick={handleCancelEdit}
-                            className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                            className="p-1.5 text-gray-500 dark:text-gray-600 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors"
                             title="取消"
                           >
                             <XMarkIcon className="w-5 h-5" />
@@ -151,21 +151,21 @@ export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, u
                         <div className="relative text-center">
                           <span className={`text-2xl ${
                             currentDisplayName 
-                              ? 'font-semibold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent'
-                              : 'text-gray-400 italic'
+                              ? 'font-semibold bg-gradient-to-r from-gray-900 dark:from-gray-100 to-gray-700 dark:to-gray-300 bg-clip-text text-transparent'
+                              : 'text-gray-400 dark:text-gray-600 italic'
                           }`}>
                             {currentDisplayName || '点击设置用户名'}
                           </span>
                           {currentDisplayName && (
-                            <div className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out"></div>
+                            <div className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-indigo-500 dark:from-indigo-400 to-purple-500 dark:to-purple-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out"></div>
                           )}
                         </div>
                         <button
                           onClick={() => setIsEditingName(true)}
                           className={`absolute -right-9 p-1.5 rounded-lg transition-all duration-200 ${
                             currentDisplayName
-                              ? 'text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 opacity-0 group-hover:opacity-100'
-                              : 'text-indigo-500 hover:text-indigo-600 hover:bg-indigo-50 opacity-100'
+                              ? 'text-gray-400 dark:text-gray-600 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-gray-700 opacity-0 group-hover:opacity-100'
+                              : 'text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-gray-900 opacity-100'
                           }`}
                           title={currentDisplayName ? "编辑用户名" : "设置用户名"}
                         >
@@ -174,7 +174,7 @@ export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, u
                       </div>
                     )}
                   </div>
-                  <div className={`mt-2 text-xs text-gray-500 transition-all duration-300 ease-in-out ${
+                  <div className={`mt-2 text-xs text-gray-500 dark:text-gray-600 transition-all duration-300 ease-in-out ${
                     isEditingName ? 'opacity-100 h-5' : 'opacity-0 h-0'
                   }`}>
                     {displayName.length}/10
@@ -184,31 +184,31 @@ export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, u
                 {/* 内容区域 */}
                 <div className="space-y-4">
                   {/* 邮箱信息 */}
-                  <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <EnvelopeIcon className="w-5 h-5 text-gray-500 mt-0.5" />
                     <div>
-                      <div className="text-sm font-medium text-gray-500">邮箱</div>
-                      <div className="text-sm text-gray-900 mt-1">{user.email}</div>
+                      <div className="text-sm font-medium text-gray-500 dark:text-gray-400">邮箱</div>
+                      <div className="text-sm text-gray-900 dark:text-gray-100 mt-1">{user.email}</div>
                     </div>
                   </div>
 
                   {/* 创建时间 */}
-                  <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <CalendarIcon className="w-5 h-5 text-gray-500 mt-0.5" />
                     <div>
-                      <div className="text-sm font-medium text-gray-500">创建时间</div>
-                      <div className="text-sm text-gray-900 mt-1">
+                      <div className="text-sm font-medium text-gray-500 dark:text-gray-400">创建时间</div>
+                      <div className="text-sm text-gray-900 dark:text-gray-100 mt-1">
                         {user.created_at ? format(new Date(user.created_at), 'yyyy年MM月dd日 HH:mm', { locale: zhCN }) : '暂无记录'}
                       </div>
                     </div>
                   </div>
 
                   {/* 最后登录时间 */}
-                  <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <ClockIcon className="w-5 h-5 text-gray-500 mt-0.5" />
                     <div>
-                      <div className="text-sm font-medium text-gray-500">最后登录时间</div>
-                      <div className="text-sm text-gray-900 mt-1">
+                      <div className="text-sm font-medium text-gray-500 dark:text-gray-400">最后登录时间</div>
+                      <div className="text-sm text-gray-900 dark:text-gray-100 mt-1">
                         {user.last_sign_in_at 
                           ? format(new Date(user.last_sign_in_at), 'yyyy年MM月dd日 HH:mm', { locale: zhCN })
                           : '暂无记录'}

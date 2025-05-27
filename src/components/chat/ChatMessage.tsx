@@ -95,8 +95,8 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message, userAvatar }) => {
           <div className="flex-1">
             {/* AI 文字回复 */}
             {message.results.content && (
-              <div className="inline-block bg-white border border-gray-200 rounded-lg px-4 py-2 mb-3">
-                <p className="text-sm text-gray-900">{message.results.content}</p>
+              <div className="inline-block bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-2 mb-3">
+                <p className="text-sm text-gray-900 dark:text-gray-100">{message.results.content}</p>
               </div>
             )}
 
@@ -104,22 +104,22 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message, userAvatar }) => {
             {Object.entries(message.results.images).map(([modelId, results], index) => (
               <div key={index} className="mb-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="h-5 w-5 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center shadow-sm">
-                    <span className="text-xs font-semibold text-indigo-700">
+                  <div className="h-5 w-5 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-indigo-500 dark:to-indigo-600 flex items-center justify-center shadow-sm">
+                    <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-300">
                       {index + 1}
                     </span>
                   </div>
-                  <h4 className="text-sm font-medium text-gray-800 flex items-center gap-1.5">
-                    <span className="text-indigo-600">{modelId}</span>
-                    <span className="text-gray-400">•</span>
-                    <span>{results.length} 张图片</span>
+                  <h4 className="text-sm font-medium text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
+                    <span className="text-indigo-600 dark:text-indigo-400">{modelId}</span>
+                    <span className="text-gray-400 dark:text-gray-600">•</span>
+                    <span className="text-gray-400 dark:text-gray-500">{results.length} 张图片</span>
                   </h4>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   {results.map((result, index) => (
                     <div
                       key={index}
-                      className="group relative aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-50"
+                      className="group relative aspect-square rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900"
                     >
                       {result.isGenerating ? (
                         <div className="absolute inset-0 flex items-center justify-center bg-white/80">
@@ -144,7 +144,7 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message, userAvatar }) => {
                         <>
                           <div
                             key={index}
-                            className="group relative aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-50 cursor-pointer"
+                            className="group relative aspect-square rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 cursor-pointer"
                             onClick={() => setSelectedImage(result.url)}
                           >
                             <img
@@ -160,8 +160,8 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message, userAvatar }) => {
                           </div>
                         </>
                       ) : (
-                        <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
-                          <span className="text-sm text-gray-500">加载中...</span>
+                        <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+                          <span className="text-sm text-gray-500 dark:text-gray-400">加载中...</span>
                         </div>
                       )}
                     </div>

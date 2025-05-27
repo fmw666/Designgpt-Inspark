@@ -1,7 +1,8 @@
 import { FC } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import { XMarkIcon, BellIcon, MoonIcon, GlobeAltIcon, Cog6ToothIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, BellIcon, MoonIcon, GlobeAltIcon, Cog6ToothIcon, SunIcon } from '@heroicons/react/24/outline';
+import { useThemeStore } from '@/styles/theme';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -9,6 +10,8 @@ interface SettingsModalProps {
 }
 
 export const SettingsModal: FC<SettingsModalProps> = ({ isOpen, onClose }) => {
+  const { theme, toggleTheme } = useThemeStore();
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-[9999]" onClose={onClose}>
@@ -35,21 +38,21 @@ export const SettingsModal: FC<SettingsModalProps> = ({ isOpen, onClose }) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-900 p-6 text-left align-middle shadow-xl transition-all">
                 {/* 标题栏 */}
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-2">
-                    <Cog6ToothIcon className="h-6 w-6 text-gray-500" />
+                    <Cog6ToothIcon className="h-6 w-6 text-gray-500 dark:text-gray-400" />
                     <Dialog.Title
                       as="h3"
-                      className="text-lg font-medium leading-6 text-gray-900"
+                      className="text-lg font-medium leading-6 text-gray-900 dark:text-white"
                     >
                       设置
                     </Dialog.Title>
                   </div>
                   <button
                     onClick={onClose}
-                    className="text-gray-400 hover:text-gray-500 transition-colors"
+                    className="text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400 transition-colors"
                   >
                     <XMarkIcon className="h-6 w-6" />
                   </button>
@@ -58,43 +61,57 @@ export const SettingsModal: FC<SettingsModalProps> = ({ isOpen, onClose }) => {
                 {/* 内容区域 */}
                 <div className="space-y-4">
                   {/* 通知设置 */}
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <BellIcon className="w-5 h-5 text-gray-500" />
+                      <BellIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                       <div>
-                        <div className="text-sm font-medium text-gray-900">通知设置</div>
-                        <div className="text-xs text-gray-500 mt-0.5">管理应用通知</div>
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">通知设置</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">管理应用通知</div>
                       </div>
                     </div>
-                    <button className="text-sm text-indigo-600 hover:text-indigo-700">
+                    <button className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300">
                       管理
                     </button>
                   </div>
 
                   {/* 主题设置 */}
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <MoonIcon className="w-5 h-5 text-gray-500" />
+                      {theme === 'light' ? (
+                        <SunIcon className="w-5 h-5 text-yellow-500" />
+                      ) : (
+                        <MoonIcon className="w-5 h-5 text-indigo-400" />
+                      )}
                       <div>
-                        <div className="text-sm font-medium text-gray-900">主题设置</div>
-                        <div className="text-xs text-gray-500 mt-0.5">切换深色/浅色模式</div>
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">主题设置</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{theme === 'light' ? '浅色主题' : '深色主题'}</div>
                       </div>
                     </div>
-                    <button className="text-sm text-indigo-600 hover:text-indigo-700">
-                      切换
+                    <button
+                      onClick={toggleTheme}
+                      className="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 bg-gray-200 dark:bg-gray-700"
+                      role="switch"
+                      aria-checked={theme === 'dark'}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                          theme === 'dark' ? 'translate-x-5' : 'translate-x-0'
+                        }`}
+                      />
                     </button>
                   </div>
 
                   {/* 语言设置 */}
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <GlobeAltIcon className="w-5 h-5 text-gray-500" />
+                      <GlobeAltIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                       <div>
-                        <div className="text-sm font-medium text-gray-900">语言设置</div>
-                        <div className="text-xs text-gray-500 mt-0.5">切换应用语言</div>
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">语言设置</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">切换应用语言</div>
                       </div>
                     </div>
-                    <button className="text-sm text-indigo-600 hover:text-indigo-700">
+                    <button className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300">
                       切换
                     </button>
                   </div>
@@ -106,4 +123,4 @@ export const SettingsModal: FC<SettingsModalProps> = ({ isOpen, onClose }) => {
       </Dialog>
     </Transition>
   );
-}; 
+};

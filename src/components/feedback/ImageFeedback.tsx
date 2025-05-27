@@ -204,13 +204,13 @@ export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelNam
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center">
           <div 
             id="feedback-modal"
-            className="bg-white rounded-lg p-6 w-full max-w-md mx-4 shadow-xl"
+            className="bg-white dark:bg-gray-900 rounded-lg p-6 w-full max-w-md mx-4 shadow-xl"
           >
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-gray-900">图片反馈</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">图片反馈</h3>
               <button
                 onClick={() => setFeedbackState(prev => ({ ...prev, isOpen: false }))}
-                className="text-gray-400 hover:text-gray-500"
+                className="text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400"
               >
                 <XMarkIcon className="w-5 h-5" />
               </button>
@@ -229,15 +229,15 @@ export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelNam
 
             {/* 评分 */}
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-3">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                 评分
               </label>
               <div className="flex items-center gap-1">
                 {[0, 1, 2, 3, 4].map(renderStar)}
                 {/* 评分文字说明 */}
-                <span className="ml-3 text-sm text-gray-500">
+                <span className="ml-3 text-sm text-gray-500 dark:text-gray-400">
                   {feedbackState.rating > 0 ? (
-                    <span className="text-yellow-500 font-medium">
+                    <span className="text-yellow-500 dark:text-yellow-400 font-medium">
                       {feedbackState.rating} 星
                     </span>
                   ) : (
@@ -249,7 +249,7 @@ export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelNam
 
             {/* 原因选择 */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 原因（可多选）
               </label>
               <div className="grid grid-cols-2 gap-2">
@@ -264,7 +264,7 @@ export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelNam
                 ].map((reason) => (
                   <div key={reason}>
                     <label
-                      className="flex items-center space-x-2 p-2 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
+                      className="flex items-center space-x-2 p-2 rounded-lg border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
                     >
                       <input
                         type="checkbox"
@@ -272,7 +272,7 @@ export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelNam
                         onChange={(e) => handleReasonChange(reason, e.target.checked)}
                         className="rounded text-indigo-600 focus:ring-indigo-500"
                       />
-                      <span className="text-sm text-gray-700">{reason}</span>
+                      <span className="text-sm text-gray-700 dark:text-gray-300">{reason}</span>
                     </label>
                     {/* 其他选项的输入框 */}
                     {reason === '其他' && feedbackState.reasons.includes('其他') && (
@@ -284,13 +284,13 @@ export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelNam
                             onChange={(e) => handleOtherReasonChange(e.target.value.slice(0, 8))}
                             placeholder="请输入其他原因..."
                             maxLength={8}
-                            className="w-full px-3 py-2 pr-16 text-sm text-gray-900 placeholder-gray-500 bg-white border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200 ease-in-out"
+                            className="w-full px-3 py-2 pr-16 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200 ease-in-out"
                           />
                           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                            <span className="text-xs text-gray-400">{feedbackState.otherReason.length}/8</span>
+                            <span className="text-xs text-gray-400 dark:text-gray-500">{feedbackState.otherReason.length}/8</span>
                             <button
                               onClick={() => handleOtherReasonChange('')}
-                              className="p-1 text-gray-400 hover:text-gray-600"
+                              className="p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
                             >
                               <XMarkIcon className="w-4 h-4" />
                             </button>
@@ -305,13 +305,13 @@ export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelNam
 
             {/* 文字反馈 */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 其他建议
               </label>
               <textarea
                 value={feedbackState.comment}
                 onChange={(e) => setFeedbackState(prev => ({ ...prev, comment: e.target.value }))}
-                className="w-full px-3 py-2 text-sm text-gray-900 placeholder-gray-500 bg-white border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none transition-all duration-200 ease-in-out"
+                className="w-full px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none placeholder-gray-500 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none transition-all duration-200 ease-in-out"
                 rows={3}
                 placeholder="请输入您的建议..."
               />
@@ -324,7 +324,7 @@ export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelNam
                 disabled={feedbackState.rating === 0}
                 className={`px-4 py-2 rounded-2xl text-white transition-colors ${
                   feedbackState.rating === 0
-                    ? 'bg-gray-400 cursor-not-allowed'
+                    ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
                     : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
                 }`}
               >

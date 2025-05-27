@@ -19,15 +19,6 @@ interface SelectedModel {
   count: number;
 }
 
-interface FeedbackState {
-  isOpen: boolean;
-  imageUrl: string | null;
-  modelName: string;
-  rating: number;
-  reasons: string[];
-  comment: string;
-}
-
 interface ChatInterfaceProps {
   onSendMessage?: (message: string, models: SelectedModel[]) => void;
   chatId?: string;
@@ -47,14 +38,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
   const [isScrolling, setIsScrolling] = useState(false);
   const [isLoadingTimeout, setIsLoadingTimeout] = useState(false);
   const loadingTimeoutRef = useRef<NodeJS.Timeout>();
-  const [feedbackState, setFeedbackState] = useState<FeedbackState>({
-    isOpen: false,
-    imageUrl: null,
-    modelName: '',
-    rating: 0,
-    reasons: [],
-    comment: ''
-  });
 
   const { user, isLoading: isUserLoading, isInitialized: isUserInitialized } = useAuth();
   const { 
@@ -538,156 +521,26 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
     }
   };
 
-  // 处理反馈提交
-  const handleFeedbackSubmit = async () => {
-    try {
-      // 这里可以调用后端 API 保存反馈
-      console.log('Feedback submitted:', feedbackState);
-      
-      // 关闭反馈弹窗
-      setFeedbackState(prev => ({ ...prev, isOpen: false }));
-      
-      // 显示成功提示
-      // TODO: 添加 toast 提示
-    } catch (error) {
-      console.error('Error submitting feedback:', error);
-    }
-  };
-
-  // 渲染反馈弹窗
-  const renderFeedbackModal = () => {
-    if (!feedbackState.isOpen) return null;
-
-    return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-        <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-medium text-gray-900">图片反馈</h3>
-            <button
-              onClick={() => setFeedbackState(prev => ({ ...prev, isOpen: false }))}
-              className="text-gray-400 hover:text-gray-500"
-            >
-              <XMarkIcon className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* 预览图片 */}
-          {feedbackState.imageUrl && (
-            <div className="mb-4">
-              <img
-                src={feedbackState.imageUrl}
-                alt="Preview"
-                className="w-full h-48 object-cover rounded-lg"
-              />
-            </div>
-          )}
-
-          {/* 评分 */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              评分
-            </label>
-            <div className="flex gap-2">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  onClick={() => setFeedbackState(prev => ({ ...prev, rating: star }))}
-                  className={`p-2 rounded-full ${
-                    feedbackState.rating >= star
-                      ? 'text-yellow-400'
-                      : 'text-gray-300'
-                  }`}
-                >
-                  ⭐
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 原因选择 */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              原因（可多选）
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                '图片质量好',
-                '符合预期',
-                '创意独特',
-                '细节丰富',
-                '风格合适',
-                '构图合理',
-                '其他'
-              ].map((reason) => (
-                <label
-                  key={reason}
-                  className="flex items-center space-x-2 p-2 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer"
-                >
-                  <input
-                    type="checkbox"
-                    checked={feedbackState.reasons.includes(reason)}
-                    onChange={(e) => {
-                      const newReasons = e.target.checked
-                        ? [...feedbackState.reasons, reason]
-                        : feedbackState.reasons.filter(r => r !== reason);
-                      setFeedbackState(prev => ({ ...prev, reasons: newReasons }));
-                    }}
-                    className="rounded text-indigo-600 focus:ring-indigo-500"
-                  />
-                  <span className="text-sm text-gray-700">{reason}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* 文字反馈 */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              其他建议
-            </label>
-            <textarea
-              value={feedbackState.comment}
-              onChange={(e) => setFeedbackState(prev => ({ ...prev, comment: e.target.value }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-              rows={3}
-              placeholder="请输入您的建议..."
-            />
-          </div>
-
-          {/* 提交按钮 */}
-          <div className="flex justify-end">
-            <button
-              onClick={handleFeedbackSubmit}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              提交反馈
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-full bg-white/50 backdrop-blur-sm">
+      <div className="flex flex-col items-center justify-center h-full bg-white/50 dark:bg-gray-900 backdrop-blur-sm">
         <div className="relative w-16 h-16">
           {/* Outer ring */}
-          <div className="absolute inset-0 border-4 border-indigo-100 rounded-full animate-pulse"></div>
+          <div className="absolute inset-0 border-4 border-indigo-100 dark:border-indigo-200 rounded-full animate-pulse"></div>
 
           {/* Spinning inner ring */}
           <div className="absolute inset-0 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
 
           {/* Center sparkle icon */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <SparklesIcon className="w-6 h-6 text-indigo-600 animate-bounce transform-gpu -translate-y-1/2" style={{animation: 'bounce 1s infinite'}} />
+            <SparklesIcon className="w-6 h-6 text-indigo-600 dark:text-indigo-400 animate-bounce transform-gpu -translate-y-1/2" style={{animation: 'bounce 1s infinite'}} />
           </div>
         </div>
 
-        <p className="mt-4 text-lg font-medium text-gray-600">
+        <p className="mt-4 text-lg font-medium text-gray-600 dark:text-gray-300">
           正在加载对话...
         </p>
-        <p className="mt-2 text-sm text-gray-500">
+        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
           请稍候片刻
         </p>
       </div>
@@ -698,7 +551,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
     <div className="flex flex-col h-full">
       {/* Chat Title - 只在有标题且用户已登录时显示 */}
       {user && currentChat?.title && (
-        <div className="h-14 border-b border-gray-200 bg-white/50 backdrop-blur-sm flex items-center px-6 justify-center group">
+        <div className="h-14 border-b border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-800 backdrop-blur-sm flex items-center px-6 justify-center group">
           <div className="relative w-full max-w-md">
             {isEditingTitle ? (
               <div className="flex items-center gap-2 animate-fadeIn">
@@ -709,7 +562,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
                     value={editedTitle}
                     onChange={handleTitleChange}
                     onKeyDown={handleTitleKeyDown}
-                    className="w-full px-2 py-1 text-lg font-medium text-gray-900 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                    className="w-full px-2 py-1 text-lg font-medium text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
                     placeholder="输入新标题..."
                     maxLength={13}
                   />
@@ -719,25 +572,25 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
                 </div>
                 <button
                   onClick={handleTitleSave}
-                  className="p-1 text-green-600 hover:text-green-700 transition-colors hover:bg-green-50 rounded-lg"
+                  className="p-1 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-500 transition-colors hover:bg-green-50 dark:hover:bg-green-900 rounded-lg"
                 >
                   <CheckIcon className="w-5 h-5" />
                 </button>
                 <button
                   onClick={handleTitleCancel}
-                  className="p-1 text-gray-500 hover:text-gray-700 transition-colors hover:bg-gray-50 rounded-lg"
+                  className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-500 transition-colors hover:bg-gray-50 dark:hover:bg-gray-900 rounded-lg"
                 >
                   <XMarkIcon className="w-5 h-5" />
                 </button>
               </div>
             ) : (
-              <div className="flex items-center justify-center gap-2 group-hover:bg-gray-50/50 rounded-lg transition-all duration-200">
-                <h1 className="text-lg font-medium text-gray-900 transition-all duration-200">
+              <div className="flex items-center justify-center gap-2 rounded-lg transition-all duration-200">
+                <h1 className="text-lg font-medium text-gray-900 dark:text-gray-100 transition-all duration-200">
                   {currentChat.title}
                 </h1>
                 <button
                   onClick={handleTitleEdit}
-                  className="p-1 text-gray-400 hover:text-gray-600 transition-all duration-200 opacity-0 group-hover:opacity-100 hover:bg-gray-100 rounded-lg"
+                  className="p-1 text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-500 transition-all duration-200 opacity-0 group-hover:opacity-100 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-lg"
                 >
                   <PencilIcon className="w-4 h-4" />
                 </button>
@@ -747,17 +600,17 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto p-4 scrollbar-custom relative">
+      <div className="flex-1 overflow-y-auto p-4 scrollbar-custom relative bg-gray-50 dark:bg-gray-800">
         {/* 加载动画遮罩 - 使用 fixed 定位 */}
         {isScrolling && (
-          <div className="fixed inset-0 bg-white/50 backdrop-blur-sm z-10 flex items-center justify-center">
+          <div className="fixed inset-0 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm z-10 flex items-center justify-center">
             <div className="flex flex-col items-center gap-2">
-              <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-              <span className="text-sm text-gray-600">正在加载消息...</span>
+              <div className="w-8 h-8 border-4 border-indigo-200 dark:border-indigo-200 border-t-indigo-600 dark:border-t-indigo-400 rounded-full animate-spin"></div>
+              <span className="text-sm text-gray-600 dark:text-gray-200">正在加载消息...</span>
               {isLoadingTimeout && (
                 <button
                   onClick={handleRefresh}
-                  className="mt-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 flex items-center gap-2 animate-fadeIn"
+                  className="mt-2 px-4 py-2 bg-indigo-600 dark:bg-indigo-400 text-white rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-500 transition-colors duration-200 flex items-center gap-2 animate-fadeIn"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -785,7 +638,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
         )}
       </div>
 
-      <div className="border-t border-primary-100 bg-white/50 backdrop-blur-sm p-4">
+      <div className="border-t border-primary-100 dark:border-gray-700 bg-white/50 dark:bg-gray-800 backdrop-blur-sm p-4">
         <ModelDrawer
           selectedModels={selectedModels}
           onModelChange={setSelectedModels}
@@ -807,7 +660,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
                       : "请先登录后再开始对话"
                 }
                 disabled={isSending || isGenerating}
-                className={`w-full max-h-[200px] py-3 pl-4 pr-12 text-sm text-gray-900 placeholder-gray-500 bg-white border border-gray-200 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none overflow-hidden transition-all duration-200 ease-in-out ${
+                className={`w-full max-h-[200px] py-3 pl-4 pr-12 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none overflow-hidden transition-all duration-200 ease-in-out ${
                   (isSending || isGenerating) ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               rows={1}
@@ -862,9 +715,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
           </div>
         </form>
       </div>
-
-      {/* 添加反馈弹窗 */}
-      {renderFeedbackModal()}
     </div>
   );
 };

@@ -12,7 +12,7 @@ const NotFound: FC = () => {
         <p className="text-gray-600 mb-8">
           The page you're looking for doesn't exist or has been moved.
         </p>
-        <Link to="/" className="btn btn-primary">
+        <Link to="/" className="bg-primary-500 text-primary-50 hover:bg-primary-600 px-4 py-2 rounded-md">
           Go Back Home
         </Link>
       </div>

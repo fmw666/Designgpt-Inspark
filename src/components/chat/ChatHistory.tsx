@@ -106,7 +106,7 @@ export const ChatHistory = () => {
               exit={{ opacity: 0, y: -20 }}
               className="mb-6"
             >
-              <h3 className="text-xs font-medium text-gray-500 mb-3 px-2 sticky top-0 bg-white py-1.5 z-10 border-b border-gray-100">
+              <h3 className="text-xs font-medium text-gray-500 mb-3 px-2 sticky top-0 bg-white dark:bg-gray-900 py-1.5 z-10 border-b border-gray-100 dark:border-gray-800">
                 {groupKey}
               </h3>
               <div className="space-y-1">
@@ -116,8 +116,8 @@ export const ChatHistory = () => {
                     onClick={() => handleChatClick(chat.id)}
                     className={`group relative w-full text-left px-3 py-2.5 rounded-xl transition-all duration-200 cursor-pointer ${
                       currentChat?.id === chat.id
-                        ? 'bg-indigo-50 text-indigo-600 shadow-sm'
-                        : 'hover:bg-gray-50 text-gray-700'
+                        ? 'bg-indigo-50 text-indigo-600 shadow-sm dark:bg-indigo-900 dark:text-indigo-400'
+                        : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
                     }`}
                     whileHover={{ scale: 1.01 }}
                     whileTap={{ scale: 0.99 }}
@@ -135,7 +135,7 @@ export const ChatHistory = () => {
                         onClick={(e) => handleDeleteClick(e, chat.id)}
                         className={`ml-2 p-1.5 text-gray-400 hover:text-red-500 transition-colors duration-200 cursor-pointer rounded-lg ${
                           isDeleting === chat.id ? 'opacity-50 cursor-not-allowed' : ''
-                        } ${currentChat?.id === chat.id ? 'group-hover:bg-white/50' : 'group-hover:bg-gray-100'}`}
+                        } ${currentChat?.id === chat.id ? 'group-hover:bg-white/50 dark:group-hover:bg-gray-900/50' : 'group-hover:bg-gray-100 dark:group-hover:bg-gray-800'}`}
                       >
                         {isDeleting === chat.id ? (
                           <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
@@ -152,7 +152,7 @@ export const ChatHistory = () => {
         </AnimatePresence>
 
         {chats.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-32 text-gray-500">
+          <div className="flex flex-col items-center justify-center h-32 text-gray-500 dark:text-gray-400">
             <p className="text-sm">暂无聊天记录</p>
           </div>
         )}

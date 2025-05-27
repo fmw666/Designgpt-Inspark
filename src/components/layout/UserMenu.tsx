@@ -30,11 +30,11 @@ const UserMenu: FC<UserMenuProps> = ({ isCollapsed, onSignInClick }) => {
     return (
       <button
         onClick={onSignInClick}
-        className="flex items-center gap-2 w-full p-2 rounded-lg hover:bg-gray-50 transition-colors"
+        className="flex items-center gap-2 w-full p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
       >
-        <UserCircleIcon className="w-8 h-8 text-gray-400" />
+        <UserCircleIcon className="w-8 h-8 text-gray-400 dark:text-gray-500" />
         {!isCollapsed && (
-          <span className="text-sm text-gray-700">登录</span>
+          <span className="text-sm text-gray-700 dark:text-gray-300">登录</span>
         )}
       </button>
     );
@@ -48,11 +48,11 @@ const UserMenu: FC<UserMenuProps> = ({ isCollapsed, onSignInClick }) => {
             <Menu.Button
               className={`flex items-center gap-2 w-full p-2 rounded-lg transition-colors ${
                 open
-                  ? 'bg-gray-100'
-                  : 'hover:bg-gray-50'
+                  ? 'bg-gray-100 dark:bg-gray-800'
+                  : 'hover:bg-gray-50 dark:hover:bg-gray-800'
               }`}
             >
-              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center text-white font-medium shadow-sm">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-400 dark:to-purple-400 flex items-center justify-center text-white font-medium shadow-sm">
                 <div className={`${getAvatarClasses()} ${getAvatarSizeClasses('sm')}`}>
                   <span>
                     {getAvatarText(user)}
@@ -60,7 +60,7 @@ const UserMenu: FC<UserMenuProps> = ({ isCollapsed, onSignInClick }) => {
                 </div>
               </div>
               {!isCollapsed && (
-                <span className="text-sm text-gray-700 truncate">
+                <span className="text-sm text-gray-700 dark:text-gray-300 truncate">
                   {user.email || '未登录'}
                 </span>
               )}
@@ -75,17 +75,17 @@ const UserMenu: FC<UserMenuProps> = ({ isCollapsed, onSignInClick }) => {
               leaveFrom="transform opacity-100 scale-100"
               leaveTo="transform opacity-0 scale-95"
             >
-              <Menu.Items className="absolute bottom-full left-0 mb-2 w-48 origin-bottom-left rounded-xl bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-[9999]">
+              <Menu.Items className="absolute bottom-full left-0 mb-2 w-48 origin-bottom-left rounded-xl bg-white dark:bg-gray-900 py-1 shadow-lg ring-1 ring-black/5 dark:ring-white/10 focus:outline-none border border-gray-100 dark:border-gray-800 z-[9999]">
                 {/* 个人信息按钮 */}
                 <Menu.Item>
                   {({ active }) => (
                     <button
                       onClick={handleProfileClick}
                       className={`${
-                        active ? 'bg-gray-50' : ''
-                      } flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors`}
+                        active ? 'bg-gray-50 dark:bg-gray-800' : ''
+                      } flex w-full items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors`}
                     >
-                      <UserIcon className="w-4 h-4 mr-2 text-gray-500" />
+                      <UserIcon className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
                       个人信息
                     </button>
                   )}
@@ -97,17 +97,17 @@ const UserMenu: FC<UserMenuProps> = ({ isCollapsed, onSignInClick }) => {
                     <button
                       onClick={handleSettingsClick}
                       className={`${
-                        active ? 'bg-gray-50' : ''
-                      } flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors`}
+                        active ? 'bg-gray-50 dark:bg-gray-800' : ''
+                      } flex w-full items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors`}
                     >
-                      <Cog6ToothIcon className="w-4 h-4 mr-2 text-gray-500" />
+                      <Cog6ToothIcon className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
                       设置
                     </button>
                   )}
                 </Menu.Item>
 
                 {/* 分隔线 */}
-                <div className="my-1 border-t border-gray-100" />
+                <div className="my-1 border-t border-gray-100 dark:border-gray-800" />
 
                 {/* 退出登录按钮 */}
                 <Menu.Item>
@@ -115,10 +115,10 @@ const UserMenu: FC<UserMenuProps> = ({ isCollapsed, onSignInClick }) => {
                     <button
                       onClick={signOut}
                       className={`${
-                        active ? 'bg-gray-50' : ''
-                      } flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors`}
+                        active ? 'bg-gray-50 dark:bg-gray-800' : ''
+                      } flex w-full items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-gray-800 transition-colors`}
                     >
-                      <ArrowRightOnRectangleIcon className="w-4 h-4 mr-2 text-red-500" />
+                      <ArrowRightOnRectangleIcon className="w-4 h-4 mr-2 text-red-500 dark:text-red-400" />
                       退出登录
                     </button>
                   )}
