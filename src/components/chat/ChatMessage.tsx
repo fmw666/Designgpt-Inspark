@@ -128,7 +128,7 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message, userAvatar }) => {
                             <span className="text-sm text-gray-600 dark:text-gray-300">生成中...</span>
                           </div>
                         </div>
-                      ) : result.error ? (
+                      ) : result.error || result.errorMessage ? (
                         <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100">
                           <div className="flex flex-col items-center gap-2 p-4 text-center">
                             <ExclamationCircleIcon className="h-6 w-6 text-red-500" />

@@ -356,7 +356,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
               images: {
                 ...message.results.images,
                 [modelName]: response.results.map(result => ({
-                  url: `https://inspark.oss-cn-shenzhen.aliyuncs.com/${result.results.url}` || null,
+                  url: result.results.url ? `https://inspark.oss-cn-shenzhen.aliyuncs.com/${result.results.url}` : null,
                   error: result.status === 'error' ? '生成失败' : null,
                   errorMessage: result.results.errorMessage || '',
                   isGenerating: false
