@@ -562,7 +562,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
                     value={editedTitle}
                     onChange={handleTitleChange}
                     onKeyDown={handleTitleKeyDown}
-                    className="w-full px-2 py-1 text-lg font-medium text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                    className="w-full px-2 py-1 text-lg font-medium text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="输入新标题..."
                     maxLength={13}
                   />
@@ -584,13 +584,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
                 </button>
               </div>
             ) : (
-              <div className="flex items-center justify-center gap-2 rounded-lg transition-all duration-200">
-                <h1 className="text-lg font-medium text-gray-900 dark:text-gray-100 transition-all duration-200">
+              <div className="flex items-center justify-center gap-2 rounded-lg">
+                <h1 className="text-lg font-medium text-gray-900 dark:text-gray-100">
                   {currentChat.title}
                 </h1>
                 <button
                   onClick={handleTitleEdit}
-                  className="p-1 text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-500 transition-all duration-200 opacity-0 group-hover:opacity-100 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-lg"
+                  className="p-1 text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-500 opacity-0 group-hover:opacity-100 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-lg"
                 >
                   <PencilIcon className="w-4 h-4" />
                 </button>
@@ -660,7 +660,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
                       : "请先登录后再开始对话"
                 }
                 disabled={isSending || isGenerating}
-                className={`w-full max-h-[200px] py-3 pl-4 pr-12 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none overflow-hidden transition-all duration-200 ease-in-out ${
+                className={`w-full max-h-[200px] py-3 pl-4 pr-12 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none overflow-hidden ease-in-out ${
                   (isSending || isGenerating) ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               rows={1}

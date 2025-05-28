@@ -284,7 +284,7 @@ export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelNam
                             onChange={(e) => handleOtherReasonChange(e.target.value.slice(0, 8))}
                             placeholder="请输入其他原因..."
                             maxLength={8}
-                            className="w-full px-3 py-2 pr-16 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200 ease-in-out"
+                            className="w-full px-3 py-2 pr-16 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 ease-in-out"
                           />
                           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
                             <span className="text-xs text-gray-400 dark:text-gray-500">{feedbackState.otherReason.length}/8</span>
@@ -311,7 +311,7 @@ export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelNam
               <textarea
                 value={feedbackState.comment}
                 onChange={(e) => setFeedbackState(prev => ({ ...prev, comment: e.target.value }))}
-                className="w-full px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none placeholder-gray-500 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none transition-all duration-200 ease-in-out"
+                className="w-full px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none placeholder-gray-500 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none ease-in-out"
                 rows={3}
                 placeholder="请输入您的建议..."
               />

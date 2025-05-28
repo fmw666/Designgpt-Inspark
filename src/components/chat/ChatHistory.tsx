@@ -130,7 +130,7 @@ export const ChatHistory = () => {
                   <motion.div
                     key={chat.id}
                     onClick={() => handleChatClick(chat.id)}
-                    className={`group relative w-full text-left px-3 py-2.5 rounded-xl transition-all duration-200 cursor-pointer ${
+                    className={`group relative w-full text-left px-3 py-2.5 rounded-xl cursor-pointer ${
                       currentChat?.id === chat.id
                         ? 'bg-indigo-50 text-indigo-600 shadow-sm dark:bg-indigo-900 dark:text-indigo-400'
                         : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'

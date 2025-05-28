@@ -33,16 +33,16 @@ const ChatLayout: FC<ChatLayoutProps> = ({ children }) => {
       <div className="fixed top-0 left-0 h-14 z-40 md:hidden flex items-center px-4">
         <button
           type="button"
-          className="group relative rounded-lg bg-white/80 backdrop-blur-sm p-2 text-gray-500 hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 ease-in-out shadow-sm hover:shadow-md border border-gray-200/50 hover:border-indigo-200"
+          className="group relative rounded-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-2 text-gray-500 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 ease-in-out shadow-sm hover:shadow-md border border-gray-200/50 dark:border-gray-700/50 hover:border-indigo-200 dark:hover:border-indigo-500/50"
           onClick={() => setIsMobileSidebarOpen(true)}
         >
           <span className="sr-only">打开侧边栏</span>
           <Bars3Icon 
-            className="h-5 w-5 transition-transform duration-200 group-hover:scale-110" 
+            className="h-5 w-5 transition-transform duration-200 group-hover:scale-110"
             aria-hidden="true" 
           />
           {/* 悬停时的光晕效果 */}
-          <span className="absolute inset-0 rounded-lg bg-indigo-50/0 group-hover:bg-indigo-50/50 transition-colors duration-200" />
+          <span className="absolute inset-0 rounded-lg bg-indigo-50/0 group-hover:bg-indigo-50/50 dark:group-hover:bg-indigo-500/10 transition-colors duration-200" />
         </button>
       </div>
 

@@ -88,7 +88,7 @@ export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, u
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-900 p-6 text-left align-middle shadow-xl transition-all">
+              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-900 p-6 text-left align-middle shadow-xl">
                 {/* 标题栏 */}
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-2">
@@ -162,7 +162,7 @@ export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, u
                         </div>
                         <button
                           onClick={() => setIsEditingName(true)}
-                          className={`absolute -right-9 p-1.5 rounded-lg transition-all duration-200 ${
+                          className={`absolute -right-9 p-1.5 rounded-lg ${
                             currentDisplayName
                               ? 'text-gray-400 dark:text-gray-600 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-gray-700 opacity-0 group-hover:opacity-100'
                               : 'text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-gray-900 opacity-100'

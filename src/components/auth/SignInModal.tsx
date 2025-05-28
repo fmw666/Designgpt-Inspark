@@ -176,7 +176,7 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
                       disabled={isInviteVerified}
                       className={`block w-full outline-none pl-10 pr-32 py-3.5 border ${
                         isInviteVerified ? 'border-green-500 bg-green-50 dark:bg-green-900 dark:text-gray-400' : 'border-gray-200 dark:border-gray-800'
-                      } rounded-xl bg-white dark:bg-gray-900 shadow-sm placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200 text-base dark:text-gray-100`}
+                      } rounded-xl bg-white dark:bg-gray-900 shadow-sm placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-base dark:text-gray-100`}
                     />
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                       <button
@@ -211,7 +211,7 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="请输入邮箱"
                       disabled={!isInviteVerified}
-                      className="block w-full bg-white dark:bg-gray-900 outline-none pl-10 pr-3 py-3.5 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200 text-base dark:text-gray-100"
+                      className="block w-full bg-white dark:bg-gray-900 outline-none pl-10 pr-3 py-3.5 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-base dark:text-gray-100"
                     />
                   </div>
                 </div>
@@ -232,7 +232,7 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
                       onChange={(e) => setVerificationCode(e.target.value)}
                       placeholder="请输入验证码"
                       disabled={!isInviteVerified}
-                      className="block w-full bg-white dark:bg-gray-900 outline-none pl-10 pr-32 py-3.5 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200 text-base dark:text-gray-100"
+                      className="block w-full bg-white dark:bg-gray-900 outline-none pl-10 pr-32 py-3.5 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-base dark:text-gray-100"
                     />
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                       <button
@@ -264,7 +264,7 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
                 <button
                   type="submit"
                   disabled={isSubmitting || !isInviteVerified || !email || !verificationCode}
-                  className={`w-full py-3.5 px-4 rounded-xl text-white font-medium transition-all duration-200 text-base ${
+                  className={`w-full py-3.5 px-4 rounded-xl text-white font-medium text-base ${
                     isSubmitting || !isInviteVerified || !email || !verificationCode
                       ? 'bg-indigo-400 cursor-not-allowed'
                       : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl'

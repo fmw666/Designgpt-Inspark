@@ -26,7 +26,7 @@ export const ChatInput: FC<ChatInputProps> = ({ onSubmit, disabled = false }) =>
         onChange={(e) => setMessage(e.target.value)}
         placeholder="输入你的想法..."
         disabled={disabled}
-        className="w-full px-4 py-3 pr-12 rounded-xl border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all duration-200 text-base"
+        className="w-full px-4 py-3 pr-12 rounded-xl border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none text-base"
       />
       <motion.button
         type="submit"

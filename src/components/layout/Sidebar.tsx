@@ -28,7 +28,7 @@ const Sidebar: FC = () => {
       <div className="px-4 mb-4">
         <motion.button
           onClick={handleNewChat}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl shadow-sm hover:shadow-md"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >

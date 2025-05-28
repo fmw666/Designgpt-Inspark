@@ -47,7 +47,7 @@ const TestLayout: FC = () => {
               <button
                 key={test.id}
                 onClick={() => setSelectedTest(test.id)}
-                className={`w-full flex items-start gap-3 p-3 rounded-lg text-sm transition-all ${
+                className={`w-full flex items-start gap-3 p-3 rounded-lg text-sm ${
                   selectedTest === test.id
                     ? 'bg-indigo-50 text-indigo-700'
                     : 'text-gray-600 hover:bg-gray-50'

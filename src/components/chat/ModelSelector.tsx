@@ -114,7 +114,7 @@ const ModelSelector: FC<ModelSelectorProps> = ({
                   {models.map((model) => (
                     <div
                       key={model.id}
-                      className={`relative rounded-lg border p-3 cursor-pointer transition-all ${
+                      className={`relative rounded-lg border p-3 cursor-pointer ${
                         model.id in selectedModels
                           ? 'border-primary-500 bg-primary-50 shadow-sm'
                           : 'border-primary-200 hover:border-primary-300 hover:bg-primary-50/50'
