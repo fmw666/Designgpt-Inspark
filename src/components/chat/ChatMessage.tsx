@@ -115,7 +115,7 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message, userAvatar }) => {
                     <span className="text-gray-400 dark:text-gray-500">{results.length} 张图片</span>
                   </h4>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-3 min-w-[300px]">
                   {results.map((result, index) => (
                     <div
                       key={index}
@@ -130,11 +130,11 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message, userAvatar }) => {
                         </div>
                       ) : result.error || result.errorMessage ? (
                         <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100">
-                          <div className="flex flex-col items-center gap-2 p-4 text-center">
+                          <div className="flex flex-col items-center gap-2 p-4 max-w-[90%] max-h-[90%] overflow-y-auto">
                             <ExclamationCircleIcon className="h-6 w-6 text-red-500" />
-                            <div className="space-y-1">
-                              <span className="text-sm text-red-600 dark:text-red-400 font-medium block">生成失败</span>
-                              <p className="text-xs text-red-500 dark:text-red-400 line-clamp-2">
+                            <div className="space-y-1 w-full text-left">
+                              <span className="text-sm text-red-600 text-center dark:text-red-400 font-medium block">生成失败</span>
+                              <p className="text-xs text-red-500 dark:text-red-400 break-words">
                                 {result.errorMessage}
                               </p>
                             </div>
