@@ -1,6 +1,6 @@
 import { FC, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SparklesIcon, ExclamationCircleIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import { SparklesIcon, ExclamationCircleIcon, XMarkIcon, ClockIcon } from '@heroicons/react/24/solid';
 import { ImageFeedback } from '@/components/feedback/ImageFeedback';
 import { getAvatarClasses, getAvatarSizeClasses } from '@/utils/avatar';
 
@@ -38,9 +38,19 @@ interface ChatMessageProps {
   userAvatar: string;
 }
 
+const GENERATION_TIMEOUT = 10 * 60 * 1000; // 10 minutes in milliseconds
+
 export const ChatMessage: FC<ChatMessageProps> = ({ message, userAvatar }) => {
   const { t } = useTranslation();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  // Check if any image is still generating and has timed out
+  const hasTimedOutImages = Object.values(message.results.images).some(results =>
+    results.some(result => 
+      result.isGenerating && 
+      (Date.now() - new Date(message.createdAt).getTime() > GENERATION_TIMEOUT)
+    )
+  );
 
   return (
     <div className="flex flex-col mb-6">
@@ -118,62 +128,78 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message, userAvatar }) => {
                   </h4>
                 </div>
                 <div className="grid grid-cols-2 gap-3 min-w-[300px]">
-                  {results.map((result, index) => (
-                    <div
-                      key={index}
-                      className="group relative aspect-square rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900"
-                    >
-                      {result.isGenerating ? (
-                        <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-gray-900">
-                          <div className="flex flex-col items-center gap-2">
-                            <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-                            <span className="text-sm text-gray-600 dark:text-gray-300">
-                              {t('common.generating')}
-                            </span>
-                          </div>
-                        </div>
-                      ) : result.error || result.errorMessage ? (
-                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100">
-                          <div className="flex flex-col items-center gap-2 p-4 max-w-[90%] max-h-[90%] overflow-y-auto">
-                            <ExclamationCircleIcon className="h-6 w-6 text-red-500" />
-                            <div className="space-y-1 w-full text-left">
-                              <span className="text-sm text-red-600 text-center dark:text-red-400 font-medium block">
-                                {t('errors.generationFailed')}
-                              </span>
-                              <p className="text-xs text-red-500 dark:text-red-400 break-words">
-                                {result.errorMessage}
-                              </p>
+                  {results.map((result, index) => {
+                    const isTimedOut = result.isGenerating && 
+                      (Date.now() - new Date(message.createdAt).getTime() > GENERATION_TIMEOUT);
+
+                    return (
+                      <div
+                        key={index}
+                        className="group relative aspect-square rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900"
+                      >
+                        {result.isGenerating ? (
+                          isTimedOut ? (
+                            <div className="absolute inset-0 flex items-center justify-center bg-yellow-50 dark:bg-yellow-900/30">
+                              <div className="flex flex-col items-center gap-2 p-4">
+                                <ClockIcon className="h-6 w-6 text-yellow-500" />
+                                <span className="text-sm text-yellow-700 dark:text-yellow-300 text-center">
+                                  {t('chat.generation.timeout')}
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-gray-900">
+                              <div className="flex flex-col items-center gap-2">
+                                <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+                                <span className="text-sm text-gray-600 dark:text-gray-300">
+                                  {t('common.generating')}
+                                </span>
+                              </div>
+                            </div>
+                          )
+                        ) : result.error || result.errorMessage ? (
+                          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100">
+                            <div className="flex flex-col items-center gap-2 p-4 max-w-[90%] max-h-[90%] overflow-y-auto">
+                              <ExclamationCircleIcon className="h-6 w-6 text-red-500" />
+                              <div className="space-y-1 w-full text-left">
+                                <span className="text-sm text-red-600 text-center dark:text-red-400 font-medium block">
+                                  {t('errors.generationFailed')}
+                                </span>
+                                <p className="text-xs text-red-500 dark:text-red-400 break-words">
+                                  {result.errorMessage}
+                                </p>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ) : result.url ? (
-                        <>
-                          <div
-                            key={index}
-                            className="group relative aspect-square rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 cursor-pointer"
-                            onClick={() => setSelectedImage(result.url)}
-                          >
-                            <img
-                              src={result.url}
-                              alt={`Generated image ${index + 1}`}
-                              className="w-full h-full object-cover transition-transform group-hover:scale-105 cursor-pointer"
-                            />
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                        ) : result.url ? (
+                          <>
+                            <div
+                              key={index}
+                              className="group relative aspect-square rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 cursor-pointer"
+                              onClick={() => setSelectedImage(result.url)}
+                            >
+                              <img
+                                src={result.url}
+                                alt={`Generated image ${index + 1}`}
+                                className="w-full h-full object-cover transition-transform group-hover:scale-105 cursor-pointer"
+                              />
+                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                            </div>
+                            {/* Feedback buttons */}
+                            <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <ImageFeedback imageUrl={result.url} modelName={modelId} />
+                            </div>
+                          </>
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+                            <span className="text-sm text-gray-500 dark:text-gray-400">
+                              {t('common.loading')}
+                            </span>
                           </div>
-                          {/* Feedback buttons */}
-                          <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <ImageFeedback imageUrl={result.url} modelName={modelId} />
-                          </div>
-                        </>
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-                          <span className="text-sm text-gray-500 dark:text-gray-400">
-                            {t('common.loading')}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             ))}

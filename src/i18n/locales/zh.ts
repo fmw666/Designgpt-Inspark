@@ -46,6 +46,7 @@ export const zh = {
       success: '✅ 图片生成完成！',
       partialSuccess: '🚫 部分生成失败！',
       failed: '❌ 全部生成失败！',
+      timeout: '⚠️ 任务超时！任务已运行超过10分钟或任务状态已丢失。',
       leaveWarning: '图片正在生成中，刷新页面将丢失生成进度，确定要离开吗？',
     },
     guide: {

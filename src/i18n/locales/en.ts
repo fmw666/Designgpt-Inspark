@@ -46,6 +46,7 @@ export const en = {
       success: '✅ Images generated successfully!',
       partialSuccess: '🚫 Some images failed to generate!',
       failed: '❌ All images failed to generate!',
+      timeout: '⚠️ Task timeout! The task has been running for more than 10 minutes or the task status has been lost.',
       leaveWarning: 'Images are being generated. Refreshing the page will lose the generation progress. Are you sure you want to leave?',
     },
     guide: {
