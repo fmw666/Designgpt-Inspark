@@ -11,6 +11,7 @@ import { Chat, chatService } from '@/services/chatService';
 import { useAuth } from '@/hooks/useAuth';
 import { eventBus } from '@/utils/eventBus';
 import { getAvatarText } from '@/utils/avatar';
+import { useTranslation } from 'react-i18next';
 
 interface SelectedModel {
   id: string;
@@ -25,6 +26,7 @@ interface ChatInterfaceProps {
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, chatId }) => {
+  const { t } = useTranslation();
   const [input, setInput] = useState('');
   const [selectedModels, setSelectedModels] = useState<SelectedModel[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -214,21 +216,19 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
     }
   }, [currentChat?.id]);
 
-  // 添加页面关闭和刷新拦截
+  // 更新页面关闭和刷新拦截
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      // 当正在生成或发送时显示提示
       if (isSending || isGenerating) {
         e.preventDefault();
-        e.returnValue = '图片正在生成中，刷新页面将丢失生成进度，确定要离开吗？';
+        e.returnValue = t('chat.generation.leaveWarning');
         return e.returnValue;
       }
     };
 
-    // 处理页面关闭事件
     const handleUnload = () => {
       if (isSending || isGenerating) {
-        return '图片正在生成中，离开页面将丢失生成进度，确定要离开吗？';
+        return t('chat.generation.leaveWarning');
       }
     };
 
@@ -239,7 +239,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('unload', handleUnload);
     };
-  }, [isSending, isGenerating]);
+  }, [isSending, isGenerating, t]);
 
   // 处理提交前的认证检查
   const handleSubmit = async (e: React.FormEvent) => {
@@ -258,7 +258,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
       try {
         // 准备初始消息结果
         const initialResults = {
-          content: '🚀 正在生成图片...',
+          content: t('chat.generation.generating'),
           images: selectedModels.reduce((acc, model) => ({
             ...acc,
             [model.name]: Array(model.count).fill({
@@ -319,7 +319,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
           if (!model) {
             // 更新这个模型的结果，保持其他模型的状态不变
             const updatedResults = {
-              content: '🚀 正在生成图片...',
+              content: t('chat.generation.generating'),
               images: {
                 ...message.results.images,
                 [modelName]: Array(count).fill({
@@ -352,7 +352,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
 
             // 更新这个模型的结果，保持其他模型的状态不变
             const updatedResults = {
-              content: '🚀 正在生成图片...',
+              content: t('chat.generation.generating'),
               images: {
                 ...message.results.images,
                 [modelName]: response.results.map(result => ({
@@ -373,7 +373,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
 
             // 更新错误状态，保持其他模型的状态不变
             const errorResults = {
-              content: '🚀 正在生成图片...',
+              content: t('chat.generation.generating'),
               images: {
                 ...message.results.images,
                 [modelName]: [{
@@ -396,11 +396,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
 
         const errorCount = Object.values(message.results.images).map(image => image.filter(i => i.error).length).reduce((a, b) => a + b, 0);
         if (errorCount == 0) {
-          message.results.content = `✅ 图片生成完成！`;
+          message.results.content = t('chat.generation.success');
         } else if (errorCount < selectedModels.length) {
-          message.results.content = `🚫 部分生成失败！`;
+          message.results.content = t('chat.generation.partialSuccess');
         } else {
-          message.results.content = `❌ 全部生成失败！`;
+          message.results.content = t('chat.generation.failed');
         }
 
         // 5. 更新最终状态，保持所有图片状态不变
@@ -525,23 +525,18 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
     return (
       <div className="flex flex-col items-center justify-center h-full bg-white/50 dark:bg-gray-900 backdrop-blur-sm">
         <div className="relative w-16 h-16">
-          {/* Outer ring */}
           <div className="absolute inset-0 border-4 border-indigo-100 dark:border-indigo-200 rounded-full animate-pulse"></div>
-
-          {/* Spinning inner ring */}
           <div className="absolute inset-0 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-
-          {/* Center sparkle icon */}
           <div className="absolute inset-0 flex items-center justify-center">
             <SparklesIcon className="w-6 h-6 text-indigo-600 dark:text-indigo-400 animate-bounce transform-gpu -translate-y-1/2" style={{animation: 'bounce 1s infinite'}} />
           </div>
         </div>
 
         <p className="mt-4 text-lg font-medium text-gray-600 dark:text-gray-300">
-          正在加载对话...
+          {t('chat.loading.title')}
         </p>
         <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-          请稍候片刻
+          {t('chat.loading.subtitle')}
         </p>
       </div>
     );
@@ -549,7 +544,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
 
   return (
     <div className="flex flex-col h-full">
-      {/* Chat Title - 只在有标题且用户已登录时显示 */}
+      {/* Chat Title */}
       {user && currentChat?.title && (
         <div className="h-14 border-b border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-800 backdrop-blur-sm flex items-center px-6 justify-center group">
           <div className="relative w-full max-w-md">
@@ -563,22 +558,24 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
                     onChange={handleTitleChange}
                     onKeyDown={handleTitleKeyDown}
                     className="w-full px-2 py-1 text-lg font-medium text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    placeholder="输入新标题..."
+                    placeholder={t('chat.title.placeholder')}
                     maxLength={13}
                   />
                   <div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400 transition-opacity duration-200">
-                    {editedTitle.length}/13
+                    {t('chat.title.characterCount', { count: editedTitle.length })}
                   </div>
                 </div>
                 <button
                   onClick={handleTitleSave}
                   className="p-1 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-500 transition-colors hover:bg-green-50 dark:hover:bg-green-900 rounded-lg"
+                  title={t('common.save')}
                 >
                   <CheckIcon className="w-5 h-5" />
                 </button>
                 <button
                   onClick={handleTitleCancel}
                   className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-500 transition-colors hover:bg-gray-50 dark:hover:bg-gray-900 rounded-lg"
+                  title={t('common.cancel')}
                 >
                   <XMarkIcon className="w-5 h-5" />
                 </button>
@@ -591,6 +588,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
                 <button
                   onClick={handleTitleEdit}
                   className="p-1 text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-500 opacity-0 group-hover:opacity-100 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-lg"
+                  title={t('chat.title.edit')}
                 >
                   <PencilIcon className="w-4 h-4" />
                 </button>
@@ -601,12 +599,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
       )}
 
       <div className="flex-1 overflow-y-auto p-4 relative bg-gray-50 dark:bg-gray-800">
-        {/* 加载动画遮罩 - 使用 fixed 定位 */}
+        {/* Loading overlay */}
         {isScrolling && (
           <div className="fixed inset-0 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm z-10 flex items-center justify-center">
             <div className="flex flex-col items-center gap-2">
               <div className="w-8 h-8 border-4 border-indigo-200 dark:border-indigo-200 border-t-indigo-600 dark:border-t-indigo-400 rounded-full animate-spin"></div>
-              <span className="text-sm text-gray-600 dark:text-gray-200">正在加载消息...</span>
+              <span className="text-sm text-gray-600 dark:text-gray-200">{t('chat.loading.loadingMessages')}</span>
               {isLoadingTimeout && (
                 <button
                   onClick={handleRefresh}
@@ -615,13 +613,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
-                  刷新
+                  {t('chat.loading.refresh')}
                 </button>
               )}
             </div>
           </div>
         )}
 
+        {/* Messages */}
         {!user || !currentChat || !currentChat!.messages!.length ? (
           <NewChatGuide />
         ) : (
@@ -632,12 +631,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
                 message={message} 
                 userAvatar={getAvatarText(user)}
               />
-        ))}
-        <div ref={messagesEndRef} />
+            ))}
+            <div ref={messagesEndRef} />
           </>
         )}
       </div>
 
+      {/* Input area */}
       <div className="border-t border-primary-100 dark:border-gray-700 bg-white/50 dark:bg-gray-800 backdrop-blur-sm p-4">
         <ModelDrawer
           selectedModels={selectedModels}
@@ -646,27 +646,27 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
         />
         <form onSubmit={handleSubmit} className="mt-4">
           <div className="relative flex items-center">
-          <div className="flex-1 relative">
-            <textarea
-              ref={textareaRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
+            <div className="flex-1 relative">
+              <textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
                 placeholder={
                   isGenerating 
-                    ? "正在生成图片，请稍候..." 
+                    ? t('chat.placeholderGenerating')
                     : user 
-                      ? "输入提示词... (Ctrl + Enter 换行）" 
-                      : "请先登录后再开始对话"
+                      ? t('chat.placeholder')
+                      : t('chat.placeholderLogin')
                 }
                 disabled={isSending || isGenerating}
                 className={`w-full max-h-[200px] py-3 pl-4 pr-12 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none overflow-hidden ease-in-out ${
                   (isSending || isGenerating) ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
-              rows={1}
-            />
-          <button
-            type="submit"
+                rows={1}
+              />
+              <button
+                type="submit"
                 disabled={!input.trim() || selectedModels.length === 0 || isSending || isGenerating}
                 className="absolute right-2 bottom-2 p-2 text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 disabled:text-indigo-400 disabled:cursor-not-allowed transition-colors duration-200 rounded-lg hover:bg-gray-800 disabled:hover:bg-transparent"
               >
@@ -674,43 +674,43 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
                   <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
                 ) : isGenerating ? (
                   <SparklesIcon className="h-5 w-5 animate-pulse text-indigo-500" />
-            ) : (
-              <PaperAirplaneIcon className="h-5 w-5" />
-            )}
-          </button>
+                ) : (
+                  <PaperAirplaneIcon className="h-5 w-5" />
+                )}
+              </button>
             </div>
           </div>
 
-          {/* 底部提示 */}
+          {/* Bottom hints */}
           <div className="mt-2 flex items-center justify-between px-2">
             <div className="flex items-center space-x-3 text-xs text-gray-500">
               <span className="flex items-center">
                 <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
-                Enter 发送
+                {t('chat.input.enterToSend')}
               </span>
               <span className="flex items-center">
                 <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" />
                 </svg>
-                Ctrl + Enter 换行
+                {t('chat.input.ctrlEnterToNewLine')}
               </span>
               {selectedModels.length > 0 && (
                 <span className="flex items-center">
                   <SparklesIcon className="h-4 w-4 mr-1" />
-                  已选择 {selectedModels.length} 个模型
+                  {t('chat.input.selectedModels', { count: selectedModels.length })}
                 </span>
               )}
               {isGenerating && (
                 <span className="flex items-center text-indigo-600 dark:text-indigo-400">
                   <SparklesIcon className="h-4 w-4 mr-1 animate-pulse" />
-                  正在生成图片...
+                  {t('chat.input.generating')}
                 </span>
               )}
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400">
-              {input.length > 0 && `${input.length} 字符`}
+              {input.length > 0 && t('chat.input.characterCount', { count: input.length })}
             </div>
           </div>
         </form>

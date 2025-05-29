@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { XMarkIcon, EnvelopeIcon, KeyIcon, TicketIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 
 interface SignInModalProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface SignInModalProps {
 }
 
 export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuccess }) => {
+  const { t } = useTranslation();
   const { sendVerificationCode, verifyCode } = useAuth();
   const [email, setEmail] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
@@ -34,21 +36,21 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
     if (inviteCode === 'innoverse0') {
       setIsInviteVerified(true);
     } else {
-      setError('邀请码无效');
+      setError(t('auth.signIn.inviteCode.invalid'));
     }
   };
 
   // 处理发送验证码
   const handleSendCode = async () => {
     if (!isInviteVerified) {
-      setError('请先验证邀请码');
+      setError(t('auth.signIn.inviteCode.required'));
       return;
     }
 
     // 验证邮箱格式
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setError('请输入有效的邮箱地址');
+      setError(t('auth.signIn.email.invalid'));
       return;
     }
 
@@ -59,7 +61,7 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
       setCountdown(60);
     } catch (err) {
       console.error('发送验证码失败', err);
-      setError('发送验证码失败，请稍后重试');
+      setError(t('auth.signIn.verificationCode.sendFailed'));
     } finally {
       setIsSendingCode(false);
     }
@@ -71,29 +73,26 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
     setError(null);
     
     if (!isInviteVerified) {
-      setError('请先验证邀请码');
+      setError(t('auth.signIn.inviteCode.required'));
       return;
     }
     
     if (!email || !verificationCode) {
-      setError('请输入邮箱和验证码');
+      setError(t('auth.signIn.verificationCode.required'));
       return;
     }
 
     setIsSubmitting(true);
     try {
       await verifyCode(email, verificationCode);
-      // 先调用 onSuccess 回调
       onSuccess?.();
-      // 然后关闭模态框
       onClose();
-      // 重置表单状态
       setEmail('');
       setVerificationCode('');
       setInviteCode('');
       setIsInviteVerified(false);
     } catch (err) {
-      setError('验证码错误，请重试');
+      setError(t('auth.signIn.verificationCode.invalid'));
     } finally {
       setIsSubmitting(false);
     }
@@ -115,10 +114,12 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
           >
             {/* 顶部导航栏 */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
-              <div className="w-8" /> {/* 占位，保持标题居中 */}
+              <div className="w-8" />
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500" />
-                <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">欢迎登录</h2>
+                <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                  {t('auth.signIn.title')}
+                </h2>
                 <div className="w-2 h-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500" />
               </div>
               <button
@@ -134,10 +135,10 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
               {/* 欢迎文本 */}
               <div className="text-center mb-8">
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent mb-2">
-                  欢迎使用 AI 绘图平台
+                  {t('auth.signIn.subtitle')}
                 </h1>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  邀请码+邮箱验证码 登录
+                  {t('auth.signIn.description')}
                 </p>
               </div>
 
@@ -161,7 +162,7 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
                 {/* 邀请码输入框 */}
                 <div>
                   <label htmlFor="inviteCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    邀请码
+                    {t('auth.signIn.inviteCode.label')}
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -172,7 +173,7 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
                       id="inviteCode"
                       value={inviteCode}
                       onChange={(e) => setInviteCode(e.target.value)}
-                      placeholder="请输入邀请码"
+                      placeholder={t('auth.signIn.inviteCode.placeholder')}
                       disabled={isInviteVerified}
                       className={`block w-full outline-none pl-10 pr-32 py-3.5 border ${
                         isInviteVerified ? 'border-green-500 bg-green-50 dark:bg-green-900 dark:text-gray-400' : 'border-gray-200 dark:border-gray-800'
@@ -189,7 +190,7 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
                             : 'text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-500'
                         }`}
                       >
-                        {isInviteVerified ? '已验证' : '验证'}
+                        {isInviteVerified ? t('auth.signIn.inviteCode.verified') : t('auth.signIn.inviteCode.verify')}
                       </button>
                     </div>
                   </div>
@@ -198,7 +199,7 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
                 {/* 邮箱输入框 */}
                 <div className={`transition-opacity duration-200 ${isInviteVerified ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    邮箱
+                    {t('auth.signIn.email.label')}
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -209,7 +210,7 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
                       id="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="请输入邮箱"
+                      placeholder={t('auth.signIn.email.placeholder')}
                       disabled={!isInviteVerified}
                       className="block w-full bg-white dark:bg-gray-900 outline-none pl-10 pr-3 py-3.5 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-base dark:text-gray-100"
                     />
@@ -219,7 +220,7 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
                 {/* 验证码输入框 */}
                 <div className={`transition-opacity duration-200 ${isInviteVerified ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
                   <label htmlFor="code" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    验证码
+                    {t('auth.signIn.verificationCode.label')}
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -230,7 +231,7 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
                       id="code"
                       value={verificationCode}
                       onChange={(e) => setVerificationCode(e.target.value)}
-                      placeholder="请输入验证码"
+                      placeholder={t('auth.signIn.verificationCode.placeholder')}
                       disabled={!isInviteVerified}
                       className="block w-full bg-white dark:bg-gray-900 outline-none pl-10 pr-32 py-3.5 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-base dark:text-gray-100"
                     />
@@ -248,12 +249,12 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
                         {isSendingCode ? (
                           <div className="flex items-center">
                             <div className="w-4 h-4 border-2 border-indigo-600 dark:border-indigo-400 border-t-transparent rounded-full animate-spin mr-1" />
-                            发送中
+                            {t('auth.signIn.verificationCode.sending')}
                           </div>
                         ) : countdown > 0 ? (
-                          `${countdown}秒后重试`
+                          t('auth.signIn.verificationCode.countdown', { count: countdown })
                         ) : (
-                          '获取验证码'
+                          t('auth.signIn.verificationCode.send')
                         )}
                       </button>
                     </div>
@@ -273,10 +274,10 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
                   {isSubmitting ? (
                     <div className="flex items-center justify-center">
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                      登录中...
+                      {t('auth.signIn.submit.loading')}
                     </div>
                   ) : (
-                    '登录'
+                    t('auth.signIn.submit.default')
                   )}
                 </button>
               </form>
@@ -284,13 +285,13 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
               {/* 底部提示 */}
               <div className="mt-8 text-center">
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  登录即表示您同意我们的
+                  {t('auth.signIn.terms.prefix')}
                   <a href="#" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-500 mx-1">
-                    服务条款
+                    {t('auth.signIn.terms.terms')}
                   </a>
-                  和
+                  {t('auth.signIn.terms.and')}
                   <a href="#" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-500 mx-1">
-                    隐私政策
+                    {t('auth.signIn.terms.privacy')}
                   </a>
                 </p>
               </div>

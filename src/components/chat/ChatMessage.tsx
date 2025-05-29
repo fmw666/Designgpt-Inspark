@@ -1,4 +1,5 @@
 import { FC, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SparklesIcon, ExclamationCircleIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import { ImageFeedback } from '@/components/feedback/ImageFeedback';
 import { getAvatarClasses, getAvatarSizeClasses } from '@/utils/avatar';
@@ -38,11 +39,12 @@ interface ChatMessageProps {
 }
 
 export const ChatMessage: FC<ChatMessageProps> = ({ message, userAvatar }) => {
+  const { t } = useTranslation();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   return (
     <div className="flex flex-col mb-6">
-      {/* 用户消息 */}
+      {/* User message */}
       <div className="flex justify-end p-3">
         <div className="flex items-start gap-3 max-w-3xl">
           <div className="flex-1 text-right">
@@ -53,16 +55,14 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message, userAvatar }) => {
           <div className="flex-shrink-0">
             <div className="h-8 w-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
               <div className={`${getAvatarClasses()} ${getAvatarSizeClasses('sm')}`}>
-                <span>
-                  {userAvatar}
-                </span>
+                <span>{userAvatar}</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 图片查看模态框 */}
+      {/* Image preview modal */}
       {selectedImage && (
         <div
           className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
@@ -84,7 +84,7 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message, userAvatar }) => {
         </div>
       )}
 
-      {/* AI 回复 */}
+      {/* AI response */}
       <div className="flex justify-start p-3">
         <div className="flex items-start gap-3 max-w-3xl">
           <div className="flex-shrink-0">
@@ -93,14 +93,14 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message, userAvatar }) => {
             </div>
           </div>
           <div className="flex-1">
-            {/* AI 文字回复 */}
+            {/* AI text response */}
             {message.results.content && (
               <div className="inline-block bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-2 mb-3">
                 <p className="text-sm text-gray-900 dark:text-gray-100">{message.results.content}</p>
               </div>
             )}
 
-            {/* AI 图片结果 */}
+            {/* AI image results */}
             {Object.entries(message.results.images).map(([modelId, results], index) => (
               <div key={index} className="mb-4">
                 <div className="flex items-center gap-2 mb-2">
@@ -112,7 +112,9 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message, userAvatar }) => {
                   <h4 className="text-sm font-medium text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
                     <span className="text-indigo-600 dark:text-indigo-400">{modelId}</span>
                     <span className="text-gray-400 dark:text-gray-600">•</span>
-                    <span className="text-gray-400 dark:text-gray-500">{results.length} 张图片</span>
+                    <span className="text-gray-400 dark:text-gray-500">
+                      {results.length} {t('chat.images')}
+                    </span>
                   </h4>
                 </div>
                 <div className="grid grid-cols-2 gap-3 min-w-[300px]">
@@ -125,7 +127,9 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message, userAvatar }) => {
                         <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-gray-900">
                           <div className="flex flex-col items-center gap-2">
                             <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-                            <span className="text-sm text-gray-600 dark:text-gray-300">生成中...</span>
+                            <span className="text-sm text-gray-600 dark:text-gray-300">
+                              {t('common.generating')}
+                            </span>
                           </div>
                         </div>
                       ) : result.error || result.errorMessage ? (
@@ -133,7 +137,9 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message, userAvatar }) => {
                           <div className="flex flex-col items-center gap-2 p-4 max-w-[90%] max-h-[90%] overflow-y-auto">
                             <ExclamationCircleIcon className="h-6 w-6 text-red-500" />
                             <div className="space-y-1 w-full text-left">
-                              <span className="text-sm text-red-600 text-center dark:text-red-400 font-medium block">生成失败</span>
+                              <span className="text-sm text-red-600 text-center dark:text-red-400 font-medium block">
+                                {t('errors.generationFailed')}
+                              </span>
                               <p className="text-xs text-red-500 dark:text-red-400 break-words">
                                 {result.errorMessage}
                               </p>
@@ -154,14 +160,16 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message, userAvatar }) => {
                             />
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
                           </div>
-                          {/* 反馈按钮 */}
+                          {/* Feedback buttons */}
                           <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
                             <ImageFeedback imageUrl={result.url} modelName={modelId} />
                           </div>
                         </>
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-                          <span className="text-sm text-gray-500 dark:text-gray-400">加载中...</span>
+                          <span className="text-sm text-gray-500 dark:text-gray-400">
+                            {t('common.loading')}
+                          </span>
                         </div>
                       )}
                     </div>

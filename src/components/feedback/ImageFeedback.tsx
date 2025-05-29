@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { HandThumbUpIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 
 interface FeedbackState {
   isOpen: boolean;
@@ -18,6 +19,7 @@ interface ImageFeedbackProps {
 }
 
 export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelName }) => {
+  const { t } = useTranslation();
   const [feedbackState, setFeedbackState] = useState<FeedbackState>({
     isOpen: false,
     imageUrl: null,
@@ -156,7 +158,7 @@ export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelNam
         </div>
         {/* 评分提示 */}
         <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-          {index + (isHoverHalf ? 0.5 : 1)} 星
+          {t('feedback.rating.star', { count: index + (isHoverHalf ? 0.5 : 1) })}
         </div>
       </button>
     );
@@ -188,13 +190,23 @@ export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelNam
     }
   };
 
+  const reasonOptions = [
+    { key: 'goodQuality', value: t('feedback.reasons.options.goodQuality') },
+    { key: 'meetsExpectations', value: t('feedback.reasons.options.meetsExpectations') },
+    { key: 'creative', value: t('feedback.reasons.options.creative') },
+    { key: 'detailed', value: t('feedback.reasons.options.detailed') },
+    { key: 'styleMatch', value: t('feedback.reasons.options.styleMatch') },
+    { key: 'composition', value: t('feedback.reasons.options.composition') },
+    { key: 'other', value: t('feedback.reasons.options.other') },
+  ];
+
   return (
     <>
       {/* 反馈按钮 */}
       <button
         onClick={openFeedback}
         className="p-2 bg-white/90 rounded-full shadow-lg hover:bg-white transition-colors"
-        title="提供反馈"
+        title={t('feedback.button.title')}
       >
         <HandThumbUpIcon className="w-5 h-5 text-indigo-600" />
       </button>
@@ -207,7 +219,9 @@ export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelNam
             className="bg-white dark:bg-gray-900 rounded-lg p-6 w-full max-w-md mx-4 shadow-xl"
           >
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">图片反馈</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                {t('feedback.title')}
+              </h3>
               <button
                 onClick={() => setFeedbackState(prev => ({ ...prev, isOpen: false }))}
                 className="text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400"
@@ -221,7 +235,7 @@ export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelNam
               <div className="mb-4">
                 <img
                   src={feedbackState.imageUrl}
-                  alt="Preview"
+                  alt={t('feedback.preview.alt')}
                   className="w-full h-48 object-cover rounded-lg"
                 />
               </div>
@@ -230,7 +244,7 @@ export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelNam
             {/* 评分 */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                评分
+                {t('feedback.rating.label')}
               </label>
               <div className="flex items-center gap-1">
                 {[0, 1, 2, 3, 4].map(renderStar)}
@@ -238,10 +252,10 @@ export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelNam
                 <span className="ml-3 text-sm text-gray-500 dark:text-gray-400">
                   {feedbackState.rating > 0 ? (
                     <span className="text-yellow-500 dark:text-yellow-400 font-medium">
-                      {feedbackState.rating} 星
+                      {t('feedback.rating.star', { count: feedbackState.rating })}
                     </span>
                   ) : (
-                    '请选择评分'
+                    t('feedback.rating.placeholder')
                   )}
                 </span>
               </div>
@@ -250,44 +264,38 @@ export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelNam
             {/* 原因选择 */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                原因（可多选）
+                {t('feedback.reasons.label')}
               </label>
               <div className="grid grid-cols-2 gap-2">
-                {[
-                  '图片质量好',
-                  '符合预期',
-                  '创意独特',
-                  '细节丰富',
-                  '风格合适',
-                  '构图合理',
-                  '其他'
-                ].map((reason) => (
-                  <div key={reason}>
+                {reasonOptions.map(({ key, value }) => (
+                  <div key={key}>
                     <label
                       className="flex items-center space-x-2 p-2 rounded-lg border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
                     >
                       <input
                         type="checkbox"
-                        checked={feedbackState.reasons.includes(reason)}
-                        onChange={(e) => handleReasonChange(reason, e.target.checked)}
+                        checked={feedbackState.reasons.includes(value)}
+                        onChange={(e) => handleReasonChange(value, e.target.checked)}
                         className="rounded text-indigo-600 focus:ring-indigo-500"
                       />
-                      <span className="text-sm text-gray-700 dark:text-gray-300">{reason}</span>
+                      <span className="text-sm text-gray-700 dark:text-gray-300">{value}</span>
                     </label>
                     {/* 其他选项的输入框 */}
-                    {reason === '其他' && feedbackState.reasons.includes('其他') && (
+                    {key === 'other' && feedbackState.reasons.includes(value) && (
                       <div className="mt-2">
                         <div className="relative">
                           <input
                             type="text"
                             value={feedbackState.otherReason}
                             onChange={(e) => handleOtherReasonChange(e.target.value.slice(0, 8))}
-                            placeholder="请输入其他原因..."
+                            placeholder={t('feedback.reasons.other.placeholder')}
                             maxLength={8}
                             className="w-full px-3 py-2 pr-16 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 ease-in-out"
                           />
                           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                            <span className="text-xs text-gray-400 dark:text-gray-500">{feedbackState.otherReason.length}/8</span>
+                            <span className="text-xs text-gray-400 dark:text-gray-500">
+                              {t('feedback.reasons.other.characterCount', { count: feedbackState.otherReason.length })}
+                            </span>
                             <button
                               onClick={() => handleOtherReasonChange('')}
                               className="p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
@@ -306,14 +314,14 @@ export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelNam
             {/* 文字反馈 */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                其他建议
+                {t('feedback.comment.label')}
               </label>
               <textarea
                 value={feedbackState.comment}
                 onChange={(e) => setFeedbackState(prev => ({ ...prev, comment: e.target.value }))}
                 className="w-full px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none placeholder-gray-500 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none ease-in-out"
                 rows={3}
-                placeholder="请输入您的建议..."
+                placeholder={t('feedback.comment.placeholder')}
               />
             </div>
 
@@ -327,8 +335,9 @@ export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelNam
                     ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
                     : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
                 }`}
+                title={feedbackState.rating === 0 ? t('feedback.submit.disabled') : undefined}
               >
-                提交反馈
+                {t('feedback.submit.button')}
               </button>
             </div>
           </div>

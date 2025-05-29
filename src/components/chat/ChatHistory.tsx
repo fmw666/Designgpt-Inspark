@@ -1,11 +1,12 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useChat } from '@/hooks/useChat';
 import { Chat } from '@/services/chatService';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, isToday, isYesterday, isThisYear } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import { zhCN, enUS } from 'date-fns/locale';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 
 // 添加一个判断是否在最近 7 天内的函数
@@ -30,9 +31,13 @@ interface GroupedChats {
 
 export const ChatHistory = () => {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const { chats, currentChat, isLoading, deleteChat, switchChat } = useChat();
   const [chatToDelete, setChatToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+
+  // 获取当前语言的 date-fns locale
+  const dateLocale = i18n.language === 'zh' ? zhCN : enUS;
 
   // 使用 useMemo 缓存分组结果
   const groupedChats = useMemo(() => {
@@ -43,17 +48,17 @@ export const ChatHistory = () => {
       const date = new Date(chat.created_at);
 
       if (isToday(date)) {
-        groupKey = '今天';
+        groupKey = t('history.today');
       } else if (isYesterday(date)) {
-        groupKey = '昨天';
+        groupKey = t('history.yesterday');
       } else if (isWithinLast7Days(date)) {
-        groupKey = '7天内';
+        groupKey = t('history.inSevenDays');
       } else if (isWithinLast30Days(date)) {
-        groupKey = '30天内';
+        groupKey = t('history.inThirtyDays');
       } else if (isThisYear(date)) {
-        groupKey = format(date, 'yyyy-MM', { locale: zhCN });
+        groupKey = format(date, 'yyyy-MM', { locale: dateLocale });
       } else {
-        groupKey = format(date, 'yyyy', { locale: zhCN });
+        groupKey = format(date, 'yyyy', { locale: dateLocale });
       }
 
       if (!groups[groupKey]) {
@@ -62,22 +67,27 @@ export const ChatHistory = () => {
       groups[groupKey].push(chat);
       return groups;
     }, {});
-  }, [chats]);
+  }, [chats, t, dateLocale]);
 
   // 使用 useMemo 缓存排序后的分组键
   const sortedGroupKeys = useMemo(() => {
+    const today = t('history.today');
+    const yesterday = t('history.yesterday');
+    const sevenDays = t('history.inSevenDays');
+    const thirtyDays = t('history.inThirtyDays');
+
     return Object.keys(groupedChats).sort((a, b) => {
-      if (a === '今天') return -1;
-      if (b === '今天') return 1;
-      if (a === '昨天') return -1;
-      if (b === '昨天') return 1;
-      if (a === '7天内') return -1;
-      if (b === '7天内') return 1;
-      if (a === '30天内') return -1;
-      if (b === '30天内') return 1;
+      if (a === today) return -1;
+      if (b === today) return 1;
+      if (a === yesterday) return -1;
+      if (b === yesterday) return 1;
+      if (a === sevenDays) return -1;
+      if (b === sevenDays) return 1;
+      if (a === thirtyDays) return -1;
+      if (b === thirtyDays) return 1;
       return b.localeCompare(a);
     });
-  }, [groupedChats]);
+  }, [groupedChats, t]);
 
   const handleChatClick = (chatId: string) => {
     switchChat(chatId);
@@ -144,7 +154,7 @@ export const ChatHistory = () => {
                           {chat.title}
                         </div>
                         <div className="text-xs text-gray-500 truncate mt-0.5">
-                          {chat.messages[0]?.content || '暂无消息'}
+                          {chat.messages[0]?.content || t('history.noMessages')}
                         </div>
                       </div>
                       <div
@@ -169,7 +179,7 @@ export const ChatHistory = () => {
 
         {chats.length === 0 && (
           <div className="flex flex-col items-center justify-center h-32 text-gray-500 dark:text-gray-400">
-            <p className="text-sm">暂无聊天记录</p>
+            <p className="text-sm">{t('history.noChats')}</p>
           </div>
         )}
       </div>
@@ -178,10 +188,10 @@ export const ChatHistory = () => {
         isOpen={!!chatToDelete}
         onClose={() => setChatToDelete(null)}
         onConfirm={handleConfirmDelete}
-        title="删除对话"
-        message="确定要删除这个对话吗？此操作无法撤销。"
-        confirmText="删除"
-        cancelText="取消"
+        title={t('history.deleteTitle')}
+        message={t('history.deleteMessage')}
+        confirmText={t('history.delete')}
+        cancelText={t('common.cancel')}
       />
     </div>
   );

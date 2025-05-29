@@ -1,9 +1,10 @@
 import { FC, useEffect, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
+import { useTranslation } from 'react-i18next';
 import { XMarkIcon, EnvelopeIcon, CalendarIcon, ClockIcon, UserCircleIcon, PencilIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import { zhCN, enUS } from 'date-fns/locale';
 import { User } from '@/services/supabase';
 import { useAuthStore } from '@/store/authStore';
 import { toast } from 'react-hot-toast';
@@ -16,9 +17,13 @@ interface UserProfileModalProps {
 }
 
 export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, user }) => {
+  const { t, i18n } = useTranslation();
   const [isEditingName, setIsEditingName] = useState(false);
   const [displayName, setDisplayName] = useState('');
   const updateDisplayName = useAuthStore(state => state.updateDisplayName);
+
+  // 获取当前语言的 date-fns locale
+  const dateLocale = i18n.language === 'zh' ? zhCN : enUS;
 
   // 当用户数据更新时，更新本地状态
   useEffect(() => {
@@ -28,7 +33,7 @@ export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, u
   // 处理保存用户名
   const handleSaveDisplayName = async () => {
     if (!displayName.trim()) {
-      toast.error('用户名不能为空');
+      toast.error(t('profile.displayName.empty'));
       return;
     }
 
@@ -40,11 +45,11 @@ export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, u
 
     try {
       await updateDisplayName(displayName.trim());
-      toast.success('用户名已更新');
+      toast.success(t('profile.displayName.updated'));
       setIsEditingName(false);
     } catch (error) {
       console.error('Error updating display name:', error);
-      toast.error('更新用户名失败');
+      toast.error(t('profile.displayName.updateFailed'));
     }
   };
 
@@ -61,6 +66,13 @@ export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, u
 
   // 获取当前用户名
   const currentDisplayName = user.user_metadata?.display_name;
+
+  // 格式化日期的函数
+  const formatDate = (date: string | null) => {
+    if (!date) return t('profile.createdAt.noRecord');
+    const formatString = i18n.language === 'zh' ? 'yyyy年MM月dd日 HH:mm' : 'MMM dd, yyyy HH:mm';
+    return format(new Date(date), formatString, { locale: dateLocale });
+  };
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -97,7 +109,7 @@ export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, u
                       as="h3"
                       className="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100"
                     >
-                      个人信息
+                      {t('profile.title')}
                     </Dialog.Title>
                   </div>
                   <button
@@ -125,7 +137,7 @@ export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, u
                           value={displayName}
                           onChange={(e) => setDisplayName(e.target.value)}
                           className="px-4 py-2 text-lg font-medium text-gray-900 dark:text-gray-100 bg-transparent border-none focus:outline-none focus:ring-0 w-48 placeholder:text-gray-400 dark:placeholder:text-gray-600"
-                          placeholder="输入用户名..."
+                          placeholder={t('profile.displayName.placeholder')}
                           maxLength={10}
                           autoFocus
                         />
@@ -133,14 +145,14 @@ export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, u
                           <button
                             onClick={handleSaveDisplayName}
                             className="p-1.5 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 hover:bg-green-50 dark:hover:bg-green-900 rounded-lg transition-colors"
-                            title="保存"
+                            title={t('profile.displayName.save')}
                           >
                             <CheckIcon className="w-5 h-5" />
                           </button>
                           <button
                             onClick={handleCancelEdit}
                             className="p-1.5 text-gray-500 dark:text-gray-600 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                            title="取消"
+                            title={t('profile.displayName.cancel')}
                           >
                             <XMarkIcon className="w-5 h-5" />
                           </button>
@@ -154,7 +166,7 @@ export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, u
                               ? 'font-semibold bg-gradient-to-r from-gray-900 dark:from-gray-100 to-gray-700 dark:to-gray-300 bg-clip-text text-transparent'
                               : 'text-gray-400 dark:text-gray-600 italic'
                           }`}>
-                            {currentDisplayName || '点击设置用户名'}
+                            {currentDisplayName || t('profile.displayName.set')}
                           </span>
                           {currentDisplayName && (
                             <div className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-indigo-500 dark:from-indigo-400 to-purple-500 dark:to-purple-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out"></div>
@@ -167,7 +179,7 @@ export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, u
                               ? 'text-gray-400 dark:text-gray-600 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-gray-700 opacity-0 group-hover:opacity-100'
                               : 'text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-gray-900 opacity-100'
                           }`}
-                          title={currentDisplayName ? "编辑用户名" : "设置用户名"}
+                          title={currentDisplayName ? t('profile.displayName.edit') : t('profile.displayName.set')}
                         >
                           <PencilIcon className="w-4 h-4" />
                         </button>
@@ -187,7 +199,9 @@ export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, u
                   <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <EnvelopeIcon className="w-5 h-5 text-gray-500 mt-0.5" />
                     <div>
-                      <div className="text-sm font-medium text-gray-500 dark:text-gray-400">邮箱</div>
+                      <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        {t('profile.email.label')}
+                      </div>
                       <div className="text-sm text-gray-900 dark:text-gray-100 mt-1">{user.email}</div>
                     </div>
                   </div>
@@ -196,9 +210,11 @@ export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, u
                   <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <CalendarIcon className="w-5 h-5 text-gray-500 mt-0.5" />
                     <div>
-                      <div className="text-sm font-medium text-gray-500 dark:text-gray-400">创建时间</div>
+                      <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        {t('profile.createdAt.label')}
+                      </div>
                       <div className="text-sm text-gray-900 dark:text-gray-100 mt-1">
-                        {user.created_at ? format(new Date(user.created_at), 'yyyy年MM月dd日 HH:mm', { locale: zhCN }) : '暂无记录'}
+                        {formatDate(user.created_at)}
                       </div>
                     </div>
                   </div>
@@ -207,11 +223,11 @@ export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, u
                   <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <ClockIcon className="w-5 h-5 text-gray-500 mt-0.5" />
                     <div>
-                      <div className="text-sm font-medium text-gray-500 dark:text-gray-400">最后登录时间</div>
+                      <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        {t('profile.lastSignIn.label')}
+                      </div>
                       <div className="text-sm text-gray-900 dark:text-gray-100 mt-1">
-                        {user.last_sign_in_at 
-                          ? format(new Date(user.last_sign_in_at), 'yyyy年MM月dd日 HH:mm', { locale: zhCN })
-                          : '暂无记录'}
+                        {formatDate(user.last_sign_in_at)}
                       </div>
                     </div>
                   </div>

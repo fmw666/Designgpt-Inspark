@@ -1,6 +1,7 @@
 import { FC } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
+import { useTranslation } from 'react-i18next';
 import { XMarkIcon, BellIcon, MoonIcon, GlobeAltIcon, Cog6ToothIcon, SunIcon } from '@heroicons/react/24/outline';
 import { useThemeStore } from '@/styles/theme';
 
@@ -11,6 +12,7 @@ interface SettingsModalProps {
 
 export const SettingsModal: FC<SettingsModalProps> = ({ isOpen, onClose }) => {
   const { theme, toggleTheme } = useThemeStore();
+  const { t, i18n } = useTranslation();
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -47,7 +49,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({ isOpen, onClose }) => {
                       as="h3"
                       className="text-lg font-medium leading-6 text-gray-900 dark:text-white"
                     >
-                      设置
+                      {t('settings.title')}
                     </Dialog.Title>
                   </div>
                   <button
@@ -60,19 +62,6 @@ export const SettingsModal: FC<SettingsModalProps> = ({ isOpen, onClose }) => {
 
                 {/* 内容区域 */}
                 <div className="space-y-4">
-                  {/* 通知设置 */}
-                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <BellIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                      <div>
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">通知设置</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">管理应用通知</div>
-                      </div>
-                    </div>
-                    <button className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300">
-                      管理
-                    </button>
-                  </div>
 
                   {/* 主题设置 */}
                   <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -83,8 +72,8 @@ export const SettingsModal: FC<SettingsModalProps> = ({ isOpen, onClose }) => {
                         <MoonIcon className="w-5 h-5 text-indigo-400" />
                       )}
                       <div>
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">主题设置</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{theme === 'light' ? '浅色主题' : '深色主题'}</div>
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">{t('settings.theme.title')}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{theme === 'light' ? t('settings.theme.light') : t('settings.theme.dark')}</div>
                       </div>
                     </div>
                     <button
@@ -107,12 +96,17 @@ export const SettingsModal: FC<SettingsModalProps> = ({ isOpen, onClose }) => {
                     <div className="flex items-center gap-3">
                       <GlobeAltIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                       <div>
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">语言设置</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">切换应用语言</div>
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">{t('settings.language.title')}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                          {i18n.language === 'en' ? t('settings.language.en') : t('settings.language.zh')}
+                        </div>
                       </div>
                     </div>
-                    <button className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300">
-                      切换
+                    <button 
+                      onClick={() => i18n.changeLanguage(i18n.language === 'en' ? 'zh' : 'en')}
+                      className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+                    >
+                      {t('common.change')}
                     </button>
                   </div>
                 </div>

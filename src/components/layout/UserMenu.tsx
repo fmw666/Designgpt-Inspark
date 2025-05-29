@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { SettingsModal } from '../user/SettingsModal';
 import { UserProfileModal } from '../user/UserProfileModal';
 import { getAvatarClasses, getAvatarSizeClasses, getAvatarText } from '@/utils/avatar';
+import { useTranslation } from 'react-i18next';
 
 interface UserMenuProps {
   isCollapsed?: boolean;
@@ -14,7 +15,7 @@ interface UserMenuProps {
 
 const UserMenu: FC<UserMenuProps> = ({ isCollapsed, onSignInClick }) => {
   const { user, signOut } = useAuth();
-
+  const { t } = useTranslation();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -34,7 +35,7 @@ const UserMenu: FC<UserMenuProps> = ({ isCollapsed, onSignInClick }) => {
       >
         <UserCircleIcon className="w-8 h-8 text-gray-400 dark:text-gray-500" />
         {!isCollapsed && (
-          <span className="text-sm text-gray-700 dark:text-gray-300">登录</span>
+          <span className="text-sm text-gray-700 dark:text-gray-300">{t('auth.login')}</span>
         )}
       </button>
     );
@@ -61,7 +62,7 @@ const UserMenu: FC<UserMenuProps> = ({ isCollapsed, onSignInClick }) => {
               </div>
               {!isCollapsed && (
                 <span className="text-sm text-gray-700 dark:text-gray-300 truncate">
-                  {user.email || '未登录'}
+                  {user.email || t('auth.notLogin')}
                 </span>
               )}
             </Menu.Button>
@@ -86,7 +87,7 @@ const UserMenu: FC<UserMenuProps> = ({ isCollapsed, onSignInClick }) => {
                       } flex w-full items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors`}
                     >
                       <UserIcon className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
-                      个人信息
+                      {t('profile.title')}
                     </button>
                   )}
                 </Menu.Item>
@@ -101,7 +102,7 @@ const UserMenu: FC<UserMenuProps> = ({ isCollapsed, onSignInClick }) => {
                       } flex w-full items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors`}
                     >
                       <Cog6ToothIcon className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
-                      设置
+                      {t('settings.title')}
                     </button>
                   )}
                 </Menu.Item>
@@ -119,7 +120,7 @@ const UserMenu: FC<UserMenuProps> = ({ isCollapsed, onSignInClick }) => {
                       } flex w-full items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-gray-800 transition-colors`}
                     >
                       <ArrowRightOnRectangleIcon className="w-4 h-4 mr-2 text-red-500 dark:text-red-400" />
-                      退出登录
+                      {t('auth.logout')}
                     </button>
                   )}
                 </Menu.Item>

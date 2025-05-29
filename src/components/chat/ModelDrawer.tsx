@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { MagnifyingGlassIcon, XMarkIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { ImageModel, modelService } from '@/services/modelService';
 import { getDefaultSelectedModels } from '@/utils/modelUtils';
+import { useTranslation } from 'react-i18next';
 
 interface SelectedModel {
   id: string;
@@ -28,6 +29,7 @@ export const ModelDrawer: React.FC<ModelDrawerProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const drawerRef = useRef<HTMLDivElement>(null);
   const isInitialMount = useRef(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const allModels = modelService.getAllModels();
@@ -149,7 +151,7 @@ export const ModelDrawer: React.FC<ModelDrawerProps> = ({
           className="flex items-center gap-1 px-3 py-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 transition-colors"
         >
           <PlusIcon className="h-4 w-4" />
-          <span>添加模型</span>
+          <span>{t('model.add')}</span>
         </button>
       </div>
 
@@ -179,7 +181,7 @@ export const ModelDrawer: React.FC<ModelDrawerProps> = ({
                           <p className="text-sm text-gray-500 dark:text-gray-400">{model.description}</p>
                           {model.publishDate && (
                             <p className="text-xs text-gray-400 dark:text-gray-600 mt-1">
-                              发布日期: {formatDate(model.publishDate)}
+                              {t('model.publishDate')}: {formatDate(model.publishDate)}
                             </p>
                           )}
                         </div>
@@ -257,7 +259,7 @@ export const ModelDrawer: React.FC<ModelDrawerProps> = ({
                       : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                   }`}
                 >
-                  {category === 'all' ? '全部' : category}
+                  {category === 'all' ? t('model.all') : category}
                 </button>
               ))}
             </div>
@@ -268,7 +270,7 @@ export const ModelDrawer: React.FC<ModelDrawerProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="搜索模型..."
+                placeholder={`${t('model.search')}...`}
                 className="w-full pl-10 pr-4 py-2.5 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 ease-in-out"
               />
               <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-400 dark:text-gray-600" />
