@@ -668,7 +668,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
               <button
                 type="submit"
                 disabled={!input.trim() || selectedModels.length === 0 || isSending || isGenerating}
-                className="absolute right-2 bottom-2 p-2 text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 disabled:text-indigo-400 disabled:cursor-not-allowed transition-colors duration-200 rounded-lg hover:bg-gray-800 disabled:hover:bg-transparent"
+                className="absolute right-2 bottom-2 p-2 text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-500 disabled:text-indigo-400 disabled:cursor-not-allowed transition-colors duration-200 rounded-lg disabled:hover:bg-transparent"
               >
                 {isSending ? (
                   <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
