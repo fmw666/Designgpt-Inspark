@@ -2,6 +2,7 @@ import { FC } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SparklesIcon, LightBulbIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'react-hot-toast';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -30,6 +31,15 @@ const itemVariants = {
 export const NewChatGuide: FC = () => {
   const { t } = useTranslation();
   const examples = t('chat.guide.tips.examples', { returnObjects: true }) as string[];
+
+  const handleCopy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success(t('chat.guide.tips.copied'));
+    } catch (err) {
+      toast.error(t('chat.guide.tips.copyFailed'));
+    }
+  };
 
   return (
     <div className="h-full flex flex-col">
@@ -91,23 +101,27 @@ export const NewChatGuide: FC = () => {
               variants={itemVariants}
               className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700"
             >
-              <div className="flex items-center gap-3 mb-6">
+              <div className="flex items-center gap-3 mb-4">
                 <LightBulbIcon className="w-6 h-6 text-amber-500" />
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                   {t('chat.guide.tips.title')}
                 </h3>
               </div>
-              <ul className="space-y-4">
+              <ul>
                 {examples.map((example: string, index: number) => (
                   <motion.li
                     key={index}
                     variants={itemVariants}
-                    className="flex items-start group"
+                    className="flex items-center"
                   >
-                    <span className="flex-shrink-0 w-2 h-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 mt-2 mr-3" />
-                    <p className="text-gray-700 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                    <span className="flex-shrink-0 w-2 h-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 mr-3" />
+                    <button
+                      onClick={() => handleCopy(example)}
+                      className="text-left text-gray-700 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg px-3 py-2 -ml-3"
+                      title={t('chat.guide.tips.clickToCopy')}
+                    >
                       {example}
-                    </p>
+                    </button>
                   </motion.li>
                 ))}
               </ul>
@@ -117,4 +131,4 @@ export const NewChatGuide: FC = () => {
       </AnimatePresence>
     </div>
   );
-}; 
+};

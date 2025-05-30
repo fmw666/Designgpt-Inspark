@@ -58,7 +58,10 @@ export const en = {
           'A cute panda playing in a bamboo forest, watercolor style',
           'A cherry blossom forest, watercolor style, soft pink and white',
           'A landscape painting, traditional Chinese style, with misty clouds'
-        ]
+        ],
+        clickToCopy: 'Click to copy',
+        copied: 'Copied to clipboard!',
+        copyFailed: 'Failed to copy text'
       }
     },
   },
