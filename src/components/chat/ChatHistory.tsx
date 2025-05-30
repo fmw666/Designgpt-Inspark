@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { format, isToday, isYesterday, isThisYear } from 'date-fns';
 import { zhCN, enUS } from 'date-fns/locale';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
+import { toast } from 'react-hot-toast';
 
 // 添加一个判断是否在最近 7 天内的函数
 const isWithinLast7Days = (date: Date) => {
@@ -100,14 +101,30 @@ export const ChatHistory = () => {
   };
 
   const handleConfirmDelete = async () => {
-    if (chatToDelete) {
-      setIsDeleting(chatToDelete);
-      try {
-        await deleteChat(chatToDelete);
-      } finally {
-        setIsDeleting(null);
-        setChatToDelete(null);
+    if (!chatToDelete) return;
+
+    setIsDeleting(chatToDelete);
+    try {
+      await deleteChat(chatToDelete);
+      toast.success(t('history.deleteSuccess'));
+      
+      // 如果删除的是当前聊天，切换到其他聊天或首页
+      if (currentChat?.id === chatToDelete) {
+        const remainingChats = chats.filter(chat => chat.id !== chatToDelete);
+        if (remainingChats.length > 0) {
+          switchChat(remainingChats[0].id);
+          navigate(`/chat/${remainingChats[0].id}`);
+        } else {
+          switchChat(null);
+          navigate('/');
+        }
       }
+    } catch (error) {
+      console.error('Error deleting chat:', error);
+      toast.error(t('history.deleteError'));
+    } finally {
+      setIsDeleting(null);
+      setChatToDelete(null);
     }
   };
 
@@ -157,18 +174,19 @@ export const ChatHistory = () => {
                           {chat.messages[0]?.content || t('history.noMessages')}
                         </div>
                       </div>
-                      <div
+                      <button
                         onClick={(e) => handleDeleteClick(e, chat.id)}
                         className={`ml-2 p-1.5 text-gray-400 hover:text-red-500 transition-colors duration-200 cursor-pointer rounded-lg ${
                           isDeleting === chat.id ? 'opacity-50 cursor-not-allowed' : ''
                         } ${currentChat?.id === chat.id ? 'group-hover:bg-white/50 dark:group-hover:bg-gray-900/50' : 'group-hover:bg-gray-100 dark:group-hover:bg-gray-800'}`}
+                        disabled={isDeleting === chat.id}
                       >
                         {isDeleting === chat.id ? (
                           <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
                         ) : (
                           <TrashIcon className="w-4 h-4" />
                         )}
-                      </div>
+                      </button>
                     </div>
                   </motion.div>
                 ))}
@@ -192,6 +210,8 @@ export const ChatHistory = () => {
         message={t('history.deleteMessage')}
         confirmText={t('history.delete')}
         cancelText={t('common.cancel')}
+        type="danger"
+        maxWidth="md"
       />
     </div>
   );
