@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { HandThumbUpIcon, XMarkIcon } from '@heroicons/react/24/solid';
-import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
+import { Modal } from '@/components/common/Modal';
 
 interface FeedbackState {
   isOpen: boolean;
@@ -41,21 +41,6 @@ export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelNam
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
   }, [feedbackState.isOpen]);
-
-//   // 处理点击外部关闭弹窗
-//   useEffect(() => {
-//     const handleClickOutside = (e: MouseEvent) => {
-//       const modal = document.getElementById('feedback-modal');
-//       if (modal && !modal.contains(e.target as Node) && feedbackState.isOpen) {
-//         setFeedbackState(prev => ({ ...prev, isOpen: false }));
-//       }
-//     };
-
-//     if (feedbackState.isOpen) {
-//       document.addEventListener('mousedown', handleClickOutside);
-//     }
-//     return () => document.removeEventListener('mousedown', handleClickOutside);
-//   }, [feedbackState.isOpen]);
 
   const openFeedback = () => {
     setFeedbackState({
@@ -211,140 +196,124 @@ export const ImageFeedback: React.FC<ImageFeedbackProps> = ({ imageUrl, modelNam
         <HandThumbUpIcon className="w-5 h-5 text-indigo-600" />
       </button>
 
-      {/* 反馈弹窗 - 使用 Portal 渲染到 body */}
-      {feedbackState.isOpen && createPortal(
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center">
-          <div 
-            id="feedback-modal"
-            className="bg-white dark:bg-gray-900 rounded-lg p-6 w-full max-w-md mx-4 shadow-xl"
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-                {t('feedback.title')}
-              </h3>
-              <button
-                onClick={() => setFeedbackState(prev => ({ ...prev, isOpen: false }))}
-                className="text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400"
-              >
-                <XMarkIcon className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* 预览图片 */}
-            {feedbackState.imageUrl && (
-              <div className="mb-4">
-                <img
-                  src={feedbackState.imageUrl}
-                  alt={t('feedback.preview.alt')}
-                  className="w-full h-48 object-cover rounded-lg"
-                />
-              </div>
-            )}
-
-            {/* 评分 */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                {t('feedback.rating.label')}
-              </label>
-              <div className="flex items-center gap-1">
-                {[0, 1, 2, 3, 4].map(renderStar)}
-                {/* 评分文字说明 */}
-                <span className="ml-3 text-sm text-gray-500 dark:text-gray-400">
-                  {feedbackState.rating > 0 ? (
-                    <span className="text-yellow-500 dark:text-yellow-400 font-medium">
-                      {t('feedback.rating.star', { count: feedbackState.rating })}
-                    </span>
-                  ) : (
-                    t('feedback.rating.placeholder')
-                  )}
-                </span>
-              </div>
-            </div>
-
-            {/* 原因选择 */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {t('feedback.reasons.label')}
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                {reasonOptions.map(({ key, value }) => (
-                  <div key={key}>
-                    <label
-                      className="flex items-center space-x-2 p-2 rounded-lg border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={feedbackState.reasons.includes(value)}
-                        onChange={(e) => handleReasonChange(value, e.target.checked)}
-                        className="rounded text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span className="text-sm text-gray-700 dark:text-gray-300">{value}</span>
-                    </label>
-                    {/* 其他选项的输入框 */}
-                    {key === 'other' && feedbackState.reasons.includes(value) && (
-                      <div className="mt-2">
-                        <div className="relative">
-                          <input
-                            type="text"
-                            value={feedbackState.otherReason}
-                            onChange={(e) => handleOtherReasonChange(e.target.value.slice(0, 8))}
-                            placeholder={t('feedback.reasons.other.placeholder')}
-                            maxLength={8}
-                            className="w-full px-3 py-2 pr-16 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 ease-in-out"
-                          />
-                          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                            <span className="text-xs text-gray-400 dark:text-gray-500">
-                              {t('feedback.reasons.other.characterCount', { count: feedbackState.otherReason.length })}
-                            </span>
-                            <button
-                              onClick={() => handleOtherReasonChange('')}
-                              className="p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
-                            >
-                              <XMarkIcon className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* 文字反馈 */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {t('feedback.comment.label')}
-              </label>
-              <textarea
-                value={feedbackState.comment}
-                onChange={(e) => setFeedbackState(prev => ({ ...prev, comment: e.target.value }))}
-                className="w-full px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none placeholder-gray-500 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none ease-in-out"
-                rows={3}
-                placeholder={t('feedback.comment.placeholder')}
-              />
-            </div>
-
-            {/* 提交按钮 */}
-            <div className="flex justify-end">
-              <button
-                onClick={handleFeedbackSubmit}
-                disabled={feedbackState.rating === 0}
-                className={`px-4 py-2 rounded-2xl text-white transition-colors ${
-                  feedbackState.rating === 0
-                    ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
-                    : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
-                }`}
-                title={feedbackState.rating === 0 ? t('feedback.submit.disabled') : undefined}
-              >
-                {t('feedback.submit.button')}
-              </button>
-            </div>
+      {/* 反馈弹窗 */}
+      <Modal
+        isOpen={feedbackState.isOpen}
+        onClose={() => setFeedbackState(prev => ({ ...prev, isOpen: false }))}
+        title={t('feedback.title')}
+        maxWidth="md"
+      >
+        {/* 预览图片 */}
+        {feedbackState.imageUrl && (
+          <div className="mb-4">
+            <img
+              src={feedbackState.imageUrl}
+              alt={t('feedback.preview.alt')}
+              className="w-full h-48 object-cover rounded-lg"
+            />
           </div>
-        </div>,
-        document.body
-      )}
+        )}
+
+        {/* 评分 */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+            {t('feedback.rating.label')}
+          </label>
+          <div className="flex items-center gap-1">
+            {[0, 1, 2, 3, 4].map(renderStar)}
+            {/* 评分文字说明 */}
+            <span className="ml-3 text-sm text-gray-500 dark:text-gray-400">
+              {feedbackState.rating > 0 ? (
+                <span className="text-yellow-500 dark:text-yellow-400 font-medium">
+                  {t('feedback.rating.star', { count: feedbackState.rating })}
+                </span>
+              ) : (
+                t('feedback.rating.placeholder')
+              )}
+            </span>
+          </div>
+        </div>
+
+        {/* 原因选择 */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            {t('feedback.reasons.label')}
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            {reasonOptions.map(({ key, value }) => (
+              <div key={key}>
+                <label
+                  className="flex items-center space-x-2 p-2 rounded-lg border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
+                >
+                  <input
+                    type="checkbox"
+                    checked={feedbackState.reasons.includes(value)}
+                    onChange={(e) => handleReasonChange(value, e.target.checked)}
+                    className="rounded text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{value}</span>
+                </label>
+                {/* 其他选项的输入框 */}
+                {key === 'other' && feedbackState.reasons.includes(value) && (
+                  <div className="mt-2">
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={feedbackState.otherReason}
+                        onChange={(e) => handleOtherReasonChange(e.target.value.slice(0, 8))}
+                        placeholder={t('feedback.reasons.other.placeholder')}
+                        maxLength={8}
+                        className="w-full px-3 py-2 pr-16 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 ease-in-out"
+                      />
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                        <span className="text-xs text-gray-400 dark:text-gray-500">
+                          {t('feedback.reasons.other.characterCount', { count: feedbackState.otherReason.length })}
+                        </span>
+                        <button
+                          onClick={() => handleOtherReasonChange('')}
+                          className="p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
+                        >
+                          <XMarkIcon className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 文字反馈 */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            {t('feedback.comment.label')}
+          </label>
+          <textarea
+            value={feedbackState.comment}
+            onChange={(e) => setFeedbackState(prev => ({ ...prev, comment: e.target.value }))}
+            className="w-full px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none placeholder-gray-500 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none ease-in-out"
+            rows={3}
+            placeholder={t('feedback.comment.placeholder')}
+          />
+        </div>
+
+        {/* 提交按钮 */}
+        <div className="flex justify-end">
+          <button
+            onClick={handleFeedbackSubmit}
+            disabled={feedbackState.rating === 0}
+            className={`px-4 py-2 rounded-2xl text-white transition-colors ${
+              feedbackState.rating === 0
+                ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
+                : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+            }`}
+            title={feedbackState.rating === 0 ? t('feedback.submit.disabled') : undefined}
+          >
+            {t('feedback.submit.button')}
+          </button>
+        </div>
+      </Modal>
     </>
   );
 };
- 

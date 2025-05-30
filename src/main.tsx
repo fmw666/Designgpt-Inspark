@@ -6,9 +6,9 @@ import './i18n';
 import './styles/index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-    <Router>
-      <React.StrictMode>
-        <App />
-      </React.StrictMode>
-    </Router>
+  <Router>
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  </Router>
 );
