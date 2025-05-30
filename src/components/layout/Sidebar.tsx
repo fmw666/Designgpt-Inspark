@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Logo } from './Logo';
+import { Logo } from '@/components/common/Logo';
 import { ChatHistory } from '../chat/ChatHistory';
 import { useAuth } from '@/hooks/useAuth';
 import { eventBus } from '@/utils/eventBus';
