@@ -213,4 +213,9 @@ export const zh = {
       alt: '预览',
     },
   },
+  assets: {
+    title: '素材库',
+    backToChat: '返回聊天',
+    todo: '素材库功能即将推出...',
+  },
 };

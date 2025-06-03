@@ -1,10 +1,12 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import Assets from '@/pages/Assets';
 import Chat from '@/pages/Chat';
 import NotFound from '@/pages/NotFound';
 import TestLayout from '@/components/test/TestLayout';
 import { AuthProvider } from '@/components/auth/AuthProvider';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 function App() {
   return (
@@ -72,6 +74,14 @@ function App() {
           <Route path="/chat" element={<Navigate to="/chat/new" replace />} />
           <Route path="/chat/:chatId" element={<Chat />} />
           <Route path="/test" element={<TestLayout />} />
+          <Route
+            path="/assets"
+            element={
+              <ProtectedRoute>
+                <Assets />
+              </ProtectedRoute>
+            }
+          />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </AuthProvider>

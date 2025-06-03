@@ -213,4 +213,9 @@ export const en = {
       alt: 'Preview',
     },
   },
+  assets: {
+    title: 'Assets',
+    backToChat: 'Back to Chat',
+    todo: 'Asset library is coming soon...',
+  },
 };
