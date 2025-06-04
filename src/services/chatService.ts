@@ -7,9 +7,11 @@ interface Model {
 }
 
 export interface ImageResult {
+  id: string;
   url: string | null;
+  text: string | null;
   error: string | null;
-  errorMessage: string;
+  errorMessage: string | null;
 }
 
 interface Results {

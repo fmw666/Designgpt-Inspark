@@ -18,6 +18,8 @@ export const zh = {
     placeholderGenerating: '正在生成图片，请稍候...',
     placeholderLogin: '请先登录后再开始对话',
     images: '张图片',
+    enterDesign: '进入设计',
+    jumpToReference: '跳转到引用位置',
     feedback: {
       helpful: '有帮助',
       notHelpful: '没帮助',
@@ -29,6 +31,9 @@ export const zh = {
       selectedModels: '已选择 {{count}} 个模型',
       generating: '正在生成图片...',
       characterCount: '{{count}} 字符',
+      designMode: '图片编辑模式',
+      designTitle: '已进入图片编辑模式',
+      designModel: '默认使用 gpt-4o-image 模型',
     },
     title: {
       edit: '编辑标题',
@@ -175,15 +180,8 @@ export const zh = {
     tryAgain: '请重试',
   },
   feedback: {
-    title: '图片反馈',
     button: {
       title: '提供反馈',
-    },
-    rating: {
-      label: '评分',
-      placeholder: '请选择评分',
-      star: '{{count}} 星',
-      halfStar: '{{count}} 星',
     },
     reasons: {
       label: '原因（可多选）',
@@ -219,3 +217,4 @@ export const zh = {
     todo: '素材库功能即将推出...',
   },
 };
+ 

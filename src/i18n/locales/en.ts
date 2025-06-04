@@ -18,6 +18,8 @@ export const en = {
     placeholderGenerating: 'Generating images, please wait...',
     placeholderLogin: 'Please sign in to start chatting',
     images: 'images',
+    enterDesign: 'Enter Design',
+    jumpToReference: 'Jump to Reference',
     feedback: {
       helpful: 'Helpful',
       notHelpful: 'Not Helpful',
@@ -29,6 +31,9 @@ export const en = {
       selectedModels: '{{count}} models selected',
       generating: 'Generating images...',
       characterCount: '{{count}} characters',
+      designMode: 'Image Edit Mode',
+      designTitle: 'Entered Image Edit Mode',
+      designModel: 'Using gpt-4o-image model by default',
     },
     title: {
       edit: 'Edit title',
@@ -175,15 +180,8 @@ export const en = {
     tryAgain: 'Please try again',
   },
   feedback: {
-    title: 'Image Feedback',
     button: {
       title: 'Provide Feedback',
-    },
-    rating: {
-      label: 'Rating',
-      placeholder: 'Please select a rating',
-      star: '{{count}} stars',
-      halfStar: '{{count}} stars',
     },
     reasons: {
       label: 'Reasons (Multiple Choice)',

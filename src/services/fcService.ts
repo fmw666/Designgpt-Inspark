@@ -4,6 +4,7 @@ export interface StandardResponse {
   id: string;
   status: 'success' | 'error';
   results: {
+    id: string | null;
     url: string | null;
     text: string | null;
     error: string | null;

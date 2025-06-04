@@ -1,8 +1,8 @@
 import { FC, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SparklesIcon, ExclamationCircleIcon, XMarkIcon, ClockIcon } from '@heroicons/react/24/solid';
-import { ImageFeedback } from '@/components/feedback/ImageFeedback';
+import { SparklesIcon, ExclamationCircleIcon, ClockIcon } from '@heroicons/react/24/solid';
 import { getAvatarClasses, getAvatarSizeClasses } from '@/utils/avatar';
+import { ImagePreview } from '@/components/common/ImagePreview';
 
 interface Model {
   id: string;
@@ -11,9 +11,11 @@ interface Model {
 }
 
 interface ImageResult {
+  id: string;
   url: string | null;
+  text: string | null;
   error: string | null;
-  errorMessage: string;
+  errorMessage: string | null;
   isGenerating?: boolean;
 }
 
@@ -31,26 +33,41 @@ export interface Message {
   content: string;
   results: Results;
   createdAt: string;
+  userImage?: {
+    url: string | null;
+    alt?: string;
+    referenceMessageId: string | null;
+    referenceResultId: string | null;
+  };
+}
+
+export interface SelectedImage {
+  url: string | null;
+  messageId: string | null;
+  resultId: string | null;
 }
 
 interface ChatMessageProps {
   message: Message;
   userAvatar: string;
+  onEnterDesign?: (image: SelectedImage) => void;
+  onJumpToReference?: (messageId: string, resultId: string) => void;
 }
 
 const GENERATION_TIMEOUT = 10 * 60 * 1000; // 10 minutes in milliseconds
 
-export const ChatMessage: FC<ChatMessageProps> = ({ message, userAvatar }) => {
+export const ChatMessage: FC<ChatMessageProps> = ({ 
+  message, 
+  userAvatar, 
+  onEnterDesign,
+  onJumpToReference 
+}) => {
   const { t } = useTranslation();
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(null);
 
-  // Check if any image is still generating and has timed out
-  const hasTimedOutImages = Object.values(message.results.images).some(results =>
-    results.some(result => 
-      result.isGenerating && 
-      (Date.now() - new Date(message.createdAt).getTime() > GENERATION_TIMEOUT)
-    )
-  );
+  const handleJumpToReference = (messageId: string, resultId: string) => {
+    onJumpToReference?.(messageId, resultId);
+  };
 
   return (
     <div className="flex flex-col mb-6">
@@ -61,9 +78,46 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message, userAvatar }) => {
             <div className="inline-block bg-indigo-600 text-white rounded-lg px-4 py-2">
               <p className="text-sm">{message.content}</p>
             </div>
+            {/* User message images */}
+            {message.userImage?.url && (
+              <div className="mt-3 flex flex-col items-end gap-2">
+                <div
+                  className="group relative aspect-square w-48 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 cursor-pointer"
+                  onClick={() => setSelectedImage({
+                    url: message.userImage?.url || null,
+                    messageId: message.userImage?.referenceMessageId || null,
+                    resultId: message.userImage?.referenceResultId || null,
+                  })}
+                >
+                  <img
+                    src={message.userImage.url}
+                    alt={message.userImage.alt || 'User uploaded image'}
+                    className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
+                </div>
+                {/* Action buttons */}
+                <div className="flex items-center gap-2">
+                  {message.userImage?.referenceMessageId && message.userImage?.referenceResultId && (
+                    <button
+                      onClick={() => handleJumpToReference(message.userImage?.referenceMessageId!, message.userImage?.referenceResultId!)}
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full transition-colors hover:bg-white dark:hover:bg-gray-700"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
+                      </svg>
+                      {t('chat.jumpToReference')}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
           <div className="flex-shrink-0">
-            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+            <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
+              message.userImage ? 'bg-gradient-to-br from-violet-500 to-fuchsia-600' : 'bg-gradient-to-br from-indigo-500 to-purple-600'
+            }`}>
               <div className={`${getAvatarClasses()} ${getAvatarSizeClasses('sm')}`}>
                 <span>{userAvatar}</span>
               </div>
@@ -73,32 +127,25 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message, userAvatar }) => {
       </div>
 
       {/* Image preview modal */}
-      {selectedImage && (
-        <div
-          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
-          onClick={() => setSelectedImage(null)}
-        >
-          <button
-            onClick={() => setSelectedImage(null)}
-            className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors"
-          >
-            <XMarkIcon className="h-8 w-8" />
-          </button>
-          <div className="relative max-w-7xl max-h-[90vh] w-full h-full">
-            <img
-              src={selectedImage}
-              alt="Preview"
-              className="w-full h-full object-contain"
-            />
-          </div>
-        </div>
-      )}
+      <ImagePreview
+        imageUrl={selectedImage?.url || null}
+        onClose={() => setSelectedImage(null)}
+        alt="Message image preview"
+        onDesignClick={() => {
+          if (selectedImage) {
+            onEnterDesign?.(selectedImage);
+            setSelectedImage(null);
+          }
+        }}
+      />
 
       {/* AI response */}
       <div className="flex justify-start p-3">
         <div className="flex items-start gap-3 max-w-3xl">
           <div className="flex-shrink-0">
-            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+            <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
+              message.userImage ? 'bg-gradient-to-br from-cyan-500 to-blue-600' : 'bg-gradient-to-br from-emerald-500 to-teal-600'
+            }`}>
               <SparklesIcon className="h-6 w-6 text-white" />
             </div>
           </div>
@@ -106,6 +153,11 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message, userAvatar }) => {
             {/* AI text response */}
             {message.results.content && (
               <div className="inline-block bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-2 mb-3">
+                {message.userImage && (
+                  <div className="mb-2 text-xs font-medium text-indigo-600 dark:text-indigo-400">
+                    【{t('chat.input.designMode')}】
+                  </div>
+                )}
                 <p className="text-sm text-gray-900 dark:text-gray-100">{message.results.content}</p>
               </div>
             )}
@@ -133,11 +185,17 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message, userAvatar }) => {
                       (Date.now() - new Date(message.createdAt).getTime() > GENERATION_TIMEOUT);
 
                     return (
-                      <div
-                        key={index}
-                        className="group relative aspect-square rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900"
-                      >
-                        {result.isGenerating ? (
+                    <div
+                      key={index}
+                      data-result-id={result.id}
+                      className="group relative aspect-square rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 bg-transparent cursor-pointer"
+                      onClick={() => setSelectedImage({
+                        url: result.url,
+                        messageId: message.id,
+                        resultId: result.id,
+                      })}
+                    >
+                      {result.isGenerating ? (
                           isTimedOut ? (
                             <div className="absolute inset-0 flex items-center justify-center bg-yellow-50 dark:bg-yellow-900/30">
                               <div className="flex flex-col items-center gap-2 p-4">
@@ -148,56 +206,56 @@ export const ChatMessage: FC<ChatMessageProps> = ({ message, userAvatar }) => {
                               </div>
                             </div>
                           ) : (
-                            <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-gray-900">
-                              <div className="flex flex-col items-center gap-2">
-                                <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+                        <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-gray-900">
+                          <div className="flex flex-col items-center gap-2">
+                            <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
                                 <span className="text-sm text-gray-600 dark:text-gray-300">
                                   {t('common.generating')}
                                 </span>
-                              </div>
-                            </div>
+                          </div>
+                        </div>
                           )
-                        ) : result.error || result.errorMessage ? (
-                          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100">
+                      ) : result.error || result.errorMessage ? (
+                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100">
                             <div className="flex flex-col items-center gap-2 p-4 max-w-[90%] max-h-[90%] overflow-y-auto">
-                              <ExclamationCircleIcon className="h-6 w-6 text-red-500" />
+                            <ExclamationCircleIcon className="h-6 w-6 text-red-500" />
                               <div className="space-y-1 w-full text-left">
                                 <span className="text-sm text-red-600 text-center dark:text-red-400 font-medium block">
                                   {t('errors.generationFailed')}
                                 </span>
                                 <p className="text-xs text-red-500 dark:text-red-400 break-words">
-                                  {result.errorMessage}
-                                </p>
-                              </div>
+                                {result.errorMessage}
+                              </p>
                             </div>
                           </div>
-                        ) : result.url ? (
-                          <>
-                            <div
-                              key={index}
-                              className="group relative aspect-square rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 cursor-pointer"
-                              onClick={() => setSelectedImage(result.url)}
-                            >
-                              <img
-                                src={result.url}
-                                alt={`Generated image ${index + 1}`}
-                                className="w-full h-full object-cover transition-transform group-hover:scale-105 cursor-pointer"
-                              />
-                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-                            </div>
-                            {/* Feedback buttons */}
-                            <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <ImageFeedback imageUrl={result.url} modelName={modelId} />
-                            </div>
-                          </>
-                        ) : (
-                          <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+                        </div>
+                      ) : result.url ? (
+                        <>
+                          <div
+                            key={index}
+                              className="group relative aspect-square rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 bg-transparent cursor-pointer"
+                            onClick={() => setSelectedImage({
+                              url: result.url,
+                              messageId: message.id,
+                              resultId: result.id,
+                            })}
+                          >
+                            <img
+                              src={result.url}
+                              alt={`Generated image ${index + 1}`}
+                                className="w-full h-full object-contain transition-transform group-hover:scale-105 cursor-pointer"
+                            />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                          </div>
+                        </>
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
                             <span className="text-sm text-gray-500 dark:text-gray-400">
                               {t('common.loading')}
                             </span>
-                          </div>
-                        )}
-                      </div>
+                        </div>
+                      )}
+                    </div>
                     );
                   })}
                 </div>

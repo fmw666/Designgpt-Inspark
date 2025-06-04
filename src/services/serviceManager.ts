@@ -104,6 +104,7 @@ export class ServiceManager {
           id: request.chatId || '',
           status: 'error',
           results: {
+            id: null,
             url: null,
             text: null,
             error: error instanceof Error ? error.message : '未知错误',
