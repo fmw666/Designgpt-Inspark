@@ -165,7 +165,7 @@ const AssetsInterface: FC = () => {
     <div className="flex flex-col h-full relative">
 
       {/* Enhanced Masonry Grid */}
-      <div className="flex-1 overflow-auto p-4 sm:p-6 dark:from-gray-900 dark:to-gray-800 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] dark:bg-[linear-gradient(to_right,#ffffff12_1px,transparent_1px),linear-gradient(to_bottom,#ffffff12_1px,transparent_1px)]">
+      <div className="flex-1 overflow-auto p-4 sm:p-6 dark:from-gray-900 dark:to-gray-800 dark:bg-gray-900 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] dark:bg-[linear-gradient(to_right,#ffffff12_1px,transparent_1px),linear-gradient(to_bottom,#ffffff12_1px,transparent_1px)]">
         <div className="w-full">
           <div className="columns-2 sm:columns-3 lg:columns-4 gap-3 sm:gap-4 lg:gap-6 [column-fill:_balance] w-full">
             {assets.map((asset) => (
