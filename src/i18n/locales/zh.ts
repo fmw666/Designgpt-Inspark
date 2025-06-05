@@ -47,7 +47,7 @@ export const zh = {
       refresh: '刷新',
     },
     generation: {
-      generating: '🚀 正在生成图片...',
+      generating: '⏳ 正在生成图片...',
       success: '✅ 图片生成完成！',
       partialSuccess: '🚫 部分生成失败！',
       failed: '❌ 全部生成失败！',
@@ -215,6 +215,7 @@ export const zh = {
     title: '素材库',
     backToChat: '返回聊天',
     todo: '素材库功能即将推出...',
+    description: '您的AI绘图作品广场',
   },
   imagePreview: {
     colorPalette: '配色方案',

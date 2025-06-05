@@ -1,15 +1,17 @@
 import { FC, useState, useRef, useEffect } from 'react';
 import { ArrowPathIcon, MagnifyingGlassMinusIcon, MagnifyingGlassPlusIcon, XMarkIcon, HandThumbUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
-import { motion, useMotionValue, PanInfo } from 'framer-motion';
+import { motion, useMotionValue, PanInfo, AnimatePresence } from 'framer-motion';
 import { Modal } from '@/components/common/Modal';
 import { useTranslation } from 'react-i18next';
+import { DocumentDuplicateIcon } from '@heroicons/react/24/outline';
+import toast from 'react-hot-toast';
 
 interface ImagePreviewProps {
   imageUrl: string | null;
   onClose: () => void;
   alt?: string;
-  userPrompt?: string[];
   colorPalette?: string[];
+  userPrompt?: string;
   aiPrompt?: string;
   onAiPromptChange?: (prompt: string) => void;
   onDesignClick?: () => void;
@@ -26,8 +28,8 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
   imageUrl,
   onClose,
   alt = 'Preview',
-  userPrompt = [],
-  colorPalette = [],
+  colorPalette = ['#FF6B6B', '#FFD93D', '#4ECDC4', '#95E1D3', '#FF8B94'],
+  userPrompt = '',
   aiPrompt = '',
   onAiPromptChange,
   onDesignClick,
@@ -43,9 +45,14 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
     comment: '',
     otherReason: ''
   });
+  const [originalFeedbackState, setOriginalFeedbackState] = useState<FeedbackState>({
+    rating: 0,
+    reasons: [],
+    comment: '',
+    otherReason: ''
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [hoverRating, setHoverRating] = useState(0);
-  const [hoverHalf, setHoverHalf] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const x = useMotionValue(0);
@@ -78,6 +85,17 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
     x.set(0);
     y.set(0);
   }, [imageUrl, x, y]);
+
+  // 检查是否有修改
+  useEffect(() => {
+    const hasStateChanges = 
+      feedbackState.rating !== originalFeedbackState.rating ||
+      JSON.stringify(feedbackState.reasons.sort()) !== JSON.stringify(originalFeedbackState.reasons.sort()) ||
+      feedbackState.comment.trim() !== originalFeedbackState.comment.trim() ||
+      feedbackState.otherReason.trim() !== originalFeedbackState.otherReason.trim();
+    
+    setHasChanges(hasStateChanges);
+  }, [feedbackState, originalFeedbackState]);
 
   if (!imageUrl) return null;
 
@@ -112,7 +130,7 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
 
   // 处理拖动开始和结束
   const handleDragStart = () => setIsDragging(true);
-  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+  const handleDragEnd = () => {
     setIsDragging(false);
     
     if (!containerRef.current || !imageRef.current) return;
@@ -174,61 +192,10 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
     };
   };
 
-  const handleFeedbackSubmit = async () => {
-    if (!imageUrl) return;
-
-    setIsSubmitting(true);
-    try {
-      // TODO: 调用后端 API 保存反馈
-      console.log('Feedback submitted:', {
-        imageUrl,
-        ...feedbackState
-      });
-      
-      // 清空反馈
-      setFeedbackState({
-        rating: 0,
-        reasons: [],
-        comment: '',
-        otherReason: ''
-      });
-    } catch (error) {
-      console.error('Error submitting feedback:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // 处理评分变化
-  const handleRatingChange = (starIndex: number, isHalf: boolean) => {
-    const rating = starIndex + (isHalf ? 0.5 : 1);
-    setFeedbackState(prev => ({ ...prev, rating }));
-  };
-
-  // 处理鼠标移动
-  const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>, starIndex: number) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const isHalf = e.clientX - rect.left < rect.width / 2;
-    setHoverRating(starIndex + 1);
-    setHoverHalf(isHalf);
-  };
-
-  // 处理鼠标离开
-  const handleMouseLeave = () => {
-    setHoverRating(0);
-    setHoverHalf(false);
-  };
-
-  // 处理点击
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>, starIndex: number) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const isHalf = e.clientX - rect.left < rect.width / 2;
-    handleRatingChange(starIndex, isHalf);
-  };
-
-  // 处理其他原因变化
-  const handleOtherReasonChange = (value: string) => {
-    setFeedbackState(prev => ({ ...prev, otherReason: value }));
+  // 处理取消
+  const handleCancel = () => {
+    setFeedbackState(originalFeedbackState);
+    setHasChanges(false);
   };
 
   // 处理原因选择变化
@@ -252,6 +219,16 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
     }
   };
 
+  // 处理其他原因变化
+  const handleOtherReasonChange = (value: string) => {
+    setFeedbackState(prev => ({ ...prev, otherReason: value }));
+  };
+
+  // 处理评论变化
+  const handleCommentChange = (value: string) => {
+    setFeedbackState(prev => ({ ...prev, comment: value }));
+  };
+
   const reasonOptions = [
     { key: 'goodQuality', value: t('feedback.reasons.options.goodQuality') },
     { key: 'meetsExpectations', value: t('feedback.reasons.options.meetsExpectations') },
@@ -262,6 +239,75 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
     { key: 'other', value: t('feedback.reasons.options.other') },
   ];
 
+  // 处理全选
+  const handleSelectAll = () => {
+    const standardOptions = reasonOptions
+      .filter(option => option.key !== 'other')
+      .map(option => option.value);
+    
+    // 如果当前已经全选，则取消全选
+    if (areAllStandardOptionsSelected()) {
+      // 保留"其他"选项的状态
+      const otherOption = reasonOptions.find(option => option.key === 'other')?.value || '';
+      const otherSelected = feedbackState.reasons.includes(otherOption);
+      
+      setFeedbackState(prev => ({
+        ...prev,
+        reasons: otherSelected ? [otherOption] : []
+      }));
+    } else {
+      // 全选标准选项，同时保留"其他"选项的状态
+      const otherOption = reasonOptions.find(option => option.key === 'other')?.value || '';
+      const otherSelected = feedbackState.reasons.includes(otherOption);
+      
+      setFeedbackState(prev => ({
+        ...prev,
+        reasons: otherSelected ? [...standardOptions, otherOption] : standardOptions
+      }));
+    }
+  };
+
+  // 检查是否所有标准选项都被选中
+  const areAllStandardOptionsSelected = () => {
+    const standardOptions = reasonOptions
+      .filter(option => option.key !== 'other')
+      .map(option => option.value);
+    
+    return standardOptions.every(option => 
+      feedbackState.reasons.includes(option)
+    );
+  };
+
+  const handleCopy = (text: string, type: 'user' | 'ai') => {
+    navigator.clipboard.writeText(text);
+    toast.success(type === 'user' ? '用户提示词已复制' : 'AI提示词已复制');
+  };
+
+  const handleFeedbackSubmit = async () => {
+    if (!imageUrl) return;
+
+    setIsSubmitting(true);
+    try {
+      // TODO: 调用后端 API 保存反馈
+      console.log('Feedback submitted:', {
+        imageUrl,
+        ...feedbackState
+      });
+      
+      // 更新原始状态
+      setOriginalFeedbackState({
+        ...feedbackState,
+        comment: feedbackState.comment.trim(),
+        otherReason: feedbackState.otherReason.trim()
+      });
+      setHasChanges(false);
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <Modal
       isOpen={!!imageUrl}
@@ -270,7 +316,7 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
       showCloseButton={false}
       className="!p-0 w-fit"
     >
-      <div className="relative flex flex-col md:flex-row w-full h-[80vh] md:h-[80vh] bg-white dark:bg-gray-900">
+      <div className="relative flex flex-col md:flex-row w-full h-fit h-[80vh] md:h-[80vh] bg-white dark:bg-gray-900">
         {/* Close button */}
         <button
           onClick={onClose}
@@ -282,11 +328,14 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
         {/* Left side - Image preview */}
         <div 
           ref={containerRef}
-          className="relative overflow-hidden bg-gray-100 dark:bg-black flex items-center justify-center aspect-square"
+          className="relative overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center aspect-square"
           onWheel={handleWheel}
         >
+          {/* Grid Background */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] dark:bg-[linear-gradient(to_right,#ffffff12_1px,transparent_1px),linear-gradient(to_bottom,#ffffff12_1px,transparent_1px)]" />
+          
           <motion.div
-            className="flex items-center justify-center cursor-grab active:cursor-grabbing"
+            className="flex items-center justify-center cursor-grab active:cursor-grabbing relative z-10"
             drag={true}
             dragConstraints={dragConstraints}
             dragElastic={0}
@@ -311,7 +360,7 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
           </motion.div>
 
           {/* Image controls - Mobile optimized */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full px-2 py-1.5 shadow-lg md:bottom-6 md:px-3">
+          <div className="absolute bottom-4 left-1/2 z-[999] -translate-x-1/2 flex items-center gap-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full px-2 py-1.5 shadow-lg md:bottom-6 md:px-3">
             <button
               onClick={handleZoomOut}
               className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors p-1 md:p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -344,7 +393,7 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
           </div>
 
           {/* Scale indicator - Mobile optimized */}
-          <div className="absolute bottom-4 right-4 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-gray-600 dark:text-gray-300 text-xs md:text-sm px-2 py-0.5 md:px-2.5 md:py-1 rounded-full">
+          <div className="absolute bottom-4 right-4 z-[999] bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-gray-600 dark:text-gray-300 text-xs md:text-sm px-2 py-0.5 md:px-2.5 md:py-1 rounded-full">
             {Math.round(scale * 100)}%
           </div>
         </div>
@@ -353,27 +402,27 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
         <div className="w-full md:w-80 lg:w-96 border-t md:border-t-0 md:border-l border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 flex flex-col h-[40vh] md:h-auto">
           <div className="flex-1 overflow-y-auto">
             {/* Image Information Section */}
-            <div className="p-4 md:p-5 lg:p-6 bg-white dark:from-gray-800/50 dark:to-gray-900">
+            <div className="p-4 md:p-5 lg:p-6 bg-white dark:bg-gray-900 dark:from-gray-800/50 dark:to-gray-900">
               {/* Color Palette */}
               <div className="mb-5">
                 {colorPalette.length > 0 ? (
-                  <div className="flex gap-2 p-2 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800/50 dark:to-gray-900 rounded-lg shadow-sm">
+                  <div className="flex cursor-pointer bg-gradient-to-br from-gray-50 to-white dark:from-gray-800/50 dark:to-gray-900 rounded-2xl overflow-hidden shadow-sm">
                     {colorPalette.map((color, index) => (
                       <div
-                        key={index}
-                        className="group relative w-8 h-8"
-                      >
-                        <div
-                          className="absolute inset-0 rounded-md shadow-sm ring-1 ring-gray-200/50 dark:ring-gray-800/50 bg-gradient-to-br from-white/50 to-transparent dark:from-gray-900/50 transition-all duration-300 group-hover:shadow-md group-hover:scale-110 group-hover:ring-2 group-hover:ring-indigo-500/20"
-                          style={{ backgroundColor: color }}
-                        />
-                        <div className="absolute inset-0 rounded-md bg-gradient-to-br from-black/0 via-black/0 to-black/10 dark:to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <span className="text-[10px] font-medium text-white drop-shadow-lg bg-black/20 px-1.5 py-0.5 rounded-full">
-                            {color}
-                          </span>
-                        </div>
+                      key={index}
+                      className="group relative flex-1 h-8 first:rounded-l-md last:rounded-r-md"
+                    >
+                      <div
+                        className="absolute inset-0 shadow-sm ring-1 ring-gray-200/50 dark:ring-gray-800/50 bg-gradient-to-br from-white/50 to-transparent dark:from-gray-900/50 transition-all duration-300"
+                        style={{ backgroundColor: color }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-br from-black/0 via-black/0 to-black/10 dark:to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <span className="text-[10px] font-medium text-white drop-shadow-lg bg-black/20 px-1.5 py-0.5 rounded-full">
+                          {color}
+                        </span>
                       </div>
+                    </div>
                     ))}
                   </div>
                 ) : (
@@ -397,20 +446,21 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
                         </svg>
                         <h3 className="text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300">{t('imagePreview.userPrompt')}</h3>
                       </div>
-                      {userPrompt.length > 0 ? (
-                        <div className="flex flex-wrap gap-2">
-                          {userPrompt.map((prompt, index) => (
-                            <span
-                              key={index}
-                              className="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full text-xs md:text-sm font-medium"
-                            >
-                              {prompt}
-                            </span>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{t('imagePreview.noUserPrompt')}</p>
-                      )}
+                      <div className="relative group">
+                        <p className="px-3 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-gray-500 dark:text-gray-400 rounded-2xl text-xs md:text-sm font-medium">
+                          {userPrompt || t('imagePreview.noUserPrompt')}
+                        </p>
+                        {userPrompt && (
+                          <motion.button
+                            onClick={() => handleCopy(userPrompt, 'user')}
+                            className="absolute bottom-1.5 right-1.5 p-1.5 rounded-lg bg-white/50 dark:bg-gray-800/50 text-gray-500/70 dark:text-gray-400/70 hover:bg-white/90 dark:hover:bg-gray-800/90 hover:text-gray-500 dark:hover:text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-all duration-200 shadow-sm hover:shadow-md"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            <DocumentDuplicateIcon className="w-4 h-4" />
+                          </motion.button>
+                        )}
+                      </div>
                     </div>
 
                     {/* AI Enhanced Prompt */}
@@ -421,9 +471,21 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
                         </svg>
                         <h3 className="text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300">{t('imagePreview.aiPrompt')}</h3>
                       </div>
-                      <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-                        {aiPrompt || t('imagePreview.noAiPrompt')}
-                      </p>
+                      <div className="relative group">
+                        <p className="px-3 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-gray-500 dark:text-gray-400 rounded-2xl text-xs md:text-sm font-medium">
+                          {aiPrompt || t('imagePreview.noAiPrompt')}
+                        </p>
+                        {aiPrompt && (
+                          <motion.button
+                            onClick={() => handleCopy(aiPrompt, 'ai')}
+                            className="absolute bottom-1.5 right-1.5 p-1.5 rounded-lg bg-white/50 dark:bg-gray-800/50 text-gray-500/70 dark:text-gray-400/70 hover:bg-white/90 dark:hover:bg-gray-800/90 hover:text-gray-500 dark:hover:text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-all duration-200 shadow-sm hover:shadow-md"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            <DocumentDuplicateIcon className="w-4 h-4" />
+                          </motion.button>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -488,9 +550,21 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
                       <div className="p-4 space-y-4">
                         {/* 原因选择 */}
                         <div>
-                          <label className="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                            {t('imagePreview.feedback.reasons.label')}
-                          </label>
+                          <div className="flex items-center justify-between mb-3">
+                            <label className="block text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300">
+                              {t('imagePreview.feedback.reasons.label')}
+                            </label>
+                            <button
+                              onClick={handleSelectAll}
+                              className={`text-xs md:text-sm px-2 py-1 rounded-lg transition-all duration-200 ${
+                                areAllStandardOptionsSelected()
+                                  ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30'
+                                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                              }`}
+                            >
+                              {areAllStandardOptionsSelected() ? '取消全选' : '全选'}
+                            </button>
+                          </div>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             {reasonOptions.map(({ key, value }) => (
                               <div key={key}>
@@ -543,7 +617,7 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
                           </label>
                           <textarea
                             value={feedbackState.comment}
-                            onChange={(e) => setFeedbackState(prev => ({ ...prev, comment: e.target.value }))}
+                            onChange={(e) => handleCommentChange(e.target.value)}
                             className="w-full px-3 py-2 text-xs md:text-sm text-gray-900 dark:text-gray-100 outline-none placeholder-gray-500 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none ease-in-out"
                             rows={3}
                             placeholder={t('imagePreview.feedback.comment.placeholder')}
@@ -551,18 +625,25 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
                         </div>
 
                         {/* 提交按钮 */}
-                        <div className="flex justify-end">
+                        <div className="flex justify-end gap-2">
+                          {hasChanges && (
+                            <button
+                              onClick={handleCancel}
+                              className="px-4 py-2 rounded-xl text-xs md:text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                            >
+                              {t('common.cancel')}
+                            </button>
+                          )}
                           <button
                             onClick={handleFeedbackSubmit}
-                            disabled={feedbackState.rating === 0 || isSubmitting}
+                            disabled={!hasChanges || isSubmitting}
                             className={`px-4 py-2 rounded-xl text-xs md:text-sm text-white transition-all duration-200 ${
-                              feedbackState.rating === 0 || isSubmitting
+                              !hasChanges || isSubmitting
                                 ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
                                 : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 hover:shadow-lg'
                             }`}
-                            title={feedbackState.rating === 0 ? t('imagePreview.feedback.submit.disabled') : undefined}
                           >
-                            {isSubmitting ? t('imagePreview.feedback.submit.submitting') : t('imagePreview.feedback.submit.button')}
+                            {isSubmitting ? t('imagePreview.feedback.submit.submitting') : t('common.save')}
                           </button>
                         </div>
                       </div>

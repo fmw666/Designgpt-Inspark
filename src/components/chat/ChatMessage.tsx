@@ -74,7 +74,7 @@ export const ChatMessage: FC<ChatMessageProps> = ({
       {/* User message */}
       <div className="flex justify-end p-3">
         <div className="flex items-start gap-3 max-w-3xl">
-          <div className="flex-1 text-right">
+          <div className="flex-1 text-left">
             <div className="inline-block bg-indigo-600 text-white rounded-lg px-4 py-2">
               <p className="text-sm">{message.content}</p>
             </div>
@@ -137,6 +137,7 @@ export const ChatMessage: FC<ChatMessageProps> = ({
             setSelectedImage(null);
           }
         }}
+        userPrompt="你好，这是一段描述词你好，这是一段描述词你好，这是一段描述词你好，这是一段描述词你好，这是一段描述词"
       />
 
       {/* AI response */}
@@ -188,7 +189,7 @@ export const ChatMessage: FC<ChatMessageProps> = ({
                     <div
                       key={index}
                       data-result-id={result.id}
-                      className="group relative aspect-square rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 bg-transparent cursor-pointer"
+                      className="group relative aspect-square rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 bg-transparent cursor-pointer bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] dark:bg-[linear-gradient(to_right,#ffffff12_1px,transparent_1px),linear-gradient(to_bottom,#ffffff12_1px,transparent_1px)]"
                       onClick={() => setSelectedImage({
                         url: result.url,
                         messageId: message.id,

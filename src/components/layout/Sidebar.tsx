@@ -3,8 +3,8 @@ import { PlusIcon } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Logo } from '@/components/common/Logo';
-import { ChatHistory } from '../chat/ChatHistory';
-import { AssetsCategory } from '../assets/AssetsCategory';
+import ChatHistory from '@/components/chat/ChatHistory';
+import AssetsCategory from '@/components/assets/AssetsCategory';
 import { useAuth } from '@/hooks/useAuth';
 import { eventBus } from '@/utils/eventBus';
 

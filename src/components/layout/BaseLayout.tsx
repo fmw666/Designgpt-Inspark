@@ -73,7 +73,7 @@ const BaseLayout: FC<BaseLayoutProps> = ({ type, children }) => {
             : 'relative'
         }`}
       >
-        <div className="w-64 h-full backdrop-blur-sm border-r border-primary-100 dark:border-gray-800 flex-shrink-0 transition-all duration-300 relative shadow-md">
+        <div className="w-64 h-full backdrop-blur-sm dark:border-gray-800 flex-shrink-0 transition-all duration-300 relative shadow-md">
           <Sidebar type={type} />
             {/* User Info at Bottom - 使用 fixed 定位确保在最上层 */}
             <div className={`${

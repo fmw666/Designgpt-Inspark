@@ -30,7 +30,7 @@ interface GroupedChats {
   [key: string]: Chat[];
 }
 
-export const ChatHistory = () => {
+const ChatHistory = () => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { chats, currentChat, isLoading, deleteChat, switchChat } = useChat();
@@ -216,4 +216,5 @@ export const ChatHistory = () => {
     </div>
   );
 };
- 
+
+export default ChatHistory;

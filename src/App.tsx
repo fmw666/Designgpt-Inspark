@@ -6,7 +6,7 @@ import NotFound from '@/pages/NotFound';
 import TestLayout from '@/components/test/TestLayout';
 import { AuthProvider } from '@/components/auth/AuthProvider';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 function App() {
   return (

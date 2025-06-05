@@ -47,7 +47,7 @@ export const en = {
       refresh: 'Refresh',
     },
     generation: {
-      generating: '🚀 Generating images...',
+      generating: '⏳ Generating images...',
       success: '✅ Images generated successfully!',
       partialSuccess: '🚫 Some images failed to generate!',
       failed: '❌ All images failed to generate!',
@@ -215,6 +215,7 @@ export const en = {
     title: 'Assets',
     backToChat: 'Back to Chat',
     todo: 'Asset library is coming soon...',
+    description: 'Your AI image gallery',
   },
   imagePreview: {
     colorPalette: 'Color Palette',
