@@ -6,7 +6,7 @@ import { SettingsModal } from '../user/SettingsModal';
 import { UserProfileModal } from '../user/UserProfileModal';
 import { getAvatarClasses, getAvatarSizeClasses, getAvatarText } from '@/utils/avatar';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 interface UserMenuProps {
   isCollapsed?: boolean;
@@ -16,6 +16,7 @@ interface UserMenuProps {
 const UserMenu: FC<UserMenuProps> = ({ isCollapsed, onSignInClick }) => {
   const { user, signOut } = useAuth();
   const { t } = useTranslation();
+  const location = useLocation();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -26,6 +27,8 @@ const UserMenu: FC<UserMenuProps> = ({ isCollapsed, onSignInClick }) => {
   const handleSettingsClick = () => {
     setIsSettingsOpen(true);
   };
+
+  const isAssetsPage = location.pathname.startsWith('/assets');
 
   if (!user) {
     return (
@@ -107,20 +110,22 @@ const UserMenu: FC<UserMenuProps> = ({ isCollapsed, onSignInClick }) => {
                   )}
                 </Menu.Item>
 
-                {/* 素材库按钮 */}
-                <Menu.Item>
-                  {({ active }) => (
-                    <Link
-                      to="/assets"
-                      className={`${
-                        active ? 'bg-gray-50 dark:bg-gray-800' : ''
-                      } flex w-full items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors`}
-                    >
-                      <PhotoIcon className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
-                      {t('assets.title')}
-                    </Link>
-                  )}
-                </Menu.Item>
+                {/* 素材库按钮 - 仅在非素材库页面显示 */}
+                {!isAssetsPage && (
+                  <Menu.Item>
+                    {({ active }) => (
+                      <Link
+                        to="/assets"
+                        className={`${
+                          active ? 'bg-gray-50 dark:bg-gray-800' : ''
+                        } flex w-full items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors`}
+                      >
+                        <PhotoIcon className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
+                        {t('assets.title')}
+                      </Link>
+                    )}
+                  </Menu.Item>
+                )}
 
                 {/* 分隔线 */}
                 <div className="my-1 border-t border-gray-100 dark:border-gray-800" />

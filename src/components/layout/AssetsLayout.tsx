@@ -1,17 +1,17 @@
 import { FC, ReactNode } from 'react';
 import BaseLayout from './BaseLayout';
 
-interface ChatLayoutProps {
+interface AssetsLayoutProps {
   children: ReactNode;
 }
 
-const ChatLayout: FC<ChatLayoutProps> = ({ children }) => {
+const AssetsLayout: FC<AssetsLayoutProps> = ({ children }) => {
 
   return (
-    <BaseLayout type="chat">
+    <BaseLayout type="assets">
       {children}
     </BaseLayout>
   );
 };
 
-export default ChatLayout; 
+export default AssetsLayout; 
