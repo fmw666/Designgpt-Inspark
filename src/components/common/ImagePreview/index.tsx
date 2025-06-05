@@ -278,9 +278,36 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
     );
   };
 
-  const handleCopy = (text: string, type: 'user' | 'ai') => {
-    navigator.clipboard.writeText(text);
-    toast.success(type === 'user' ? '用户提示词已复制' : 'AI提示词已复制');
+  const handleCopy = async (text: string, type: 'user' | 'ai') => {
+    try {
+      // 尝试使用现代 API
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        // 降级方案：使用传统方法
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+          document.execCommand('copy');
+        } catch (err) {
+          console.error('Fallback: Oops, unable to copy', err);
+          throw new Error('复制失败');
+        }
+        
+        textArea.remove();
+      }
+      toast.success(type === 'user' ? '用户提示词已复制' : 'AI提示词已复制');
+    } catch (err) {
+      console.error('Failed to copy text:', err);
+      toast.error('复制失败，请手动复制');
+    }
   };
 
   const handleFeedbackSubmit = async () => {

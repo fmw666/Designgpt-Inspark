@@ -34,9 +34,32 @@ export const NewChatGuide: FC = () => {
 
   const handleCopy = async (text: string) => {
     try {
-      await navigator.clipboard.writeText(text);
+      // 尝试使用现代 API
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        // 降级方案：使用传统方法
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+          document.execCommand('copy');
+        } catch (err) {
+          console.error('Fallback: Oops, unable to copy', err);
+          throw new Error('复制失败');
+        }
+        
+        textArea.remove();
+      }
       toast.success(t('chat.guide.tips.copied'));
     } catch (err) {
+      console.error('Failed to copy text:', err);
       toast.error(t('chat.guide.tips.copyFailed'));
     }
   };
