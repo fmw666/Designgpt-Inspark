@@ -1,7 +1,8 @@
-import { FC, useState } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { FolderIcon, PhotoIcon, SparklesIcon, StarIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface Category {
   id: string;
@@ -18,6 +19,8 @@ interface Tag {
 
 const AssetsCategory: FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -42,9 +45,56 @@ const AssetsCategory: FC = () => {
     { id: 'digital', name: '数字艺术', count: 18 },
   ];
 
+  // 从 URL 参数初始化选中状态
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const categoryParam = searchParams.get('_c');
+    
+    if (categoryParam === null) {
+      setSelectedCategory('all');
+    } else {
+      switch (categoryParam) {
+        case '1':
+          setSelectedCategory('text2img');
+          break;
+        case '2':
+          setSelectedCategory('img2img');
+          break;
+        case '0':
+          setSelectedCategory('favorites');
+          break;
+        default:
+          setSelectedCategory('all');
+      }
+    }
+  }, [location.search]);
+
   const handleCategoryClick = (categoryId: string) => {
     setSelectedCategory(categoryId);
-    // TODO: 触发分类切换事件
+    
+    // 构建新的 URL
+    let newPath = '/assets';
+    const searchParams = new URLSearchParams(location.search);
+    
+    switch (categoryId) {
+      case 'text2img':
+        searchParams.set('_c', '1');
+        break;
+      case 'img2img':
+        searchParams.set('_c', '2');
+        break;
+      case 'favorites':
+        searchParams.set('_c', '0');
+        break;
+      default:
+        searchParams.delete('_c');
+    }
+    
+    // 保留其他查询参数
+    const newSearch = searchParams.toString();
+    const newUrl = newSearch ? `${newPath}?${newSearch}` : newPath;
+    
+    navigate(newUrl, { replace: true });
   };
 
   const handleTagClick = (tagId: string) => {
