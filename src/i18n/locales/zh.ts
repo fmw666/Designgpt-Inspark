@@ -216,5 +216,51 @@ export const zh = {
     backToChat: '返回聊天',
     todo: '素材库功能即将推出...',
   },
+  imagePreview: {
+    colorPalette: '配色方案',
+    userPrompt: '图片描述词',
+    aiPrompt: '图片描述词（AI优化版）',
+    modelInfo: '模型信息',
+    model: '模型',
+    created: '创建时间',
+    aspectRatio: '宽高比',
+    noColors: '暂无颜色',
+    noUserPrompt: '暂无',
+    noAiPrompt: '暂无',
+    feedback: {
+      title: '图片反馈',
+      reasons: {
+        label: '原因（可多选）',
+        options: {
+          goodQuality: '图片质量好',
+          meetsExpectations: '符合预期',
+          creative: '创意独特',
+          detailed: '细节丰富',
+          styleMatch: '风格合适',
+          composition: '构图合理',
+          other: '其他',
+        },
+        other: {
+          placeholder: '请输入其他原因...',
+          characterCount: '{{count}}/8',
+        },
+      },
+      comment: {
+        label: '其他建议',
+        placeholder: '请输入您的建议...',
+      },
+      submit: {
+        button: '提交反馈',
+        disabled: '请先选择评分',
+        submitting: '提交中...',
+      },
+    },
+    controls: {
+      zoomIn: '放大',
+      zoomOut: '缩小',
+      reset: '重置',
+      flip: '翻转图片',
+    },
+  },
 };
  

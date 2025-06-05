@@ -216,4 +216,51 @@ export const en = {
     backToChat: 'Back to Chat',
     todo: 'Asset library is coming soon...',
   },
+  imagePreview: {
+    colorPalette: 'Color Palette',
+    userPrompt: 'Image Description',
+    aiPrompt: 'Image Description (AI Enhanced)',
+    modelInfo: 'Model Information',
+    model: 'Model',
+    created: 'Created',
+    aspectRatio: 'Aspect Ratio',
+    noColors: 'No colors',
+    noUserPrompt: 'None',
+    noAiPrompt: 'None',
+    feedback: {
+      title: 'Feedback',
+      reasons: {
+        label: 'Reasons (Multiple Choice)',
+        options: {
+          goodQuality: 'Good Image Quality',
+          meetsExpectations: 'Meets Expectations',
+          creative: 'Creative and Unique',
+          detailed: 'Rich in Details',
+          styleMatch: 'Appropriate Style',
+          composition: 'Good Composition',
+          other: 'Other',
+        },
+        other: {
+          placeholder: 'Please enter other reasons...',
+          characterCount: '{{count}}/8',
+        },
+      },
+      comment: {
+        label: 'Additional Comments',
+        placeholder: 'Please enter your suggestions...',
+      },
+      submit: {
+        button: 'Submit Feedback',
+        disabled: 'Please select a rating first',
+        submitting: 'Submitting...',
+      },
+    },
+    controls: {
+      zoomIn: 'Zoom In',
+      zoomOut: 'Zoom Out',
+      reset: 'Reset',
+      flip: 'Flip Image',
+    },
+  },
 };
+ 
