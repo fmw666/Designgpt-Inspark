@@ -174,6 +174,13 @@ export const zh = {
       dark: '深色',
       system: '跟随系统',
     },
+    modelInfo: {
+      title: '模型信息',
+      visible: '显示',
+      hidden: '隐藏',
+      updated: '模型信息显示状态已更新',
+      updateFailed: '更新模型信息显示状态失败',
+    },
   },
   errors: {
     generationFailed: '生成失败',

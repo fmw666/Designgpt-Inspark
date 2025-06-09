@@ -17,6 +17,17 @@ interface ModelDrawerProps {
   disabled?: boolean;
 }
 
+export const getDefaultModels = (): SelectedModel[] => {
+  const allModels = modelService.getAllModels();
+  // 按发布日期排序
+  const sortedModels = [...allModels].sort((a, b) => {
+    const dateA = new Date(a.publishDate || 0);
+    const dateB = new Date(b.publishDate || 0);
+    return dateB.getTime() - dateA.getTime();
+  });
+  return getDefaultSelectedModels(sortedModels);
+};
+
 export const ModelDrawer: React.FC<ModelDrawerProps> = ({
   selectedModels,
   onModelChange,

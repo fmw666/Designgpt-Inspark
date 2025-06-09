@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { PaperAirplaneIcon, SparklesIcon, PencilIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/solid';
-import { ModelDrawer } from './ModelDrawer';
+import { ModelDrawer, getDefaultModels } from './ModelDrawer';
 import { NewChatGuide } from '@/components/chat/NewChatGuide';
 import { ImageModel, modelService } from '@/services/modelService';
 import { serviceManager } from '@/services/serviceManager';
@@ -266,9 +266,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
       return;
     }
 
-    if (input.trim() && (selectedModels.length > 0 || designImage)) {
+    if (input.trim() && (selectedModels.length > 0 || designImage || user.user_metadata?.hide_model_info)) {
       setIsSending(true);
       const currentInput = input;
+      const currentSelectedModels = user.user_metadata?.hide_model_info ? getDefaultModels() : selectedModels;
 
       try {
         // 准备初始消息结果
@@ -286,7 +287,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
                   isGenerating: false
                 }]
               }
-            : selectedModels.reduce((acc, model) => ({
+            : currentSelectedModels.reduce((acc, model) => ({
             ...acc,
             [model.name]: Array(model.count).fill(null).map(() => ({
               id: `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -305,7 +306,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
           content: currentInput,
           models: designImage 
             ? [{ id: 'gpt-4o-image', name: 'gpt-4o-image', count: 1 }]
-            : selectedModels,
+            : currentSelectedModels,
           results: initialResults,
           createdAt: new Date().toISOString(),
           userImage: designImage ? {
@@ -357,7 +358,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
         scrollToBottom();
 
         // 2. 为每个选中的模型生成图片
-        const updatePromises = selectedModels.map(async ({ id, count }) => {
+        const updatePromises = currentSelectedModels.map(async ({ id, count }) => {
           const model: ImageModel | undefined = modelService.getModelById(id);
           const modelName = model?.name || id;
 
@@ -448,7 +449,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
         const errorCount = Object.values(message.results.images).map(image => image.filter(i => i.error).length).reduce((a, b) => a + b, 0);
         if (errorCount == 0) {
           message.results.content = t('chat.generation.success');
-        } else if (errorCount < selectedModels.length) {
+        } else if (errorCount < currentSelectedModels.length) {
           message.results.content = t('chat.generation.partialSuccess');
         } else {
           message.results.content = t('chat.generation.failed');
@@ -465,7 +466,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
         await updateMessageResults(message.id, finalResults, true);
 
         // 7. 调用外部回调
-        onSendMessage?.(currentInput, selectedModels);
+        onSendMessage?.(currentInput, currentSelectedModels);
 
       } catch (error) {
         console.error('Error in handleSubmit:', error);
@@ -747,6 +748,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
                 userAvatar={getAvatarText(user)}
                 onEnterDesign={handleEnterDesign}
                 onJumpToReference={handleJumpToReference}
+                user={user}
               />
             ))}
             <div ref={messagesEndRef} />
@@ -756,13 +758,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
 
       {/* Input area */}
       <div className="border-t border-primary-100 dark:border-gray-700 bg-white/50 dark:bg-gray-800 backdrop-blur-sm p-4">
-        {!designImage ? (
-        <ModelDrawer
-          selectedModels={selectedModels}
-          onModelChange={setSelectedModels}
-          disabled={isGenerating}
-        />
-        ) : (
+        {!designImage && !(user?.user_metadata?.hide_model_info ?? false) && (
+          <ModelDrawer
+            selectedModels={selectedModels}
+            onModelChange={setSelectedModels}
+            disabled={isGenerating}
+          />
+        )}
+        {designImage && (
           <div className="flex items-center gap-3">
             <div 
               className="group relative flex items-center gap-3 cursor-pointer ml-3"
@@ -801,12 +804,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
         )}
         <form onSubmit={handleSubmit} className="mt-4">
           <div className="relative flex items-center">
-          <div className="flex-1 relative">
-            <textarea
-              ref={textareaRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
+            <div className="flex-1 relative">
+              <textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
                 placeholder={
                   isGenerating 
                     ? t('chat.placeholderGenerating')
@@ -818,10 +821,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
                 className={`w-full max-h-[200px] py-3 pl-4 pr-12 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none overflow-hidden ease-in-out ${
                   (isSending || isGenerating) ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
-              rows={1}
-            />
-          <button
-            type="submit"
+                rows={1}
+              />
+              <button
+                type="submit"
                 disabled={!input.trim() || (selectedModels.length === 0 && !designImage) || isSending || isGenerating}
                 className="absolute right-2 bottom-2 p-2 text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-500 disabled:text-indigo-400 disabled:cursor-not-allowed transition-colors duration-200 rounded-lg disabled:hover:bg-transparent"
               >
@@ -829,10 +832,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
                   <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
                 ) : isGenerating ? (
                   <SparklesIcon className="h-5 w-5 animate-pulse text-indigo-500" />
-            ) : (
-              <PaperAirplaneIcon className="h-5 w-5" />
-            )}
-          </button>
+                ) : (
+                  <PaperAirplaneIcon className="h-5 w-5" />
+                )}
+              </button>
             </div>
           </div>
 
@@ -858,17 +861,17 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
                 </span>
               ) : (
                 <>
-                  {selectedModels.length > 0 && (
+                  {!(user?.user_metadata?.hide_model_info ?? false) && selectedModels.length > 0 && (
                     <span className="flex items-center">
                       <SparklesIcon className="h-4 w-4 mr-1" />
                       {t('chat.input.selectedModels', { count: selectedModels.length })}
-                </span>
-              )}
-              {isGenerating && (
-                <span className="flex items-center text-indigo-600 dark:text-indigo-400">
-                  <SparklesIcon className="h-4 w-4 mr-1 animate-pulse" />
+                    </span>
+                  )}
+                  {isGenerating && (
+                    <span className="flex items-center text-indigo-600 dark:text-indigo-400">
+                      <SparklesIcon className="h-4 w-4 mr-1 animate-pulse" />
                       {t('chat.input.generating')}
-                </span>
+                    </span>
                   )}
                 </>
               )}

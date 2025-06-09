@@ -16,6 +16,7 @@ export interface User {
   last_sign_in_at: string | null;
   user_metadata?: {
     display_name?: string;
+    hide_model_info?: boolean;
     [key: string]: any;
   };
 }

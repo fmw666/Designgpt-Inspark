@@ -29,7 +29,7 @@ export class AuthService {
   }
 
   // 更新用户元数据
-  async updateUserMetadata(metadata: { display_name?: string }): Promise<User> {
+  async updateUserMetadata(metadata: { [key: string]: any }): Promise<User> {
     const { data: { user }, error } = await supabase.auth.updateUser({
       data: metadata
     });

@@ -174,6 +174,13 @@ export const en = {
       dark: 'Dark',
       system: 'System',
     },
+    modelInfo: {
+      title: 'Model Information',
+      visible: 'Visible',
+      hidden: 'Hidden',
+      updated: 'Model information visibility updated',
+      updateFailed: 'Failed to update model information visibility',
+    },
   },
   errors: {
     generationFailed: 'Generation Failed',
