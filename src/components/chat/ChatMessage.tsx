@@ -167,7 +167,7 @@ export const ChatMessage: FC<ChatMessageProps> = ({
                 )}
                 <p className="text-sm text-gray-900 dark:text-gray-100">
                   {message.results.content}
-                  {!(user?.user_metadata?.hide_model_info ?? false) && (
+                  {(user?.user_metadata?.hide_model_info ?? false) && (
                     <span className="ml-2 text-xs text-gray-500">
                       ({Object.values(message.results.images).flat().length} {t('chat.images')})
                     </span>
