@@ -180,7 +180,7 @@ export const ChatMessage: FC<ChatMessageProps> = ({
             {(user?.user_metadata?.hide_model_info ?? false) ? (
               // 隐藏模型信息模式下的图片展示
               <div className="mb-4">
-                <div className="grid grid-cols-4 gap-2 min-w-[300px]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 min-w-[300px]">
                   {Object.values(message.results.images)
                     .flat()
                     .map((result, index) => {
@@ -191,7 +191,7 @@ export const ChatMessage: FC<ChatMessageProps> = ({
                         <div
                           key={index}
                           data-result-id={result.id}
-                          className="group relative aspect-square rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 bg-transparent cursor-pointer bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] dark:bg-[linear-gradient(to_right,#ffffff12_1px,transparent_1px),linear-gradient(to_bottom,#ffffff12_1px,transparent_1px)]"
+                          className="group relative aspect-square min-w-[200px] rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 bg-transparent cursor-pointer bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] dark:bg-[linear-gradient(to_right,#ffffff12_1px,transparent_1px),linear-gradient(to_bottom,#ffffff12_1px,transparent_1px)]"
                           onClick={() => setSelectedImage({
                             url: result.url,
                             messageId: message.id,
@@ -281,7 +281,7 @@ export const ChatMessage: FC<ChatMessageProps> = ({
                           <div
                             key={index}
                             data-result-id={result.id}
-                            className="group relative aspect-square rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 bg-transparent cursor-pointer bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] dark:bg-[linear-gradient(to_right,#ffffff12_1px,transparent_1px),linear-gradient(to_bottom,#ffffff12_1px,transparent_1px)]"
+                            className="group relative aspect-square min-w-[200px] rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 bg-transparent cursor-pointer bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] dark:bg-[linear-gradient(to_right,#ffffff12_1px,transparent_1px),linear-gradient(to_bottom,#ffffff12_1px,transparent_1px)]"
                             onClick={() => setSelectedImage({
                               url: result.url,
                               messageId: message.id,

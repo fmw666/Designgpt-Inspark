@@ -28,6 +28,12 @@ interface DesignImage {
   referenceResultId: string | null;
 }
 
+interface StreamResponse {
+  role: 'assistant' | 'StreamClosed';
+  status: 'streaming' | 'image';
+  content: string;
+}
+
 interface ChatInterfaceProps {
   onSendMessage?: (message: string, models: SelectedModel[]) => void;
   chatId?: string;
@@ -256,6 +262,146 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
     };
   }, [isSending, isGenerating, t]);
 
+  // Add new function to handle streaming response
+  const handleStreamResponse = async (message: Message, stream: ReadableStream<Uint8Array>) => {
+    const reader = stream.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let buffer = '';
+    let accumulatedContent = '';
+    let retryCount = 0;
+    const MAX_RETRIES = 5;
+    let lastUpdateTime = Date.now();
+    const UPDATE_INTERVAL = 1000; // 1秒更新一次数据库
+
+    try {
+      while (true) {
+        try {
+          const { done, value } = await reader.read();
+          
+          if (done) {
+            // 检查是否收到了 StreamClosed
+            // if (!buffer.includes('event: close')) {
+            //   // 如果没有收到 StreamClosed，但已经收到了内容，认为是正常结束
+            //   if (accumulatedContent) {
+            //     console.log('Stream ended with content but no StreamClosed flag');
+            //     break;
+            //   }
+            //   throw new Error('Stream ended without StreamClosed flag');
+            // }
+            break;
+          }
+
+          // 使用 UTF-8 解码器处理数据
+          const chunk = decoder.decode(value, { stream: true });
+          buffer += chunk;
+          
+          // 处理可能的不完整 JSON
+          let startIndex = 0;
+          let endIndex = buffer.indexOf('\n');
+          
+          while (endIndex !== -1) {
+            const line = buffer.slice(startIndex, endIndex).trim();
+            if (line && line.startsWith('data: ')) {
+              try {
+                const jsonStr = line.slice(6); // 移除 'data: ' 前缀
+                // 将单引号替换为双引号，并处理可能的转义问题
+                const validJsonStr = jsonStr.replace(/'/g, '"');
+                const response: StreamResponse = JSON.parse(validJsonStr);
+                
+                if (response.role === 'assistant') {
+                  if (response.status === 'streaming') {
+                    // 处理文本流
+                    accumulatedContent += response.content;
+                    
+                    // 检查是否需要更新数据库
+                    const now = Date.now();
+                    if (now - lastUpdateTime >= UPDATE_INTERVAL) {
+                      // Update the content with the accumulated response
+                      const updatedResults = {
+                        ...message.results,
+                        content: accumulatedContent
+                      };
+                      message.results = updatedResults;
+                      await updateMessageResults(message.id, updatedResults, true);
+                      lastUpdateTime = now;
+                    } else {
+                      // 只更新内存中的状态
+                      message.results.content = accumulatedContent;
+                    }
+                  } else if (response.status === 'image') {
+                    // 处理图片URL
+                    const updatedResults = {
+                      ...message.results,
+                      images: {
+                        'gpt-4o-image': [{
+                          id: message.results.images['gpt-4o-image'][0].id,
+                          url: `https://inspark.oss-cn-shenzhen.aliyuncs.com/${response.content}`,
+                          text: null,
+                          error: null,
+                          errorMessage: null,
+                          isGenerating: false
+                        }]
+                      }
+                    };
+                    message.results = updatedResults;
+                    await updateMessageResults(message.id, updatedResults, true);
+                  }
+                }
+              } catch (e) {
+                console.error('Error parsing stream response:', e, 'Line:', line);
+              }
+            } else if (line === 'event: close') {
+              // Stream 正常结束，进行最后一次数据库更新
+              const updatedResults = {
+                ...message.results,
+                content: accumulatedContent || t('chat.generation.success')
+              };
+              message.results = updatedResults;
+              await updateMessageResults(message.id, updatedResults, true);
+              console.log('Stream closed normally');
+            }
+            startIndex = endIndex + 1;
+            endIndex = buffer.indexOf('\n', startIndex);
+          }
+          
+          // 保留未处理完的数据
+          buffer = buffer.slice(startIndex);
+        } catch (error) {
+          // 处理网络错误
+          if (error instanceof TypeError && error.message === 'network error') {
+            console.error('Network error occurred:', error);
+            if (retryCount < MAX_RETRIES) {
+              retryCount++;
+              console.log(`Retrying... (${retryCount}/${MAX_RETRIES})`);
+              // 等待一段时间后重试
+              await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+              continue;
+            }
+          }
+          throw error;
+        }
+      }
+    } catch (error) {
+      console.error('Error reading stream:', error);
+      // Update error state
+      const errorResults = {
+        ...message.results,
+        images: {
+          'gpt-4o-image': [{
+            ...message.results.images['gpt-4o-image'][0],
+            error: '生成失败',
+            errorMessage: error instanceof Error ? error.message : '生成失败',
+            isGenerating: false
+          }]
+        }
+      };
+      message.results = errorResults;
+      await updateMessageResults(message.id, errorResults, true);
+    } finally {
+      reader.releaseLock();
+    }
+  };
+
   // 处理提交前的认证检查
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -277,14 +423,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
           content: t('chat.generation.generating'),
           images: designImage 
             ? {
-                // demo 图片
                 'gpt-4o-image': [{
                   id: `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                  url: designImage.url,
+                  url: null,
                   text: null,
                   error: null,
                   errorMessage: null,
-                  isGenerating: false
+                  isGenerating: true
                 }]
               }
             : currentSelectedModels.reduce((acc, model) => ({
@@ -345,10 +490,55 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
         setInput('');
         setIsSending(false);
 
-        // 如果是设计模式，直接显示成功
+        // 如果是设计模式，使用新的流式API
         if (designImage) {
-          message.results.content = t('chat.generation.success');
-          await updateMessageResults(message.id, message.results, true);
+          const requestBody = {
+            messages: [
+              {
+                role: "user",
+                content: [
+                  {
+                    type: "text",
+                    text: currentInput
+                  },
+                  {
+                    type: "image_url",
+                    image_url: {
+                      url: designImage.url
+                    }
+                  }
+                ]
+              }
+            ]
+          };
+
+          try {
+            const response = await fetch('https://invo-one-ajzmkpolem.cn-shenzhen.fcapp.run/stream', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            if (!response.body) {
+              throw new Error('No response body');
+            }
+
+            // Handle the streaming response
+            await handleStreamResponse(message, response.body);
+          } catch (error) {
+            console.error('Error in design mode:', error);
+            message.results.images['gpt-4o-image'][0].error = '生成失败';
+            message.results.images['gpt-4o-image'][0].errorMessage = error instanceof Error ? error.message : '生成失败';
+            message.results.images['gpt-4o-image'][0].isGenerating = false;
+            await updateMessageResults(message.id, message.results, true);
+          }
+
           setIsGenerating(false);
           return;
         }
