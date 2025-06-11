@@ -12,7 +12,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { eventBus } from '@/utils/eventBus';
 import { getAvatarText } from '@/utils/avatar';
 import { useTranslation } from 'react-i18next';
-import { ImagePreview } from '../common/ImagePreview';
 
 interface SelectedModel {
   id: string;
@@ -834,59 +833,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
 
   return (
     <div className="flex flex-col h-full">
-      {/* Image Preview Modal */}
-      <ImagePreview
-        imageInfo={selectedImage ? {
-          url: selectedImage,
-          id: currentChat?.messages.find(msg => 
-            msg.results?.images && 
-            Object.values(msg.results.images).some(images => 
-              images.some(img => img.url === selectedImage)
-            )
-          )?.results?.images?.['gpt-4o-image']?.[0]?.id || '',
-          messageId: currentChat?.messages.find(msg => 
-            msg.results?.images && 
-            Object.values(msg.results.images).some(images => 
-              images.some(img => img.url === selectedImage)
-            )
-          )?.id || '',
-          userPrompt: currentChat?.messages.find(msg => 
-            msg.results?.images && 
-            Object.values(msg.results.images).some(images => 
-              images.some(img => img.url === selectedImage)
-            )
-          )?.content || '',
-          aiPrompt: '暂无',
-          model: 'gpt-4o-image',
-          createdAt: currentChat?.messages.find(msg => 
-            msg.results?.images && 
-            Object.values(msg.results.images).some(images => 
-              images.some(img => img.url === selectedImage)
-            )
-          )?.createdAt || new Date().toISOString()
-        } : null}
-        onClose={() => setSelectedImage(null)}
-        alt="Image preview"
-        onDesignClick={() => {
-          const message = currentChat?.messages.find(msg => 
-            msg.results?.images && 
-            Object.values(msg.results.images).some(images => 
-              images.some(img => img.url === selectedImage)
-            )
-          );
-          if (message) {
-            const image = Object.values(message.results?.images || {}).flat().find(img => img.url === selectedImage);
-            if (image) {
-              handleEnterDesign({
-                url: selectedImage,
-                messageId: message.id,
-                resultId: image.id
-              });
-              setSelectedImage(null);
-            }
-          }
-        }}
-      />
       
       {/* Chat Title */}
       {user && currentChat?.title && (
