@@ -957,9 +957,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
                 <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                   {t('chat.input.designTitle', '已进入图片编辑模式')}
                 </span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">
-                  {t('chat.input.designModel', '默认使用 gpt-4o-image 模型')}
-                </span>
               </div>
               <button
                 onClick={handleCloseClick}
