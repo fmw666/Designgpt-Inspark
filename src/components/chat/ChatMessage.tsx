@@ -79,7 +79,7 @@ export const ChatMessage: FC<ChatMessageProps> = ({
     <>
       {/* Image preview modal */}
       <ImagePreview
-        imageInfo={selectedImage ? {
+        imageInfo={selectedImage && selectedImage.url ? {
           url: selectedImage.url || '',
           id: selectedImage.resultId || '',
           messageId: selectedImage.messageId || '',

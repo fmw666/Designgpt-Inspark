@@ -231,10 +231,17 @@ const AssetsInterface: FC = () => {
       {/* Image Preview Modal */}
       {selectedImage && (
         <ImagePreview
-          imageUrl={selectedImage.url}
+          imageInfo={selectedImage && selectedImage.url ? {
+            url: selectedImage.url || '',
+            id: selectedImage.id || '',
+            messageId: selectedImage.id || '',
+            userPrompt: selectedImage.title,
+            aiPrompt: '暂无',
+            model: 'gpt-4o-image',
+            createdAt: selectedImage.createdAt,
+          } : null}
           onClose={() => setSelectedImage(null)}
           alt={selectedImage.title}
-          userPrompt={selectedImage.title}
         />
       )}
     </div>
