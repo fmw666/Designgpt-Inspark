@@ -235,23 +235,23 @@ const IMAGE_MODELS: ImageModel[] = [
       group: 'cogview',
     },
   },
-  {
-    id: 'irag-1.0',
-    name: 'IRAG-1.0',
-    publishDate: new Date('2024-11-12'),
-    description: '百度自研的 iRAG（image based RAG），检索增强的文生图技术，将百度搜索的亿级图片资源跟强大的基础模型能力相结合，就可以生成各种超真实的图片',
-    maxImages: 4,
-    category: '文心一言',
-    demo: {
-      prompt: 'A dreamy portrait of a mermaid in an underwater palace',
-      images: demoImages.midjourney,
-    },
-    config: {
-      maxConcurrent: 2,
-      cooldownMs: 1000,
-      group: 'wenxin',
-    },
-  },
+  // {
+  //   id: 'irag-1.0',
+  //   name: 'IRAG-1.0',
+  //   publishDate: new Date('2024-11-12'),
+  //   description: '百度自研的 iRAG（image based RAG），检索增强的文生图技术，将百度搜索的亿级图片资源跟强大的基础模型能力相结合，就可以生成各种超真实的图片',
+  //   maxImages: 4,
+  //   category: '文心一言',
+  //   demo: {
+  //     prompt: 'A dreamy portrait of a mermaid in an underwater palace',
+  //     images: demoImages.midjourney,
+  //   },
+  //   config: {
+  //     maxConcurrent: 2,
+  //     cooldownMs: 1000,
+  //     group: 'wenxin',
+  //   },
+  // },
   {
     id: 'wanx2.0-t2i-turbo',
     name: '通义万相2.0-文生图-Turbo',

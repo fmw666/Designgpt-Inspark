@@ -44,7 +44,7 @@ export const getDefaultSelectedModels = (models: ImageModel[]): { id: string; co
   const latestModels = getLatestModelsByCategory(models);
   return Object.values(latestModels).map(model => ({
     id: model.id,
-    count: 1,
+    count: model.category === '豆包' ? 3 : model.category === 'OpenAI' ? 2 : 1,
     category: model.category,
     name: model.name
   }));
