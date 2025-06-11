@@ -6,13 +6,23 @@ import { useTranslation } from 'react-i18next';
 import { DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
+interface ImageInfo {
+  url: string;
+  id: string;
+  messageId: string;
+  userPrompt: string;
+  aiPrompt?: string;
+  model: string;
+  createdAt: string;
+  error?: string;
+  errorMessage?: string;
+}
+
 interface ImagePreviewProps {
-  imageUrl: string | null;
+  imageInfo: ImageInfo | null;
   onClose: () => void;
   alt?: string;
   colorPalette?: string[];
-  userPrompt?: string;
-  aiPrompt?: string;
   onAiPromptChange?: (prompt: string) => void;
   onDesignClick?: () => void;
 }
@@ -25,12 +35,10 @@ interface FeedbackState {
 }
 
 export const ImagePreview: FC<ImagePreviewProps> = ({
-  imageUrl,
+  imageInfo,
   onClose,
   alt = 'Preview',
   colorPalette = ['#FF6B6B', '#FFD93D', '#4ECDC4', '#95E1D3', '#FF8B94'],
-  userPrompt = '',
-  aiPrompt = '',
   onAiPromptChange,
   onDesignClick,
 }) => {
@@ -77,14 +85,14 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
         img.onload = updateSize;
       }
     }
-  }, [imageUrl]);
+  }, [imageInfo?.url]);
 
   // Reset position and scale when image changes
   useEffect(() => {
     setScale(1);
     x.set(0);
     y.set(0);
-  }, [imageUrl, x, y]);
+  }, [imageInfo?.url, x, y]);
 
   // 检查是否有修改
   useEffect(() => {
@@ -97,7 +105,7 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
     setHasChanges(hasStateChanges);
   }, [feedbackState, originalFeedbackState]);
 
-  if (!imageUrl) return null;
+  if (!imageInfo) return null;
 
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
@@ -311,13 +319,13 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
   };
 
   const handleFeedbackSubmit = async () => {
-    if (!imageUrl) return;
+    if (!imageInfo) return;
 
     setIsSubmitting(true);
     try {
       // TODO: 调用后端 API 保存反馈
       console.log('Feedback submitted:', {
-        imageUrl,
+        imageInfo,
         ...feedbackState
       });
       
@@ -337,7 +345,7 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
 
   return (
     <Modal
-      isOpen={!!imageUrl}
+      isOpen={!!imageInfo}
       onClose={onClose}
       maxWidth="6xl"
       showCloseButton={false}
@@ -379,7 +387,7 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
           >
             <img
               ref={imageRef}
-              src={imageUrl}
+              src={imageInfo.url}
               alt={alt}
               className="w-full h-full object-contain"
               draggable={false}
@@ -475,11 +483,11 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
                       </div>
                       <div className="relative group">
                         <p className="px-3 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-gray-500 dark:text-gray-400 rounded-2xl text-xs md:text-sm font-medium">
-                          {userPrompt || t('imagePreview.noUserPrompt')}
+                          {imageInfo.userPrompt || t('imagePreview.noUserPrompt')}
                         </p>
-                        {userPrompt && (
+                        {imageInfo.userPrompt && (
                           <motion.button
-                            onClick={() => handleCopy(userPrompt, 'user')}
+                            onClick={() => handleCopy(imageInfo.userPrompt, 'user')}
                             className="absolute bottom-1.5 right-1.5 p-1.5 rounded-lg bg-white/50 dark:bg-gray-800/50 text-gray-500/70 dark:text-gray-400/70 hover:bg-white/90 dark:hover:bg-gray-800/90 hover:text-gray-500 dark:hover:text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-all duration-200 shadow-sm hover:shadow-md"
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
@@ -500,11 +508,11 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
                       </div>
                       <div className="relative group">
                         <p className="px-3 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-gray-500 dark:text-gray-400 rounded-2xl text-xs md:text-sm font-medium">
-                          {aiPrompt || t('imagePreview.noAiPrompt')}
+                          {imageInfo.aiPrompt || t('imagePreview.noAiPrompt')}
                         </p>
-                        {aiPrompt && (
+                        {imageInfo.aiPrompt && (
                           <motion.button
-                            onClick={() => handleCopy(aiPrompt, 'ai')}
+                            onClick={() => handleCopy(imageInfo.aiPrompt || '', 'ai')}
                             className="absolute bottom-1.5 right-1.5 p-1.5 rounded-lg bg-white/50 dark:bg-gray-800/50 text-gray-500/70 dark:text-gray-400/70 hover:bg-white/90 dark:hover:bg-gray-800/90 hover:text-gray-500 dark:hover:text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-all duration-200 shadow-sm hover:shadow-md"
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
@@ -522,17 +530,21 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
                       {/* Model */}
                       <div className="flex items-center justify-between">
                         <div className="text-[10px] md:text-xs font-medium text-gray-500 dark:text-gray-400">{t('imagePreview.model')}</div>
-                        <div className="text-xs font-medium text-indigo-700 dark:text-indigo-300 bg-gradient-to-r from-indigo-50/90 to-indigo-100/90 dark:from-indigo-900/30 dark:to-indigo-800/30 px-2.5 py-1 rounded-md ring-1 ring-indigo-200/50 dark:ring-indigo-800/50">Stable Diffusion XL</div>
+                        <div className="text-xs font-medium text-indigo-700 dark:text-indigo-300 bg-gradient-to-r from-indigo-50/90 to-indigo-100/90 dark:from-indigo-900/30 dark:to-indigo-800/30 px-2.5 py-1 rounded-md ring-1 ring-indigo-200/50 dark:ring-indigo-800/50">{imageInfo.model}</div>
                       </div>
                       {/* Created Time */}
                       <div className="flex items-center justify-between">
                         <div className="text-[10px] md:text-xs font-medium text-gray-500 dark:text-gray-400">{t('imagePreview.created')}</div>
-                        <div className="text-xs font-medium text-emerald-700 dark:text-emerald-300 bg-gradient-to-r from-emerald-50/90 to-emerald-100/90 dark:from-emerald-900/30 dark:to-emerald-800/30 px-2.5 py-1 rounded-md ring-1 ring-emerald-200/50 dark:ring-emerald-800/50">2024-03-21 14:30</div>
+                        <div className="text-xs font-medium text-emerald-700 dark:text-emerald-300 bg-gradient-to-r from-emerald-50/90 to-emerald-100/90 dark:from-emerald-900/30 dark:to-emerald-800/30 px-2.5 py-1 rounded-md ring-1 ring-emerald-200/50 dark:ring-emerald-800/50">
+                          {new Date(imageInfo.createdAt).toLocaleString()}
+                        </div>
                       </div>
                       {/* Aspect Ratio */}
                       <div className="flex items-center justify-between">
                         <div className="text-[10px] md:text-xs font-medium text-gray-500 dark:text-gray-400">{t('imagePreview.aspectRatio')}</div>
-                        <div className="text-xs font-medium text-purple-700 dark:text-purple-300 bg-gradient-to-r from-purple-50/90 to-purple-100/90 dark:from-purple-900/30 dark:to-purple-800/30 px-2.5 py-1 rounded-md ring-1 ring-purple-200/50 dark:ring-purple-800/50">1:1</div>
+                        <div className="text-xs font-medium text-purple-700 dark:text-purple-300 bg-gradient-to-r from-purple-50/90 to-purple-100/90 dark:from-purple-900/30 dark:to-purple-800/30 px-2.5 py-1 rounded-md ring-1 ring-purple-200/50 dark:ring-purple-800/50">
+                          {imageSize.width && imageSize.height ? `${imageSize.width}:${imageSize.height}` : 'Unknown'}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -541,7 +553,7 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
             </div>
 
             {/* Feedback Section */}
-            {imageUrl && (
+            {imageInfo && (
               <div className="p-4 md:p-5 lg:p-6 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
                 <div className="relative group">
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-lg blur opacity-20 group-hover:opacity-30 transition duration-300"></div>
@@ -572,7 +584,7 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
                       </div>
                     </div>
                     <div className={`transition-all duration-300 ease-in-out ${
-                      isFeedbackExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
+                      hasFeedback ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
                     }`}>
                       <div className="p-4 space-y-4">
                         {/* 原因选择 */}

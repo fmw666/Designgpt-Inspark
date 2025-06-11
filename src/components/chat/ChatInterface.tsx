@@ -12,7 +12,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { eventBus } from '@/utils/eventBus';
 import { getAvatarText } from '@/utils/avatar';
 import { useTranslation } from 'react-i18next';
-import { ImagePreview } from '@/components/common/ImagePreview';
 
 interface SelectedModel {
   id: string;
@@ -834,12 +833,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
 
   return (
     <div className="flex flex-col h-full">
-      {/* Image Preview Modal */}
-      <ImagePreview
-        imageUrl={selectedImage}
-        onClose={() => setSelectedImage(null)}
-        alt="Image preview"
-      />
       
       {/* Chat Title */}
       {user && currentChat?.title && (

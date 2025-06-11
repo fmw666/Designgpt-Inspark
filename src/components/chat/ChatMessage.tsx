@@ -134,7 +134,15 @@ export const ChatMessage: FC<ChatMessageProps> = ({
 
       {/* Image preview modal */}
       <ImagePreview
-        imageUrl={selectedImage?.url || null}
+        imageInfo={selectedImage ? {
+          url: selectedImage.url || '',
+          id: selectedImage.resultId || '',
+          messageId: selectedImage.messageId || '',
+          userPrompt: message.content,
+          aiPrompt: '暂无',
+          model: Object.keys(message.results.images)[0] || 'gpt-4o-image',
+          createdAt: message.createdAt
+        } : null}
         onClose={() => setSelectedImage(null)}
         alt="Message image preview"
         onDesignClick={() => {
@@ -143,7 +151,6 @@ export const ChatMessage: FC<ChatMessageProps> = ({
             setSelectedImage(null);
           }
         }}
-        userPrompt="你好，这是一段描述词你好，这是一段描述词你好，这是一段描述词你好，这是一段描述词你好，这是一段描述词"
       />
 
       {/* AI response */}
