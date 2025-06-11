@@ -334,7 +334,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
                       ...message.results,
                       images: {
                         'gpt-4o-image': [{
-                          id: message.results.images['gpt-4o-image'][0].id,
+                          id: `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                           url: `https://inspark.oss-cn-shenzhen.aliyuncs.com/${response.content}`,
                           text: null,
                           error: null,
@@ -422,16 +422,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onSendMessage, cha
         const initialResults = {
           content: t('chat.generation.generating'),
           images: designImage 
-            ? {
-                'gpt-4o-image': [{
-                  id: `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                  url: null,
-                  text: null,
-                  error: null,
-                  errorMessage: null,
-                  isGenerating: true
-                }]
-              }
+            ? {}  // 初始时不设置图片，等待结果
             : currentSelectedModels.reduce((acc, model) => ({
             ...acc,
             [model.name]: Array(model.count).fill(null).map(() => ({
