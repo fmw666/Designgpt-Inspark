@@ -9,15 +9,20 @@ export const useChat = () => {
     currentChat,
     isLoading,
     isInitialized,
+    shouldScrollToBottom,
     setChats,
     setCurrentChat,
+    setIsLoading,
     setIsInitialized,
+    setShouldScrollToBottom,
     initialize,
     createNewChat,
     addMessage,
     updateMessageResults,
     switchChat,
-    deleteChat
+    deleteChat,
+    loadChatMessages,
+    unAuthenticate
   } = useChatStore();
 
   useEffect(() => {
@@ -35,14 +40,19 @@ export const useChat = () => {
     currentChat,
     isLoading,
     isInitialized,
+    shouldScrollToBottom,
     setChats,
     setCurrentChat,
+    setIsLoading,
+    setIsInitialized,
+    setShouldScrollToBottom,
+    initialize,
     createNewChat: user ? createNewChat : async () => null,
     addMessage: user ? addMessage : async () => null,
     updateMessageResults: user ? updateMessageResults : async () => {},
     switchChat: user ? switchChat : () => {},
     deleteChat: user ? deleteChat : async () => {},
-    initialize
+    loadChatMessages,
+    unAuthenticate: user ? unAuthenticate : () => {}
   };
 };
- 

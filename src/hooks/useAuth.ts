@@ -8,6 +8,7 @@ export const useAuth = () => {
     initialize,
     isLoading,
     signOut,
+    unAuthenticate,
     sendVerificationCode,
     verifyCode
   } = useAuthStore();
@@ -23,6 +24,7 @@ export const useAuth = () => {
     isLoading,
     isInitialized,
     signOut,
+    unAuthenticate,
     sendVerificationCode,
     verifyCode
   };

@@ -1,5 +1,4 @@
 import { FC, ReactNode } from 'react';
-import BaseLayout from './BaseLayout';
 
 interface AssetsLayoutProps {
   children: ReactNode;
@@ -8,9 +7,9 @@ interface AssetsLayoutProps {
 const AssetsLayout: FC<AssetsLayoutProps> = ({ children }) => {
 
   return (
-    <BaseLayout type="assets">
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       {children}
-    </BaseLayout>
+    </div>
   );
 };
 

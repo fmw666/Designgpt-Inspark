@@ -53,6 +53,7 @@ export const en = {
       failed: '❌ All images failed to generate!',
       timeout: '⚠️ Task timeout! The task has been running for more than 10 minutes or the task status has been lost.',
       leaveWarning: 'Images are being generated. Refreshing the page will lose the generation progress. Are you sure you want to leave?',
+      noContent: 'No content',
     },
     guide: {
       title: 'Start a New Design Conversation',

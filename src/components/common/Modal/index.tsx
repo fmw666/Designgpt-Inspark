@@ -30,7 +30,7 @@ const maxWidthClasses = {
 export const Modal: FC<ModalProps> = ({
   isOpen,
   onClose,
-  title,
+  title = '',
   children,
   showCloseButton = true,
   maxWidth = 'md',
@@ -76,14 +76,12 @@ export const Modal: FC<ModalProps> = ({
                 {/* 标题栏 */}
                 {(title || showCloseButton) && (
                   <div className="flex items-center justify-between mb-6">
-                    {title && (
-                      <Dialog.Title
-                        as="h3"
-                        className="text-lg font-medium leading-6 text-gray-900 dark:text-white"
-                      >
-                        {title}
-                      </Dialog.Title>
-                    )}
+                    <Dialog.Title
+                      as="h3"
+                      className="text-lg font-medium leading-6 text-gray-900 dark:text-white"
+                    >
+                      {title}
+                    </Dialog.Title>
                     {showCloseButton && (
                       <button
                         onClick={onClose}

@@ -1,4 +1,4 @@
-import { User } from '@/services/supabase';
+import { User } from '@/services/authService';
 
 /**
  * 获取用户头像显示文本
@@ -8,13 +8,13 @@ import { User } from '@/services/supabase';
 export const getAvatarText = (user: User | null): string => {
   if (!user) return '?';
   
-  // 优先使用 display_name
-  const displayName = user.user_metadata?.display_name;
+  // 优先使用 username
+  const displayName = user.username;
   if (displayName) {
     return displayName.charAt(0).toUpperCase();
   }
   
-  // 如果没有 display_name，使用邮箱首字母
+  // 如果没有 username，使用邮箱首字母
   return user.email.split('@')[0].charAt(0).toUpperCase();
 };
 

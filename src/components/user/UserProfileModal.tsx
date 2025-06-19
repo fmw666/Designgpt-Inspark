@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { EnvelopeIcon, CalendarIcon, ClockIcon, PencilIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 import { zhCN, enUS } from 'date-fns/locale';
-import { User } from '@/services/supabase';
+import { User } from '@/services/authService';
 import { useAuthStore } from '@/store/authStore';
 import { toast } from 'react-hot-toast';
 import { getAvatarText, getAvatarClasses, getAvatarSizeClasses } from '@/utils/avatar';
@@ -26,7 +26,7 @@ export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, u
 
   // 当用户数据更新时，更新本地状态
   useEffect(() => {
-    setDisplayName(user.user_metadata?.display_name || '');
+    setDisplayName(user.username);
   }, [user]);
 
   // 处理保存用户名
@@ -37,7 +37,7 @@ export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, u
     }
 
     // 如果用户名没有变化，直接关闭编辑状态
-    if (displayName.trim() === user.user_metadata?.display_name) {
+    if (displayName.trim() === user.username) {
       setIsEditingName(false);
       return;
     }
@@ -54,7 +54,7 @@ export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, u
 
   // 处理取消编辑
   const handleCancelEdit = () => {
-    setDisplayName(user.user_metadata?.display_name || '');
+    setDisplayName(user.username);
     setIsEditingName(false);
   };
 
@@ -64,7 +64,7 @@ export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, u
   }
 
   // 获取当前用户名
-  const currentDisplayName = user.user_metadata?.display_name;
+  const currentDisplayName = user.username;
 
   // 格式化日期的函数
   const formatDate = (date: string | null) => {
@@ -187,7 +187,7 @@ export const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, u
               {t('profile.lastSignIn.label')}
             </div>
             <div className="text-sm text-gray-900 dark:text-gray-100 mt-1">
-              {formatDate(user.last_sign_in_at)}
+              {formatDate(user.last_login_at)}
             </div>
           </div>
         </div>

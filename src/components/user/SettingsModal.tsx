@@ -5,7 +5,7 @@ import { useThemeStore } from '@/styles/theme';
 import { Modal } from '@/components/common/Modal';
 import { useAuthStore } from '@/store/authStore';
 import { toast } from 'react-hot-toast';
-import { authService } from '@/services/authService';
+import { authService, User } from '@/services/authService';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -23,12 +23,17 @@ export const SettingsModal: FC<SettingsModalProps> = ({ isOpen, onClose }) => {
     
     setIsUpdatingModelInfo(true);
     try {
-      const newValue = !(user?.user_metadata?.hide_model_info ?? false);
-      const updatedUser = await authService.updateUserMetadata({
-        ...user?.user_metadata,
+      const newValue = !(user?.meta_data?.hide_model_info ?? false);
+      await authService.updateUserMetadata({
         hide_model_info: newValue
       });
-      setUser(updatedUser);
+      setUser({
+        ...user,
+        meta_data: {
+          ...user?.meta_data,
+          hide_model_info: newValue
+        }
+      } as User);
       toast.success(t('settings.modelInfo.updated'));
     } catch (error) {
       console.error('Error updating model info visibility:', error);
@@ -103,7 +108,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({ isOpen, onClose }) => {
             <div>
               <div className="text-sm font-medium text-gray-900 dark:text-white">{t('settings.modelInfo.title')}</div>
               <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                {(user?.user_metadata?.hide_model_info ?? false) ? t('settings.modelInfo.hidden') : t('settings.modelInfo.visible')}
+                {(user?.meta_data?.hide_model_info ?? false) ? t('settings.modelInfo.hidden') : t('settings.modelInfo.visible')}
               </div>
             </div>
           </div>
@@ -111,10 +116,10 @@ export const SettingsModal: FC<SettingsModalProps> = ({ isOpen, onClose }) => {
             onClick={handleToggleModelInfo}
             disabled={isUpdatingModelInfo}
             className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
-              !(user?.user_metadata?.hide_model_info ?? false) ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-700'
+              !(user?.meta_data?.hide_model_info ?? false) ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-700'
             } disabled:opacity-50 disabled:cursor-not-allowed`}
             role="switch"
-            aria-checked={!(user?.user_metadata?.hide_model_info ?? false)}
+            aria-checked={!(user?.meta_data?.hide_model_info ?? false)}
           >
             {isUpdatingModelInfo ? (
               <div className="absolute inset-0 flex items-center justify-center">
@@ -124,7 +129,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({ isOpen, onClose }) => {
               <span
                 aria-hidden="true"
                 className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                  !(user?.user_metadata?.hide_model_info ?? false) ? 'translate-x-5' : 'translate-x-0'
+                  !(user?.meta_data?.hide_model_info ?? false) ? 'translate-x-5' : 'translate-x-0'
                 }`}
               />
             )}

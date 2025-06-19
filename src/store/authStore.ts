@@ -1,6 +1,5 @@
 import { create } from 'zustand';
-import { authService } from '@/services/authService';
-import { User } from '@/services/supabase';
+import { authService, User } from '@/services/authService';
 
 interface AuthState {
   user: User | null;
@@ -14,6 +13,7 @@ interface AuthState {
   updateDisplayName: (displayName: string) => Promise<void>;
   isLoading: boolean;
   setIsLoading: (isLoading: boolean) => void;
+  unAuthenticate: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -38,7 +38,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isLoading: true
       }));
 
-      const user = await authService.getSession();
+      const user = await authService.getCurrentUser();
       
       set(state => ({
         ...state,
@@ -55,35 +55,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isInitialized: true
       }));
     }
-    
-    // 监听认证状态变化
-    authService.onAuthStateChange((_event, session) => {
-      if (session) {
-        set(state => ({
-          ...state,
-          user: {
-            id: session.user.id,
-            email: session.user.email!,
-            created_at: session.user.created_at,
-            last_sign_in_at: session.user.last_sign_in_at || null,
-            user_metadata: session.user.user_metadata
-          }
-        }));
-      } else {
-        set(state => ({
-          ...state,
-          user: null
-        }));
-      }
-    });
   },
 
   signOut: async () => {
     const { setUser } = get();
     try {
       await authService.signOut();
-      
-      // 清空用户状态
       setUser(null);
     } catch (error) {
       console.error('Error signing out:', error);
@@ -101,8 +78,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   verifyCode: async (email: string, code: string) => {
+    const { setUser } = get();
     try {
-      await authService.verifyEmailCode(email, code);
+      const user = await authService.verifyEmailCode(email, code);
+      setUser(user);
     } catch (error) {
       console.error('Error verifying code:', error);
       throw error;
@@ -110,13 +89,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   updateDisplayName: async (displayName: string) => {
-    const { setUser } = get();
+    const { user, setUser } = get();
     try {
-      const updatedUser = await authService.updateUserMetadata({ display_name: displayName });
-      setUser(updatedUser);
+      await authService.updateUserMetadata({ username: displayName });
+      const newUser = {
+        ...user as User,
+        username: displayName
+      };
+      setUser(newUser);
     } catch (error) {
       console.error('Error updating display name:', error);
       throw error;
     }
   },
+  
+  unAuthenticate: () => {
+    set({ user: null, isInitialized: false, isLoading: false });
+  }
 }));

@@ -1,17 +1,14 @@
-import { FC, ReactNode, useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import Sidebar from './Sidebar';
 import UserMenu from './UserMenu';
-import { SignInModal } from '@/components/auth/SignInModal';
 import { Bars3Icon } from '@heroicons/react/24/outline';
 import { Transition } from '@headlessui/react';
 
-interface BaseLayoutProps {
+interface BaseSidebarProps {
   type: 'chat' | 'assets';
-  children: ReactNode;
 }
 
-const BaseLayout: FC<BaseLayoutProps> = ({ type, children }) => {
-  const [isSignInModalOpen, setIsSignInModalOpen] = useState(false);
+const BaseSidebar: FC<BaseSidebarProps> = ({ type }) => {
   const [isMobileWidth, setIsMobileWidth] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
@@ -27,7 +24,7 @@ const BaseLayout: FC<BaseLayoutProps> = ({ type, children }) => {
   }, []);
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <>
       {/* 移动端菜单按钮 - 在 md 断点以下显示，与标题垂直居中对齐 */}
       <div className="fixed top-0 left-0 h-14 z-40 md:hidden flex items-center px-4">
         <button
@@ -81,27 +78,12 @@ const BaseLayout: FC<BaseLayoutProps> = ({ type, children }) => {
                 ? 'fixed bottom-0 left-0' 
                 : 'absolute bottom-0 left-0'
             } w-64 p-4 border-t border-r border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-gray-900 backdrop-blur-sm z-[9999]`}>
-              <UserMenu 
-                onSignInClick={() => setIsSignInModalOpen(true)}
-              />
+              <UserMenu />
             </div>
         </div>
       </Transition>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <main className="flex-1 overflow-y-auto">
-          {children}
-        </main>
-      </div>
-
-      {/* Sign In Modal */}
-      <SignInModal
-        isOpen={isSignInModalOpen}
-        onClose={() => setIsSignInModalOpen(false)}
-      />
-    </div>
+    </>
   );
 };
 
-export default BaseLayout; 
+export default BaseSidebar; 

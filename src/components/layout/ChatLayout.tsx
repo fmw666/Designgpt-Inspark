@@ -1,5 +1,4 @@
 import { FC, ReactNode } from 'react';
-import BaseLayout from './BaseLayout';
 
 interface ChatLayoutProps {
   children: ReactNode;
@@ -8,10 +7,10 @@ interface ChatLayoutProps {
 const ChatLayout: FC<ChatLayoutProps> = ({ children }) => {
 
   return (
-    <BaseLayout type="chat">
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       {children}
-    </BaseLayout>
+    </div>
   );
 };
 
-export default ChatLayout; 
+export default ChatLayout;

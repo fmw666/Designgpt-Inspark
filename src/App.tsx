@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
 import Assets from '@/pages/Assets';
 import Chat from '@/pages/Chat';
 import NotFound from '@/pages/NotFound';
@@ -7,8 +7,29 @@ import TestLayout from '@/components/test/TestLayout';
 import { AuthProvider } from '@/components/auth/AuthProvider';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import { useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { useChat } from '@/hooks/useChat';
+import { eventBus } from '@/utils/eventBus';
 
 function App() {
+  const { unAuthenticate: onAuthUnAuth } = useAuth();
+  const { unAuthenticate: onChatUnAuth } = useChat();
+
+  useEffect(() => {
+    const handleUnauthenticated = () => {
+      toast.error('登录已过期，请重新登录', { id: 'unauthenticated' });
+      onChatUnAuth();
+      onAuthUnAuth();
+    };
+
+    eventBus.on('unauthenticated', handleUnauthenticated);
+
+    return () => {
+      eventBus.off('unauthenticated', handleUnauthenticated);
+    };
+  }, [onChatUnAuth, onAuthUnAuth]);
+
   return (
     <ThemeProvider>
       <AuthProvider>

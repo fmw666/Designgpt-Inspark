@@ -21,6 +21,7 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSendingCode, setIsSendingCode] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorKey, setErrorKey] = useState(0);
   const [isInviteVerified, setIsInviteVerified] = useState(false);
 
   // 处理倒计时
@@ -31,38 +32,46 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
     }
   }, [countdown]);
 
+  // 设置错误消息的辅助函数
+  const setErrorMessage = (message: string | null) => {
+    setError(message);
+    if (message) {
+      setErrorKey(prev => prev + 1);
+    }
+  };
+
   // 处理邀请码验证
   const handleInviteVerification = () => {
-    setError(null);
+    setErrorMessage(null);
     if (inviteCode === 'innoverse0') {
       setIsInviteVerified(true);
     } else {
-      setError(t('auth.signIn.inviteCode.invalid'));
+      setErrorMessage(t('auth.signIn.inviteCode.invalid'));
     }
   };
 
   // 处理发送验证码
   const handleSendCode = async () => {
     if (!isInviteVerified) {
-      setError(t('auth.signIn.inviteCode.required'));
+      setErrorMessage(t('auth.signIn.inviteCode.required'));
       return;
     }
 
     // 验证邮箱格式
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setError(t('auth.signIn.email.invalid'));
+      setErrorMessage(t('auth.signIn.email.invalid'));
       return;
     }
 
     try {
-      setError(null);
+      setErrorMessage(null);
       setIsSendingCode(true);
       await sendVerificationCode(email);
       setCountdown(60);
     } catch (err) {
       console.error('发送验证码失败', err);
-      setError(t('auth.signIn.verificationCode.sendFailed'));
+      setErrorMessage(t('auth.signIn.verificationCode.sendFailed'));
     } finally {
       setIsSendingCode(false);
     }
@@ -71,15 +80,15 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
   // 处理登录
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setErrorMessage(null);
     
     if (!isInviteVerified) {
-      setError(t('auth.signIn.inviteCode.required'));
+      setErrorMessage(t('auth.signIn.inviteCode.required'));
       return;
     }
     
     if (!email || !verificationCode) {
-      setError(t('auth.signIn.verificationCode.required'));
+      setErrorMessage(t('auth.signIn.verificationCode.required'));
       return;
     }
 
@@ -93,7 +102,7 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
       setInviteCode('');
       setIsInviteVerified(false);
     } catch (err) {
-      setError(t('auth.signIn.verificationCode.invalid'));
+      setErrorMessage(t('auth.signIn.verificationCode.invalid'));
     } finally {
       setIsSubmitting(false);
     }
@@ -103,29 +112,131 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={t('auth.signIn.title')}
       maxWidth="md"
       closeOnBackdropClick={false}
     >
       {/* 欢迎文本 */}
-      <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent mb-2">
-          {t('auth.signIn.subtitle')}
-        </h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          {t('auth.signIn.description')}
-        </p>
+      <div className="relative mb-6">
+        {/* 背景装饰 */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="absolute inset-0 overflow-hidden"
+        >
+          <motion.div 
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+            className="absolute -top-24 -right-24 w-48 h-48 rounded-full blur-3xl backdrop-blur-sm" 
+          />
+          <motion.div 
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 1, ease: "easeOut", delay: 0.4 }}
+            className="absolute -bottom-24 -left-24 w-48 h-48 rounded-full blur-3xl backdrop-blur-sm" 
+          />
+          <div className="absolute inset-0 dark:from-gray-900/50 dark:to-gray-900/50 backdrop-blur-[2px]" />
+        </motion.div>
+
+        {/* 主要内容 */}
+        <div className="relative">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ 
+              duration: 0.7,
+              ease: [0.22, 1, 0.36, 1],
+              delay: 0.1
+            }}
+            className="text-center relative z-10 px-6 py-2 rounded-2xl bg-white/30 dark:bg-gray-900/30 backdrop-blur-sm border border-white/10 dark:border-gray-800/10"
+          >
+            <motion.h1 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ 
+                duration: 0.6,
+                ease: [0.22, 1, 0.36, 1],
+                delay: 0.2
+              }}
+              className="text-3xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent mb-3 drop-shadow-sm"
+            >
+              {t('auth.signIn.subtitle')}
+            </motion.h1>
+            <motion.div 
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ 
+                duration: 0.6,
+                ease: [0.22, 1, 0.36, 1],
+                delay: 0.3
+              }}
+              className="flex items-center justify-center gap-2 mb-4"
+            >
+              <div className="h-px w-12 bg-gradient-to-r from-transparent via-gray-300/80 dark:via-gray-600/80 to-transparent" />
+              <span className="text-sm text-gray-500 dark:text-gray-400 bg-white/50 dark:bg-gray-900/50 px-2 py-0.5 rounded-full backdrop-blur-sm">
+                {t('auth.signIn.description')}
+              </span>
+              <div className="h-px w-12 bg-gradient-to-r from-transparent via-gray-300/80 dark:via-gray-600/80 to-transparent" />
+            </motion.div>
+            <motion.div 
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ 
+                duration: 0.6,
+                ease: [0.22, 1, 0.36, 1],
+                delay: 0.4
+              }}
+              className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400"
+            >
+              <div className="flex items-center gap-1.5 bg-white/30 dark:bg-gray-900/30 px-3 py-1.5 rounded-full backdrop-blur-sm">
+                <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 dark:bg-indigo-400" />
+                <span>安全可靠</span>
+              </div>
+              <div className="w-1 h-1 rounded-full bg-gray-300/50 dark:bg-gray-600/50" />
+              <div className="flex items-center gap-1.5 bg-white/30 dark:bg-gray-900/30 px-3 py-1.5 rounded-full backdrop-blur-sm">
+                <div className="w-1.5 h-1.5 rounded-full bg-purple-500 dark:bg-purple-400" />
+                <span>简单易用</span>
+              </div>
+              <div className="w-1 h-1 rounded-full bg-gray-300/50 dark:bg-gray-600/50" />
+              <div className="flex items-center gap-1.5 bg-white/30 dark:bg-gray-900/30 px-3 py-1.5 rounded-full backdrop-blur-sm">
+                <div className="w-1.5 h-1.5 rounded-full bg-pink-500 dark:bg-pink-400" />
+                <span>功能强大</span>
+              </div>
+            </motion.div>
+          </motion.div>
+        </div>
       </div>
 
       {/* 错误提示 */}
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {error && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="mb-4 p-3 bg-red-50 dark:bg-red-900 text-red-600 dark:text-red-400 text-sm rounded-lg"
+            key={errorKey}
+            initial={{ opacity: 0, y: -8, scale: 0.98, rotateX: -10 }}
+            animate={{ 
+              opacity: 1, 
+              y: 0, 
+              scale: 1,
+              rotateX: 0,
+              transition: {
+                type: "spring",
+                stiffness: 1000,
+                damping: 20,
+                mass: 0.3,
+                duration: 0.12
+              }
+            }}
+            exit={{ 
+              opacity: 0, 
+              y: -8, 
+              scale: 0.98,
+              rotateX: -10,
+              transition: {
+                duration: 0.1
+              }
+            }}
+            className="mb-4 p-3 bg-red-50 dark:bg-red-900 text-red-600 dark:text-red-400 text-sm rounded-lg shadow-sm"
           >
             {error}
           </motion.div>
@@ -133,7 +244,7 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
       </AnimatePresence>
 
       {/* 表单 */}
-      <form onSubmit={handleSignIn} className="space-y-6">
+      <form onSubmit={handleSignIn} className="space-y-4">
         {/* 邀请码输入框 */}
         <div>
           <label htmlFor="inviteCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -154,7 +265,7 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
                 isInviteVerified ? 'border-green-500 bg-green-50 dark:bg-green-900 dark:text-gray-400' : 'border-gray-200 dark:border-gray-800'
               } rounded-xl bg-white dark:bg-gray-900 shadow-sm placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-base dark:text-gray-100`}
             />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
               <button
                 type="button"
                 onClick={handleInviteVerification}
@@ -210,7 +321,7 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSuc
               disabled={!isInviteVerified}
               className="block w-full bg-white dark:bg-gray-900 outline-none pl-10 pr-32 py-3.5 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-base dark:text-gray-100"
             />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
               <button
                 type="button"
                 onClick={handleSendCode}

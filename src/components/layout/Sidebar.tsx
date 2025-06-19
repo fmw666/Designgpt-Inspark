@@ -7,6 +7,7 @@ import ChatHistory from '@/components/chat/ChatHistory';
 import AssetsCategory from '@/components/assets/AssetsCategory';
 import { useAuth } from '@/hooks/useAuth';
 import { eventBus } from '@/utils/eventBus';
+import { useChat } from '@/hooks/useChat';
 
 interface SidebarProps {
   type?: 'chat' | 'assets';
@@ -15,6 +16,7 @@ interface SidebarProps {
 const Sidebar: FC<SidebarProps> = ({ type = 'chat' }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { setCurrentChat } = useChat();
 
   const handleNewClick = () => {
     if (!user) {
@@ -22,6 +24,7 @@ const Sidebar: FC<SidebarProps> = ({ type = 'chat' }) => {
       return;
     }
 
+    setCurrentChat(null);
     navigate('/chat/new');
   };
 

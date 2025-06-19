@@ -2,44 +2,9 @@ import { FC, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SparklesIcon, ExclamationCircleIcon, ClockIcon } from '@heroicons/react/24/solid';
 import { getAvatarClasses, getAvatarSizeClasses } from '@/utils/avatar';
+import { getCdnUrl } from '@/utils/ossImg';
 import { ImagePreview } from '@/components/common/ImagePreview';
-
-interface Model {
-  id: string;
-  name: string;
-  count: number;
-}
-
-interface ImageResult {
-  id: string;
-  url: string | null;
-  text: string | null;
-  error: string | null;
-  errorMessage: string | null;
-  isGenerating?: boolean;
-}
-
-interface Results {
-  images: {
-    [key: string]: ImageResult[];
-  };
-  content: string;
-  isGenerating?: boolean;
-}
-
-export interface Message {
-  id: string;
-  models: Model[];
-  content: string;
-  results: Results;
-  createdAt: string;
-  userImage?: {
-    url: string | null;
-    alt?: string;
-    referenceMessageId: string | null;
-    referenceResultId: string | null;
-  };
-}
+import { Message } from '@/services/chatService';
 
 export interface SelectedImage {
   url: string | null;
@@ -53,7 +18,7 @@ interface ChatMessageProps {
   onEnterDesign?: (image: SelectedImage) => void;
   onJumpToReference?: (messageId: string, resultId: string) => void;
   user?: {
-    user_metadata?: {
+    meta_data?: {
       hide_model_info?: boolean;
     };
   };
@@ -83,10 +48,10 @@ export const ChatMessage: FC<ChatMessageProps> = ({
           url: selectedImage.url || '',
           id: selectedImage.resultId || '',
           messageId: selectedImage.messageId || '',
-          userPrompt: message.content,
+          userPrompt: message.content || '',
           aiPrompt: '暂无',
-          model: Object.keys(message.results.images)[0] || 'gpt-4o-image',
-          createdAt: message.createdAt
+          model: Object.keys(message.results?.images || {})[0] || 'gpt-4o-image',
+          createdAt: message.createdAt || ''
         } : null}
         onClose={() => setSelectedImage(null)}
         alt="Message image preview"
@@ -156,7 +121,7 @@ export const ChatMessage: FC<ChatMessageProps> = ({
 
         {/* AI response */}
         <div className="flex justify-start p-3">
-          <div className={`flex items-start gap-3 ${!(user?.user_metadata?.hide_model_info ?? false) ? 'max-w-3xl' : 'max-w-8xl'}`}>
+          <div className={`flex items-start gap-3 ${!(user?.meta_data?.hide_model_info ?? false) ? 'max-w-3xl' : 'max-w-8xl'}`}>
             <div className="flex-shrink-0">
               <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
                 message.userImage ? 'bg-gradient-to-br from-cyan-500 to-blue-600' : 'bg-gradient-to-br from-emerald-500 to-teal-600'
@@ -166,7 +131,7 @@ export const ChatMessage: FC<ChatMessageProps> = ({
             </div>
             <div className="flex-1">
               {/* AI text response */}
-              {message.results.content && (
+              {message.results?.status ? (
                 <div className="inline-block bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-2 mb-3">
                   {message.userImage && (
                     <div className="mb-2 text-xs font-medium text-indigo-600 dark:text-indigo-400">
@@ -174,36 +139,43 @@ export const ChatMessage: FC<ChatMessageProps> = ({
                     </div>
                   )}
                   <p className="text-sm text-gray-900 dark:text-gray-100">
-                    {message.results.content}
-                    {(user?.user_metadata?.hide_model_info ?? false) && (
+                    {message.results.status.failed === message.results.status.total ? (
+                      t('chat.generation.failed')
+                    ) : (
+                      t('chat.generation.success')
+                    )}
+                    {(user?.meta_data?.hide_model_info ?? false) && (
                       <span className="ml-2 text-xs text-gray-500">
                         ({Object.values(message.results.images).flat().length} {t('chat.images')})
                       </span>
                     )}
                   </p>
                 </div>
+              ) : (
+                <div className="inline-block bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-2 mb-3">
+                  {t('chat.generation.noContent')}
+                </div>
               )}
 
               {/* AI image results */}
-              {(user?.user_metadata?.hide_model_info ?? false) ? (
+              {(user?.meta_data?.hide_model_info ?? false) ? (
                 // 隐藏模型信息模式下的图片展示
                 <div className="mb-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 min-w-[300px]">
-                    {Object.values(message.results.images)
-                      .flat()
+                    {Object.values(message.results?.images || {}).flat()
                       .map((result, index) => {
                         const isTimedOut = result.isGenerating && 
-                          (Date.now() - new Date(message.createdAt).getTime() > GENERATION_TIMEOUT);
+                          (Date.now() - new Date(message.createdAt!).getTime() > GENERATION_TIMEOUT);
 
                         return (
                           <div
                             key={index}
-                            data-result-id={result.id}
+                            data-result-id={result.uuid}
                             className="group relative aspect-square min-w-[200px] rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 bg-transparent cursor-pointer bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] dark:bg-[linear-gradient(to_right,#ffffff12_1px,transparent_1px),linear-gradient(to_bottom,#ffffff12_1px,transparent_1px)]"
                             onClick={() => setSelectedImage({
                               url: result.url,
-                              messageId: message.id,
-                              resultId: result.id,
+                              messageId: message.uuid!,
+                              resultId: result.uuid,
                             })}
                           >
                             {result.isGenerating ? (
@@ -242,7 +214,7 @@ export const ChatMessage: FC<ChatMessageProps> = ({
                               </div>
                             ) : result.url ? (
                               <img
-                                src={result.url}
+                                src={getCdnUrl(result.url)}
                                 alt={`Generated image ${index + 1}`}
                                 className="w-full h-full object-contain transition-transform group-hover:scale-105 cursor-pointer"
                               />
@@ -261,7 +233,7 @@ export const ChatMessage: FC<ChatMessageProps> = ({
                 </div>
               ) : (
                 // 显示模型信息模式下的图片展示
-                Object.entries(message.results.images).map(([modelId, results], index) => {
+                Object.entries(message.results?.images || {}).map(([modelId, results], index) => {
                   return (
                     <div key={index} className="mb-4">
                       {!message.userImage && (
@@ -283,17 +255,17 @@ export const ChatMessage: FC<ChatMessageProps> = ({
                       <div className="grid grid-cols-2 gap-3 min-w-[300px]">
                         {results.map((result, index) => {
                           const isTimedOut = result.isGenerating && 
-                            (Date.now() - new Date(message.createdAt).getTime() > GENERATION_TIMEOUT);
+                            (Date.now() - new Date(message.createdAt!).getTime() > GENERATION_TIMEOUT);
 
                           return (
                             <div
                               key={index}
-                              data-result-id={result.id}
+                              data-result-id={result.uuid}
                               className="group relative aspect-square min-w-[200px] rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 bg-transparent cursor-pointer bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] dark:bg-[linear-gradient(to_right,#ffffff12_1px,transparent_1px),linear-gradient(to_bottom,#ffffff12_1px,transparent_1px)]"
                               onClick={() => setSelectedImage({
                                 url: result.url,
-                                messageId: message.id,
-                                resultId: result.id,
+                                messageId: message.uuid!,
+                                resultId: result.uuid,
                               })}
                             >
                               {result.isGenerating ? (
@@ -332,7 +304,7 @@ export const ChatMessage: FC<ChatMessageProps> = ({
                                 </div>
                               ) : result.url ? (
                                 <img
-                                  src={result.url}
+                                  src={getCdnUrl(result.url)}
                                   alt={`Generated image ${index + 1}`}
                                   className="w-full h-full object-contain transition-transform group-hover:scale-105 cursor-pointer"
                                 />

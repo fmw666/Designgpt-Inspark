@@ -91,6 +91,7 @@ const ChatHistory = () => {
   }, [groupedChats, t]);
 
   const handleChatClick = (chatId: string) => {
+    if (currentChat?.uuid === chatId) return;
     switchChat(chatId);
     navigate(`/chat/${chatId}`);
   };
@@ -108,16 +109,9 @@ const ChatHistory = () => {
       await deleteChat(chatToDelete);
       toast.success(t('history.deleteSuccess'));
       
-      // 如果删除的是当前聊天，切换到其他聊天或首页
-      if (currentChat?.id === chatToDelete) {
-        const remainingChats = chats.filter(chat => chat.id !== chatToDelete);
-        if (remainingChats.length > 0) {
-          switchChat(remainingChats[0].id);
-          navigate(`/chat/${remainingChats[0].id}`);
-        } else {
-          switchChat(null);
-          navigate('/');
-        }
+      // 如果删除的是当前聊天，切换到首页
+      if (currentChat?.uuid === chatToDelete) {
+        navigate('/chat/new');
       }
     } catch (error) {
       console.error('Error deleting chat:', error);
@@ -155,10 +149,10 @@ const ChatHistory = () => {
               <div className="space-y-1">
                 {groupedChats[groupKey].map((chat) => (
                   <motion.div
-                    key={chat.id}
-                    onClick={() => handleChatClick(chat.id)}
+                    key={chat.uuid}
+                    onClick={() => handleChatClick(chat.uuid)}
                     className={`group relative w-full text-left px-3 py-2.5 rounded-xl cursor-pointer ${
-                      currentChat?.id === chat.id
+                      currentChat?.uuid === chat.uuid
                         ? 'bg-indigo-50 text-indigo-600 shadow-sm dark:bg-indigo-900 dark:text-indigo-400'
                         : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
                     }`}
@@ -171,17 +165,17 @@ const ChatHistory = () => {
                           {chat.title}
                         </div>
                         <div className="text-xs text-gray-500 truncate mt-0.5">
-                          {chat.messages[0]?.content || t('history.noMessages')}
+                          {chat.description}
                         </div>
                       </div>
                       <button
-                        onClick={(e) => handleDeleteClick(e, chat.id)}
+                        onClick={(e) => handleDeleteClick(e, chat.uuid)}
                         className={`ml-2 p-1.5 text-gray-400 hover:text-red-500 transition-colors duration-200 cursor-pointer rounded-lg ${
-                          isDeleting === chat.id ? 'opacity-50 cursor-not-allowed' : ''
-                        } ${currentChat?.id === chat.id ? 'group-hover:bg-white/50 dark:group-hover:bg-gray-900/50' : 'group-hover:bg-gray-100 dark:group-hover:bg-gray-800'}`}
-                        disabled={isDeleting === chat.id}
+                          isDeleting === chat.uuid ? 'opacity-50 cursor-not-allowed' : ''
+                        } ${currentChat?.uuid === chat.uuid ? 'group-hover:bg-white/50 dark:group-hover:bg-gray-900/50' : 'group-hover:bg-gray-100 dark:group-hover:bg-gray-800'}`}
+                        disabled={isDeleting === chat.uuid}
                       >
-                        {isDeleting === chat.id ? (
+                        {isDeleting === chat.uuid ? (
                           <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
                         ) : (
                           <TrashIcon className="w-4 h-4" />

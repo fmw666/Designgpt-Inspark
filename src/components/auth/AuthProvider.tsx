@@ -1,8 +1,8 @@
 import { createContext, useEffect, useState } from 'react';
-import { User } from '@/services/supabase';
 import { SignInModal } from './SignInModal';
 import { eventBus } from '@/utils/eventBus';
 import { useAuth } from '@/hooks/useAuth';
+import { User } from '@/services/authService';
 
 interface AuthContextType {
   user: User | null;

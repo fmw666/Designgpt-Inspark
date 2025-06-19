@@ -7,13 +7,13 @@ import { UserProfileModal } from '../user/UserProfileModal';
 import { getAvatarClasses, getAvatarSizeClasses, getAvatarText } from '@/utils/avatar';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
+import { eventBus } from '@/utils/eventBus';
 
 interface UserMenuProps {
   isCollapsed?: boolean;
-  onSignInClick: () => void;
 }
 
-const UserMenu: FC<UserMenuProps> = ({ isCollapsed, onSignInClick }) => {
+const UserMenu: FC<UserMenuProps> = ({ isCollapsed }) => {
   const { user, signOut } = useAuth();
   const { t } = useTranslation();
   const location = useLocation();
@@ -26,6 +26,10 @@ const UserMenu: FC<UserMenuProps> = ({ isCollapsed, onSignInClick }) => {
 
   const handleSettingsClick = () => {
     setIsSettingsOpen(true);
+  };
+
+  const onSignInClick = () => {
+    eventBus.emit('needSignIn');
   };
 
   const isAssetsPage = location.pathname.startsWith('/assets');

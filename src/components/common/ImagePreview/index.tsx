@@ -5,6 +5,7 @@ import { Modal } from '@/components/common/Modal';
 import { useTranslation } from 'react-i18next';
 import { DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import { getCdnUrl } from '@/utils/ossImg';
 
 interface ImageInfo {
   url: string;
@@ -387,7 +388,7 @@ export const ImagePreview: FC<ImagePreviewProps> = ({
           >
             <img
               ref={imageRef}
-              src={imageInfo.url}
+              src={getCdnUrl(imageInfo.url)}
               alt={alt}
               className="w-full h-full object-contain"
               draggable={false}

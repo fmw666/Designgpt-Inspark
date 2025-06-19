@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import axiosInstance, { PaginationResponse } from './axios';
 
 interface Model {
   id: string;
@@ -7,34 +7,49 @@ interface Model {
 }
 
 export interface ImageResult {
-  id: string;
+  uuid: string;
   url: string | null;
   text: string | null;
   error: string | null;
   errorMessage: string | null;
+  isGenerating?: boolean;
 }
 
-interface Results {
+export interface Results {
   images: {
     [key: string]: ImageResult[];
   };
-  content: string;
+  status: {
+    failed: number;
+    success: number;
+    total: number;
+    generating: number;
+  };
 }
 
 export interface Message {
-  id: string;
-  models: Model[];
-  content: string;
-  results: Results;
-  createdAt: string;
+  uuid?: string;
+  models?: Model[] | null;
+  content?: string;
+  results?: Results | null;
+  createdAt?: string;
+  userImage?: {
+    url: string | null;
+    alt?: string;
+    referenceMessageId: string | null;
+    referenceResultId: string | null;
+  };
 }
 
 export interface Chat {
-  id: string;
+  uuid: string;
   title: string;
-  messages: Message[];
+  description: string | null;
   created_at: string;
-  user_id: string;
+}
+
+export interface ChatWithMessages extends Chat {
+  messages?: Message[];
 }
 
 export class ChatService {
@@ -52,22 +67,8 @@ export class ChatService {
   // 获取用户的所有聊天记录
   async getUserChats(): Promise<Chat[]> {
     try {
-      const currentUser = await supabase.auth.getUser();
-      if (!currentUser.data.user) {
-        throw new Error('User not found');
-      }
-      const { data, error } = await supabase
-        .from('chat_msg')
-        .select('*')
-        .eq('user_id', currentUser.data.user.id)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-
-      return data.map(chat => ({
-        ...chat,
-        messages: chat.messages || []
-      }));
+      const response = await axiosInstance.get<PaginationResponse<Chat>>('/chats');
+      return response.items;
     } catch (error) {
       console.error('Error fetching user chats:', error);
       throw error;
@@ -75,28 +76,14 @@ export class ChatService {
   }
 
   // 创建新聊天
-  async createChat(title: string = '新对话', initialMessages: Message[] = []): Promise<Chat> {
+  async createChat(title: string = '新对话'): Promise<Chat> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
-
-      const { data, error } = await supabase
-        .from('chat_msg')
-        .insert([{
-          user_id: user.id,
-          title,
-          messages: initialMessages
-        }])
-        .select()
-        .single();
-
-      if (error) throw error;
+      const data = await axiosInstance.post<Chat>('/chats', {
+        title,
+      });
 
       return {
         ...data,
-        messages: data.messages || []
       };
     } catch (error) {
       console.error('Error creating chat:', error);
@@ -107,18 +94,10 @@ export class ChatService {
   // 更新聊天记录
   async updateChat(chatId: string, updates: Partial<Chat>): Promise<Chat> {
     try {
-      const { data, error } = await supabase
-        .from('chat_msg')
-        .update(updates)
-        .eq('id', chatId)
-        .select()
-        .single();
-
-      if (error) throw error;
+      const data = await axiosInstance.put<Chat>(`/chats/${chatId}`, updates);
 
       return {
         ...data,
-        messages: data.messages || []
       };
     } catch (error) {
       console.error('Error updating chat:', error);
@@ -127,32 +106,20 @@ export class ChatService {
   }
 
   // 添加消息到聊天
-  async addMessage(chat: Chat, message: Message): Promise<Chat> {
+  async addMessage(chat_id: string, message: Message): Promise<Chat> {
     try {
-      // 更新消息数组
-      const updatedMessages = [...(chat.messages || []), message];
-      
       // 如果是第一条消息，使用消息内容作为标题
-      const title = chat.messages?.length === 0 
-        ? message.content.slice(0, 30) 
-        : chat.title;
+      const title = message.content!.slice(0, 30)
+        ? message.content!.slice(0, 30) 
+        : '';
 
-      // 更新聊天记录
-      const { data, error } = await supabase
-        .from('chat_msg')
-        .update({
-          messages: updatedMessages,
-          title
-        })
-        .eq('id', chat.id)
-        .select()
-        .single();
-
-      if (error) throw error;
+      const data = await axiosInstance.post<Chat>(`/chats/${chat_id}/messages`, {
+        message,
+        title
+      });
 
       return {
         ...data,
-        messages: data.messages || []
       };
     } catch (error) {
       console.error('Error adding message:', error);
@@ -163,12 +130,7 @@ export class ChatService {
   // 删除聊天
   async deleteChat(chatId: string): Promise<void> {
     try {
-      const { error } = await supabase
-        .from('chat_msg')
-        .delete()
-        .eq('id', chatId);
-
-      if (error) throw error;
+      await axiosInstance.delete(`/chats/${chatId}`);
     } catch (error) {
       console.error('Error deleting chat:', error);
       throw error;
@@ -177,17 +139,32 @@ export class ChatService {
 
   async getChat(chatId: string): Promise<Chat | null> {
     try {
-      const { data, error } = await supabase
-        .from('chat_msg')
-        .select('*')
-        .eq('id', chatId)
-        .single();
-
-      if (error) throw error;
-      return data as Chat;
+      const data = await axiosInstance.get<Chat>(`/chats/${chatId}`);
+      return data;
     } catch (error) {
       console.error('Error getting chat:', error);
       return null;
+    }
+  }
+
+  // 获取聊天的消息列表
+  async getChatMessages(chatId: string): Promise<Message[]> {
+    try {
+      const response = await axiosInstance.get<PaginationResponse<Message>>(`/chats/${chatId}/messages`);
+      return response.items;
+    } catch (error) {
+      console.error('Error fetching chat messages:', error);
+      throw error;
+    }
+  }
+
+  // 更新消息结果
+  async updateMessageResults(messageId: string, results: Message['results']): Promise<void> {
+    try {
+      await axiosInstance.put(`/messages/${messageId}/results`, { results });
+    } catch (error) {
+      console.error('Error updating message results:', error);
+      throw error;
     }
   }
 }
